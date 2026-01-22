@@ -3,6 +3,7 @@ import type { PrayerTime } from "@/lib/prayerTimes";
 
 export function useNotification() {
   const permissionGranted = useRef(false);
+  const scheduledTimeouts = useRef<NodeJS.Timeout[]>([]);
 
   useEffect(() => {
     if ("Notification" in window) {
@@ -10,6 +11,11 @@ export function useNotification() {
         permissionGranted.current = true;
       }
     }
+
+    // Cleanup timeouts on unmount
+    return () => {
+      scheduledTimeouts.current.forEach(clearTimeout);
+    };
   }, []);
 
   const requestPermission = useCallback(async () => {
@@ -35,18 +41,27 @@ export function useNotification() {
   const sendNotification = useCallback((prayer: PrayerTime) => {
     if (!permissionGranted.current) return;
 
-    new Notification(`Ezan Vakti: ${prayer.name}`, {
+    const notification = new Notification(`Ezan Vakti Geldi: ${prayer.name}`, {
       body: `${prayer.name} vakti girdi. Hayırlı ibadetler.`,
       icon: "/pwa-192x192.png",
       badge: "/pwa-192x192.png",
       tag: `prayer-${prayer.nameEn}`,
       requireInteraction: true,
     });
+
+    // Auto close after 30 seconds
+    setTimeout(() => notification.close(), 30000);
+
+    return notification;
   }, []);
 
   const schedulePrayerNotifications = useCallback(
-    (prayers: PrayerTime[]) => {
+    (prayers: PrayerTime[], onPrayerTime?: (prayer: PrayerTime) => void) => {
       if (!permissionGranted.current) return;
+
+      // Clear any existing scheduled notifications
+      scheduledTimeouts.current.forEach(clearTimeout);
+      scheduledTimeouts.current = [];
 
       const now = Date.now();
 
@@ -54,9 +69,12 @@ export function useNotification() {
         const timeUntilPrayer = prayer.timestamp - now;
 
         if (timeUntilPrayer > 0 && timeUntilPrayer < 24 * 60 * 60 * 1000) {
-          setTimeout(() => {
+          const timeout = setTimeout(() => {
             sendNotification(prayer);
+            onPrayerTime?.(prayer);
           }, timeUntilPrayer);
+
+          scheduledTimeouts.current.push(timeout);
         }
       });
     },
