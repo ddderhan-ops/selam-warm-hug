@@ -2,17 +2,21 @@ import { getDailyVerse } from "@/lib/verses";
 import { BookOpen, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useTranslation } from "@/contexts/LanguageContext";
+
+const APP_URL = "https://selam-warm-hug.lovable.app";
 
 export function DailyVerse() {
+  const { t } = useTranslation();
   const verse = getDailyVerse();
 
   const handleShare = async () => {
-    const shareText = `📖 Günün Ayeti\n\n"${verse.arabic}"\n\n${verse.turkish}\n\n— ${verse.source}\n\n🕌 Ezan Vakti Uygulaması`;
+    const shareText = `📖 ${t.dailyVerse}\n\n"${verse.arabic}"\n\n${verse.turkish}\n\n— ${verse.source}\n\n🕌 ${t.shareAppText}: ${APP_URL}`;
 
     if (navigator.share) {
       try {
         await navigator.share({
-          title: "Günün Ayeti",
+          title: t.dailyVerse,
           text: shareText,
         });
       } catch (error) {
@@ -39,14 +43,14 @@ export function DailyVerse() {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <BookOpen className="w-5 h-5 text-primary" />
-          <span className="text-sm font-medium text-primary">Günün Ayeti</span>
+          <span className="text-sm font-medium text-primary">{t.dailyVerse}</span>
         </div>
         <Button
           variant="ghost"
           size="icon"
           onClick={handleShare}
           className="h-9 w-9 rounded-full hover:bg-primary/10"
-          title="Paylaş"
+          title={t.share}
         >
           <Share2 className="w-4 h-4 text-primary" />
         </Button>

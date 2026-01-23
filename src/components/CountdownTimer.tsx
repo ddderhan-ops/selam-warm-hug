@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import type { PrayerTime } from "@/lib/prayerTimes";
 import { formatTimeRemaining } from "@/lib/prayerTimes";
+import { useTranslation } from "@/contexts/LanguageContext";
 
 interface CountdownTimerProps {
   nextPrayer: PrayerTime | null;
 }
 
 export function CountdownTimer({ nextPrayer }: CountdownTimerProps) {
+  const { t } = useTranslation();
   const [timeRemaining, setTimeRemaining] = useState("00:00:00");
 
   useEffect(() => {
@@ -29,7 +31,7 @@ export function CountdownTimer({ nextPrayer }: CountdownTimerProps) {
   return (
     <div className="text-center py-8 animate-slide-up">
       <p className="text-muted-foreground text-sm font-medium mb-2 uppercase tracking-wider">
-        Sonraki Vakit
+        {t.nextPrayer}
       </p>
       <h2 className="text-2xl font-semibold text-primary mb-4">
         {nextPrayer.name}
@@ -41,7 +43,7 @@ export function CountdownTimer({ nextPrayer }: CountdownTimerProps) {
         </p>
       </div>
       <p className="text-muted-foreground text-sm mt-4">
-        {nextPrayer.time} saatinde
+        {nextPrayer.time} {t.atTime}
       </p>
     </div>
   );

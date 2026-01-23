@@ -4,11 +4,14 @@ import { CountdownTimer } from "@/components/CountdownTimer";
 import { PrayerTimesList } from "@/components/PrayerTimesList";
 import { DailyVerse } from "@/components/DailyVerse";
 import { AdPlaceholder } from "@/components/AdPlaceholder";
-import { LocationPermissionCard } from "@/components/LocationPermissionCard";
+import { SplashScreen } from "@/components/SplashScreen";
+import { QiblaCompass } from "@/components/QiblaCompass";
+import { SettingsDrawer } from "@/components/SettingsDrawer";
 import { useTheme } from "@/hooks/useTheme";
 import { useNotification } from "@/hooks/useNotification";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useAdhan } from "@/hooks/useAdhan";
+import { useTranslation } from "@/contexts/LanguageContext";
 import {
   fetchPrayerTimes,
   getNextPrayer,
@@ -17,10 +20,24 @@ import {
   type City,
   type PrayerTimesData,
 } from "@/lib/prayerTimes";
-import { Loader2, Navigation } from "lucide-react";
+import { Loader2, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 
+type View = 'main' | 'qibla';
+
 const Index = () => {
+  const { t } = useTranslation();
+  const [showSplash, setShowSplash] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const hasSeenSplash = sessionStorage.getItem('hasSeenSplash');
+      return !hasSeenSplash;
+    }
+    return true;
+  });
+  const [currentView, setCurrentView] = useState<View>('main');
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  
   const [selectedCity, setSelectedCity] = useState<City | null>(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("selectedCity");
@@ -43,14 +60,15 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-  const [adhanEnabled, setAdhanEnabled] = useState(() => {
+  const [soundAlertEnabled, setSoundAlertEnabled] = useState(() => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("adhanEnabled") === "true";
+      return localStorage.getItem("soundAlertEnabled") === "true";
     }
     return false;
   });
 
   const lastDateRef = useRef<string>("");
+  const nextPrayerCheckRef = useRef<NodeJS.Timeout | null>(null);
 
   const { theme, toggleTheme } = useTheme();
   const { requestPermission, schedulePrayerNotifications, isSupported } =
@@ -64,6 +82,11 @@ const Index = () => {
   } = useGeolocation();
   const { playAdhan } = useAdhan();
 
+  const handleSplashComplete = useCallback(() => {
+    sessionStorage.setItem('hasSeenSplash', 'true');
+    setShowSplash(false);
+  }, []);
+
   const loadPrayerTimes = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -72,17 +95,14 @@ const Index = () => {
       let data: PrayerTimesData;
 
       if (useCurrentLocation && latitude && longitude) {
-        // Use current location
         const nearestCity = findNearestCity(latitude, longitude);
         data = await fetchPrayerTimes(
           { latitude, longitude },
           nearestCity?.name
         );
       } else if (selectedCity) {
-        // Use selected city
         data = await fetchPrayerTimes(selectedCity);
       } else {
-        // Fallback to Istanbul
         const defaultCity = turkishCities[0];
         data = await fetchPrayerTimes(defaultCity);
         setSelectedCity(defaultCity);
@@ -91,16 +111,15 @@ const Index = () => {
       setPrayerData(data);
       lastDateRef.current = new Date().toDateString();
 
-      // Schedule notifications with adhan callback
       if (notificationsEnabled) {
         schedulePrayerNotifications(data.prayers, (prayer) => {
-          if (adhanEnabled) {
+          if (soundAlertEnabled) {
             playAdhan();
           }
         });
       }
     } catch (err) {
-      setError("Namaz vakitleri yüklenemedi. Lütfen tekrar deneyin.");
+      setError(t.prayerTimesError);
       console.error(err);
     } finally {
       setLoading(false);
@@ -112,8 +131,9 @@ const Index = () => {
     selectedCity,
     notificationsEnabled,
     schedulePrayerNotifications,
-    adhanEnabled,
+    soundAlertEnabled,
     playAdhan,
+    t.prayerTimesError,
   ]);
 
   // Load prayer times when location or city changes
@@ -122,6 +142,30 @@ const Index = () => {
       loadPrayerTimes();
     }
   }, [geoLoading, loadPrayerTimes]);
+
+  // Auto-transition to next prayer when current prayer time passes
+  useEffect(() => {
+    if (!prayerData) return;
+
+    const checkNextPrayer = () => {
+      const now = Date.now();
+      const nextPrayer = getNextPrayer(prayerData.prayers);
+      
+      if (nextPrayer) {
+        const timeUntilNext = nextPrayer.timestamp - now;
+        
+        // If the next prayer is in the past (for tomorrow), reload data
+        if (timeUntilNext < 0) {
+          loadPrayerTimes();
+        }
+      }
+    };
+
+    // Check every second for smooth countdown transition
+    const interval = setInterval(checkNextPrayer, 1000);
+    
+    return () => clearInterval(interval);
+  }, [prayerData, loadPrayerTimes]);
 
   // Check for date change and refresh at midnight
   useEffect(() => {
@@ -132,7 +176,7 @@ const Index = () => {
       }
     };
 
-    const interval = setInterval(checkDateChange, 60000); // Check every minute
+    const interval = setInterval(checkDateChange, 60000);
     return () => clearInterval(interval);
   }, [loadPrayerTimes]);
 
@@ -142,8 +186,8 @@ const Index = () => {
       localStorage.setItem("selectedCity", JSON.stringify(selectedCity));
     }
     localStorage.setItem("useCurrentLocation", String(useCurrentLocation));
-    localStorage.setItem("adhanEnabled", String(adhanEnabled));
-  }, [selectedCity, useCurrentLocation, adhanEnabled]);
+    localStorage.setItem("soundAlertEnabled", String(soundAlertEnabled));
+  }, [selectedCity, useCurrentLocation, soundAlertEnabled]);
 
   const handleCityChange = (city: City) => {
     setSelectedCity(city);
@@ -153,7 +197,7 @@ const Index = () => {
   const handleUseCurrentLocation = () => {
     if (latitude && longitude) {
       setUseCurrentLocation(true);
-      toast.success("Mevcut konum kullanılıyor");
+      toast.success(t.usingCurrentLocation);
     } else {
       requestLocation();
     }
@@ -167,14 +211,14 @@ const Index = () => {
 
     if (notificationsEnabled) {
       setNotificationsEnabled(false);
-      setAdhanEnabled(false);
-      toast.info("Bildirimler kapatıldı");
+      setSoundAlertEnabled(false);
+      toast.info(t.notificationsOff);
     } else {
       const granted = await requestPermission();
       if (granted) {
         setNotificationsEnabled(true);
-        setAdhanEnabled(true);
-        toast.success("Bildirimler ve ezan sesi aktif");
+        setSoundAlertEnabled(true);
+        toast.success(t.notificationsOn);
 
         if (prayerData) {
           schedulePrayerNotifications(prayerData.prayers, (prayer) => {
@@ -187,15 +231,64 @@ const Index = () => {
     }
   };
 
+  const handleSoundAlertToggle = () => {
+    setSoundAlertEnabled(!soundAlertEnabled);
+  };
+
+  // Swipe handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 80;
+    const isRightSwipe = distance < -80;
+
+    if (isLeftSwipe && currentView === 'main') {
+      setCurrentView('qibla');
+    } else if (isRightSwipe && currentView === 'qibla') {
+      setCurrentView('main');
+    }
+  };
+
   const nextPrayer = prayerData ? getNextPrayer(prayerData.prayers) : null;
 
-  // Show location permission card if needed
+  // Show splash screen
+  if (showSplash) {
+    return <SplashScreen onComplete={handleSplashComplete} />;
+  }
+
+  // Show Qibla compass
+  if (currentView === 'qibla') {
+    return (
+      <div
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        <QiblaCompass
+          latitude={latitude}
+          longitude={longitude}
+          onBack={() => setCurrentView('main')}
+        />
+      </div>
+    );
+  }
+
   if (geoLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Konum alınıyor...</p>
+          <p className="text-muted-foreground">{t.loadingLocation}</p>
         </div>
       </div>
     );
@@ -206,7 +299,7 @@ const Index = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Namaz vakitleri yükleniyor...</p>
+          <p className="text-muted-foreground">{t.loadingPrayerTimes}</p>
         </div>
       </div>
     );
@@ -218,7 +311,7 @@ const Index = () => {
         <div className="text-center">
           <p className="text-destructive mb-4">{error}</p>
           <button onClick={loadPrayerTimes} className="text-primary underline">
-            Tekrar Dene
+            {t.retry}
           </button>
         </div>
       </div>
@@ -226,12 +319,17 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div 
+      className="min-h-screen bg-background"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       <div className="max-w-md mx-auto px-5 py-6 pb-8">
         <Header
           selectedCity={
             useCurrentLocation
-              ? { name: prayerData?.city || "Mevcut Konum", latitude: 0, longitude: 0 }
+              ? { name: prayerData?.city || t.currentLocation, latitude: 0, longitude: 0 }
               : selectedCity || turkishCities[0]
           }
           onCityChange={handleCityChange}
@@ -244,6 +342,14 @@ const Index = () => {
           useCurrentLocation={useCurrentLocation}
           onUseCurrentLocation={handleUseCurrentLocation}
           hasLocationPermission={!permissionDenied && latitude !== null}
+          settingsButton={
+            <SettingsDrawer
+              notificationsEnabled={notificationsEnabled}
+              onNotificationToggle={handleNotificationToggle}
+              soundAlertEnabled={soundAlertEnabled}
+              onSoundAlertToggle={handleSoundAlertToggle}
+            />
+          }
         />
 
         <CountdownTimer nextPrayer={nextPrayer} />
@@ -255,17 +361,26 @@ const Index = () => {
           />
         </div>
 
+        {/* Swipe hint */}
+        <div 
+          className="flex items-center justify-center gap-2 text-muted-foreground text-sm mb-4 cursor-pointer hover:text-primary transition-colors"
+          onClick={() => setCurrentView('qibla')}
+        >
+          <span>{t.swipeForQibla}</span>
+          <ChevronRight className="w-4 h-4" />
+        </div>
+
         <AdPlaceholder />
 
         <DailyVerse />
 
         <footer className="mt-8 text-center">
           <p className="text-muted-foreground/60 text-xs">
-            Vakitler Aladhan API ile alınmaktadır
+            {t.dataSource}
           </p>
-          {adhanEnabled && notificationsEnabled && (
+          {soundAlertEnabled && notificationsEnabled && (
             <p className="text-primary/60 text-xs mt-1">
-              🔔 Ezan sesi aktif
+              🔔 {t.adhanActive}
             </p>
           )}
         </footer>
