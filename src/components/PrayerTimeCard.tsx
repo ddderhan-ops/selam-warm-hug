@@ -1,6 +1,7 @@
 import type { PrayerTime } from "@/lib/prayerTimes";
 import { cn } from "@/lib/utils";
 import { Clock } from "lucide-react";
+import { useTranslation } from "@/contexts/LanguageContext";
 
 interface PrayerTimeCardProps {
   prayer: PrayerTime;
@@ -8,7 +9,22 @@ interface PrayerTimeCardProps {
   isPassed: boolean;
 }
 
+const prayerNameKeys: Record<string, 'fajr' | 'sunrise' | 'dhuhr' | 'asr' | 'maghrib' | 'isha'> = {
+  Fajr: "fajr",
+  Sunrise: "sunrise",
+  Dhuhr: "dhuhr",
+  Asr: "asr",
+  Maghrib: "maghrib",
+  Isha: "isha",
+};
+
 export function PrayerTimeCard({ prayer, isActive, isPassed }: PrayerTimeCardProps) {
+  const { t } = useTranslation();
+  
+  // Get translated prayer name
+  const prayerKey = prayerNameKeys[prayer.nameEn];
+  const translatedName = prayerKey ? t.prayerNames[prayerKey] : prayer.name;
+
   return (
     <div
       className={cn(
@@ -31,7 +47,7 @@ export function PrayerTimeCard({ prayer, isActive, isPassed }: PrayerTimeCardPro
             isActive && "text-primary-foreground"
           )}
         >
-          {prayer.name}
+          {translatedName}
         </span>
       </div>
       <div className="flex items-center gap-2">
