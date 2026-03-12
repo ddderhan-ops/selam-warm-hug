@@ -311,7 +311,7 @@ const Index = () => {
     }
   };
 
-  const nextPrayer = prayerData ? getNextPrayer(prayerData.prayers) : null;
+  const nextPrayer = prayerData ? getNextPrayer(prayerData.prayers, nowTimestamp) : null;
 
   // Show splash screen
   if (showSplash) {
