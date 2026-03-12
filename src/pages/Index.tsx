@@ -66,9 +66,9 @@ const Index = () => {
     }
     return false;
   });
+  const [nowTimestamp, setNowTimestamp] = useState(Date.now());
 
   const lastDateRef = useRef<string>("");
-  const nextPrayerCheckRef = useRef<NodeJS.Timeout | null>(null);
 
   const { theme, toggleTheme } = useTheme();
   const { requestPermission, schedulePrayerNotifications, isSupported } =
