@@ -140,7 +140,7 @@ const translations: Record<Language, Translations> = {
     },
     dailyVerse: 'Verse of the Day',
     share: 'Share',
-    shareAppText: 'Sent from Nur Prayer Times app',
+    shareAppText: 'Sent from Nur Ezan Vakti app',
     settings: 'Settings',
     notifications: 'Notifications',
     notificationsOn: 'Notifications and adhan sound active',
