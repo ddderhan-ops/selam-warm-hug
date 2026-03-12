@@ -91,33 +91,65 @@ const Index = () => {
     setLoading(true);
     setError(null);
 
-    try {
-      let data: PrayerTimesData;
+      try {
+        let data: PrayerTimesData;
+        let notificationContext: {
+          city: string;
+          latitude: number;
+          longitude: number;
+          date: string;
+          hijriDate: string;
+        } | null = null;
 
-      if (useCurrentLocation && latitude && longitude) {
-        const nearestCity = findNearestCity(latitude, longitude);
-        data = await fetchPrayerTimes(
-          { latitude, longitude },
-          nearestCity?.name
-        );
-      } else if (selectedCity) {
-        data = await fetchPrayerTimes(selectedCity);
-      } else {
-        const defaultCity = turkishCities[0];
-        data = await fetchPrayerTimes(defaultCity);
-        setSelectedCity(defaultCity);
-      }
+        if (useCurrentLocation && latitude && longitude) {
+          const nearestCity = findNearestCity(latitude, longitude);
+          data = await fetchPrayerTimes(
+            { latitude, longitude },
+            nearestCity?.name
+          );
+          notificationContext = {
+            city: data.city,
+            latitude,
+            longitude,
+            date: data.date,
+            hijriDate: data.hijriDate,
+          };
+        } else if (selectedCity) {
+          data = await fetchPrayerTimes(selectedCity);
+          notificationContext = {
+            city: data.city,
+            latitude: selectedCity.latitude,
+            longitude: selectedCity.longitude,
+            date: data.date,
+            hijriDate: data.hijriDate,
+          };
+        } else {
+          const defaultCity = turkishCities[0];
+          data = await fetchPrayerTimes(defaultCity);
+          setSelectedCity(defaultCity);
+          notificationContext = {
+            city: data.city,
+            latitude: defaultCity.latitude,
+            longitude: defaultCity.longitude,
+            date: data.date,
+            hijriDate: data.hijriDate,
+          };
+        }
 
-      setPrayerData(data);
-      lastDateRef.current = new Date().toDateString();
+        setPrayerData(data);
+        lastDateRef.current = new Date().toDateString();
 
-      if (notificationsEnabled) {
-        schedulePrayerNotifications(data.prayers, (prayer) => {
-          if (soundAlertEnabled) {
-            playAdhan();
-          }
-        });
-      }
+        if (notificationsEnabled && notificationContext) {
+          schedulePrayerNotifications(
+            data.prayers,
+            () => {
+              if (soundAlertEnabled) {
+                playAdhan();
+              }
+            },
+            notificationContext
+          );
+        }
     } catch (err) {
       setError(t.prayerTimesError);
       console.error(err);
