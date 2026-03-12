@@ -175,29 +175,14 @@ const Index = () => {
     }
   }, [geoLoading, loadPrayerTimes]);
 
-  // Auto-transition to next prayer when current prayer time passes
+  // Live clock tick so next prayer and countdown switch without refresh
   useEffect(() => {
-    if (!prayerData) return;
+    const interval = window.setInterval(() => {
+      setNowTimestamp(Date.now());
+    }, 1000);
 
-    const checkNextPrayer = () => {
-      const now = Date.now();
-      const nextPrayer = getNextPrayer(prayerData.prayers);
-      
-      if (nextPrayer) {
-        const timeUntilNext = nextPrayer.timestamp - now;
-        
-        // If the next prayer is in the past (for tomorrow), reload data
-        if (timeUntilNext < 0) {
-          loadPrayerTimes();
-        }
-      }
-    };
-
-    // Check every second for smooth countdown transition
-    const interval = setInterval(checkNextPrayer, 1000);
-    
     return () => clearInterval(interval);
-  }, [prayerData, loadPrayerTimes]);
+  }, []);
 
   // Check for date change and refresh at midnight
   useEffect(() => {
