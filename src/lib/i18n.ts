@@ -219,7 +219,7 @@ const translations: Record<Language, Translations> = {
     },
     dailyVerse: 'Vers des Tages',
     share: 'Teilen',
-    shareAppText: 'Gesendet von Nur Gebetszeiten App',
+    shareAppText: 'Gesendet von der Nur Ezan Vakti App',
     settings: 'Einstellungen',
     notifications: 'Benachrichtigungen',
     notificationsOn: 'Benachrichtigungen und Adhan-Sound aktiv',
