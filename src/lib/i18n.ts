@@ -127,7 +127,7 @@ const translations: Record<Language, Translations> = {
     },
   },
   en: {
-    appName: 'Nur Prayer Times',
+    appName: 'Nur Ezan Vakti',
     nextPrayer: 'Next Prayer',
     atTime: 'at',
     prayerNames: {
