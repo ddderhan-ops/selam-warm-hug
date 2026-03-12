@@ -1,3 +1,10 @@
+import {
+  getLatestPrayerTimesCache,
+  getPrayerTimesCache,
+  savePrayerTimesCache,
+  toDateKey,
+} from "@/lib/prayerCache";
+
 export interface PrayerTime {
   name: string;
   nameEn: string;
@@ -30,7 +37,7 @@ export const turkishCities: City[] = [
   { name: "İstanbul", latitude: 41.0082, longitude: 28.9784 },
   { name: "Ankara", latitude: 39.9334, longitude: 32.8597 },
   { name: "İzmir", latitude: 38.4192, longitude: 27.1287 },
-  { name: "Bursa", latitude: 40.1885, longitude: 29.0610 },
+  { name: "Bursa", latitude: 40.1885, longitude: 29.061 },
   { name: "Antalya", latitude: 36.8969, longitude: 30.7133 },
   { name: "Adana", latitude: 36.9914, longitude: 35.3308 },
   { name: "Konya", latitude: 37.8746, longitude: 32.4932 },
@@ -76,76 +83,107 @@ export async function fetchPrayerTimes(
   const day = today.getDate();
   const month = today.getMonth() + 1;
   const year = today.getFullYear();
+  const dateKey = toDateKey(today);
+  const resolvedCity = "name" in location ? location.name : cityName || "Mevcut Konum";
 
-  const response = await fetch(
-    `https://api.aladhan.com/v1/timings/${day}-${month}-${year}?latitude=${location.latitude}&longitude=${location.longitude}&method=13`
-  );
+  try {
+    const response = await fetch(
+      `https://api.aladhan.com/v1/timings/${day}-${month}-${year}?latitude=${location.latitude}&longitude=${location.longitude}&method=13`
+    );
 
-  if (!response.ok) {
-    throw new Error("Namaz vakitleri alınamadı");
-  }
+    if (!response.ok) {
+      throw new Error("Namaz vakitleri alınamadı");
+    }
 
-  const data = await response.json();
-  const timings = data.data.timings;
-  const hijri = data.data.date.hijri;
+    const data = await response.json();
+    const timings = data.data.timings;
+    const hijri = data.data.date.hijri;
 
-  const prayerKeys = ["Fajr", "Sunrise", "Dhuhr", "Asr", "Maghrib", "Isha"];
+    const prayerKeys = ["Fajr", "Sunrise", "Dhuhr", "Asr", "Maghrib", "Isha"];
 
-  const prayers: PrayerTime[] = prayerKeys.map((key) => {
-    const timeStr = timings[key];
-    const [hours, minutes] = timeStr.split(":").map(Number);
-    const timestamp = new Date(year, month - 1, day, hours, minutes).getTime();
+    const prayers: PrayerTime[] = prayerKeys.map((key) => {
+      const timeStr = String(timings[key]).split(" ")[0];
+      const [hours, minutes] = timeStr.split(":").map(Number);
+      const timestamp = new Date(year, month - 1, day, hours, minutes).getTime();
 
-    return {
-      name: prayerNamesTr[key],
-      nameEn: key,
-      time: timeStr,
-      timestamp,
+      return {
+        name: prayerNamesTr[key],
+        nameEn: key,
+        time: timeStr,
+        timestamp,
+      };
+    });
+
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     };
-  });
 
-  const options: Intl.DateTimeFormatOptions = {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  };
+    const hijriMonthTr = hijriMonthsTr[hijri.month.en] || hijri.month.en;
 
-  // Get Turkish name for Hijri month
-  const hijriMonthTr = hijriMonthsTr[hijri.month.en] || hijri.month.en;
+    const prayerData: PrayerTimesData = {
+      date: today.toLocaleDateString("tr-TR", options),
+      hijriDate: `${hijri.day} ${hijriMonthTr} ${hijri.year}`,
+      hijriDay: Number.parseInt(hijri.day, 10),
+      hijriMonth: hijriMonthTr,
+      hijriYear: Number.parseInt(hijri.year, 10),
+      city: resolvedCity,
+      prayers,
+    };
 
-  return {
-    date: today.toLocaleDateString("tr-TR", options),
-    hijriDate: `${hijri.day} ${hijriMonthTr} ${hijri.year}`,
-    hijriDay: parseInt(hijri.day),
-    hijriMonth: hijriMonthTr,
-    hijriYear: parseInt(hijri.year),
-    city: "name" in location ? location.name : cityName || "Mevcut Konum",
-    prayers,
-  };
+    void savePrayerTimesCache({
+      dateKey,
+      latitude: location.latitude,
+      longitude: location.longitude,
+      data: prayerData,
+    });
+
+    return prayerData;
+  } catch (error) {
+    const cachedData =
+      (await getPrayerTimesCache({
+        dateKey,
+        latitude: location.latitude,
+        longitude: location.longitude,
+      })) ||
+      (await getLatestPrayerTimesCache({
+        latitude: location.latitude,
+        longitude: location.longitude,
+      }));
+
+    if (cachedData) {
+      return cachedData;
+    }
+
+    throw error instanceof Error ? error : new Error("Namaz vakitleri alınamadı");
+  }
 }
 
-export function getNextPrayer(prayers: PrayerTime[]): PrayerTime | null {
-  const now = Date.now();
+export function getNextPrayer(
+  prayers: PrayerTime[],
+  now: number = Date.now()
+): PrayerTime | null {
+  if (!prayers.length) return null;
 
-  for (const prayer of prayers) {
-    if (prayer.timestamp > now) {
-      return prayer;
-    }
+  const orderedPrayers = [...prayers].sort((a, b) => a.timestamp - b.timestamp);
+  const upcomingPrayer = orderedPrayers.find((prayer) => prayer.timestamp > now);
+
+  if (upcomingPrayer) {
+    return upcomingPrayer;
   }
 
-  // If all prayers have passed, return the first prayer (for tomorrow)
-  return prayers[0];
+  const tomorrowFajr = orderedPrayers[0];
+
+  return {
+    ...tomorrowFajr,
+    timestamp: tomorrowFajr.timestamp + 24 * 60 * 60 * 1000,
+  };
 }
 
 export function formatTimeRemaining(targetTime: number): string {
-  const now = Date.now();
-  let diff = targetTime - now;
-
-  if (diff < 0) {
-    // Next day's prayer
-    diff += 24 * 60 * 60 * 1000;
-  }
+  const diff = Math.max(targetTime - Date.now(), 0);
 
   const hours = Math.floor(diff / (1000 * 60 * 60));
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));

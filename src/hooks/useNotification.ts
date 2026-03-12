@@ -1,20 +1,40 @@
 import { useEffect, useRef, useCallback } from "react";
 import type { PrayerTime } from "@/lib/prayerTimes";
+import { toDateKey } from "@/lib/prayerCache";
+
+interface NotificationScheduleContext {
+  city: string;
+  latitude: number;
+  longitude: number;
+  date?: string;
+  hijriDate?: string;
+  dateKey?: string;
+}
+
+async function getServiceWorkerRegistration(): Promise<ServiceWorkerRegistration | null> {
+  if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) {
+    return null;
+  }
+
+  try {
+    return await navigator.serviceWorker.ready;
+  } catch {
+    return null;
+  }
+}
 
 export function useNotification() {
   const permissionGranted = useRef(false);
-  const scheduledTimeouts = useRef<NodeJS.Timeout[]>([]);
+  const scheduledTimeouts = useRef<number[]>([]);
 
   useEffect(() => {
-    if ("Notification" in window) {
-      if (Notification.permission === "granted") {
-        permissionGranted.current = true;
-      }
+    if (typeof window !== "undefined" && "Notification" in window) {
+      permissionGranted.current = Notification.permission === "granted";
     }
 
-    // Cleanup timeouts on unmount
     return () => {
-      scheduledTimeouts.current.forEach(clearTimeout);
+      scheduledTimeouts.current.forEach((timeoutId) => clearTimeout(timeoutId));
+      scheduledTimeouts.current = [];
     };
   }, []);
 
@@ -38,29 +58,87 @@ export function useNotification() {
     return false;
   }, []);
 
-  const sendNotification = useCallback((prayer: PrayerTime) => {
-    if (!permissionGranted.current) return;
+  const sendNotification = useCallback(async (prayer: PrayerTime) => {
+    if (!permissionGranted.current) {
+      return null;
+    }
 
-    const notification = new Notification(`Ezan Vakti Geldi: ${prayer.name}`, {
+    const title = `Ezan Vakti Geldi: ${prayer.name}`;
+    const options: NotificationOptions = {
       body: `${prayer.name} vakti girdi. Hayırlı ibadetler.`,
       icon: "/pwa-192x192.png",
       badge: "/pwa-192x192.png",
       tag: `prayer-${prayer.nameEn}`,
       requireInteraction: true,
-    });
+      renotify: true,
+      vibrate: [200, 120, 200],
+      data: {
+        sound: "/audio/ezan.mp3",
+        channelId: "prayer-times-channel",
+        channelName: "Namaz Vakitleri",
+      },
+    };
 
-    // Auto close after 30 seconds
-    setTimeout(() => notification.close(), 30000);
+    const registration = await getServiceWorkerRegistration();
+
+    if (registration) {
+      await registration.showNotification(title, options);
+      return null;
+    }
+
+    const notification = new Notification(title, options);
+    window.setTimeout(() => notification.close(), 30_000);
 
     return notification;
   }, []);
 
-  const schedulePrayerNotifications = useCallback(
-    (prayers: PrayerTime[], onPrayerTime?: (prayer: PrayerTime) => void) => {
-      if (!permissionGranted.current) return;
+  const syncPrayerScheduleWithServiceWorker = useCallback(
+    async (prayers: PrayerTime[], context?: NotificationScheduleContext) => {
+      const registration = await getServiceWorkerRegistration();
 
-      // Clear any existing scheduled notifications
-      scheduledTimeouts.current.forEach(clearTimeout);
+      if (!registration?.active || !context) {
+        return;
+      }
+
+      registration.active.postMessage({
+        type: "CACHE_PRAYERS",
+        payload: {
+          prayers,
+          city: context.city,
+          latitude: context.latitude,
+          longitude: context.longitude,
+          date: context.date,
+          hijriDate: context.hijriDate,
+          dateKey: context.dateKey || toDateKey(new Date()),
+        },
+      });
+
+      registration.active.postMessage({ type: "CHECK_DUE_PRAYERS" });
+
+      if ("sync" in registration) {
+        void (
+          registration as ServiceWorkerRegistration & {
+            sync?: { register: (tag: string) => Promise<void> };
+          }
+        ).sync?.register("prayer-times-check").catch(() => undefined);
+      }
+    },
+    []
+  );
+
+  const schedulePrayerNotifications = useCallback(
+    (
+      prayers: PrayerTime[],
+      onPrayerTime?: (prayer: PrayerTime) => void,
+      context?: NotificationScheduleContext
+    ) => {
+      void syncPrayerScheduleWithServiceWorker(prayers, context);
+
+      if (!permissionGranted.current) {
+        return;
+      }
+
+      scheduledTimeouts.current.forEach((timeoutId) => clearTimeout(timeoutId));
       scheduledTimeouts.current = [];
 
       const now = Date.now();
@@ -69,22 +147,25 @@ export function useNotification() {
         const timeUntilPrayer = prayer.timestamp - now;
 
         if (timeUntilPrayer > 0 && timeUntilPrayer < 24 * 60 * 60 * 1000) {
-          const timeout = setTimeout(() => {
-            sendNotification(prayer);
+          const timeoutId = window.setTimeout(async () => {
+            await sendNotification(prayer);
             onPrayerTime?.(prayer);
           }, timeUntilPrayer);
 
-          scheduledTimeouts.current.push(timeout);
+          scheduledTimeouts.current.push(timeoutId);
         }
       });
     },
-    [sendNotification]
+    [sendNotification, syncPrayerScheduleWithServiceWorker]
   );
 
   return {
     requestPermission,
     sendNotification,
     schedulePrayerNotifications,
-    isSupported: typeof window !== "undefined" && "Notification" in window,
+    isSupported:
+      typeof window !== "undefined" &&
+      "Notification" in window &&
+      "serviceWorker" in navigator,
   };
 }

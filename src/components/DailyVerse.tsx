@@ -7,11 +7,11 @@ import { useTranslation } from "@/contexts/LanguageContext";
 const APP_URL = "https://selam-warm-hug.lovable.app";
 
 export function DailyVerse() {
-  const { t } = useTranslation();
-  const verse = getDailyVerse();
+  const { t, language } = useTranslation();
+  const verse = getDailyVerse(language);
 
   const handleShare = async () => {
-    const shareText = `📖 ${t.dailyVerse}\n\n"${verse.arabic}"\n\n${verse.turkish}\n\n— ${verse.source}\n\n🕌 ${t.shareAppText}: ${APP_URL}`;
+    const shareText = `📖 ${t.dailyVerse}\n\n"${verse.arabic}"\n\n${verse.text}\n\n— ${verse.source}\n\n🕌 ${t.shareAppText}: ${APP_URL}`;
 
     if (navigator.share) {
       try {
@@ -60,9 +60,7 @@ export function DailyVerse() {
         {verse.arabic}
       </p>
 
-      <p className="text-foreground/90 text-base leading-relaxed mb-3">
-        {verse.turkish}
-      </p>
+      <p className="text-foreground/90 text-base leading-relaxed mb-3">{verse.text}</p>
 
       <p className="text-muted-foreground text-sm">— {verse.source}</p>
     </div>
