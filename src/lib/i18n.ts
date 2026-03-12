@@ -377,7 +377,7 @@ const translations: Record<Language, Translations> = {
     },
     dailyVerse: 'آية اليوم',
     share: 'مشاركة',
-    shareAppText: 'أُرسلت من تطبيق نور أوقات الصلاة',
+    shareAppText: 'أُرسلت من تطبيق Nur Ezan Vakti',
     settings: 'الإعدادات',
     notifications: 'الإشعارات',
     notificationsOn: 'الإشعارات وصوت الأذان مفعّلة',
