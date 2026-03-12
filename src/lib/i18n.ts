@@ -364,7 +364,7 @@ const translations: Record<Language, Translations> = {
     },
   },
   ar: {
-    appName: 'نور أوقات الصلاة',
+    appName: 'Nur Ezan Vakti',
     nextPrayer: 'الصلاة القادمة',
     atTime: 'في الساعة',
     prayerNames: {
