@@ -17,11 +17,21 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.ico", "pwa-192x192.png", "pwa-512x512.png"],
+      injectRegister: "auto",
+      strategies: "injectManifest",
+      srcDir: "src",
+      filename: "sw.ts",
+      includeAssets: [
+        "favicon.ico",
+        "pwa-192x192.png",
+        "pwa-512x512.png",
+        "audio/ezan.mp3",
+      ],
       manifest: {
         name: "Nur Ezan Vakti",
-        short_name: "Nur Ezan",
-        description: "Modern namaz vakitleri uygulaması - Ezan vakitleri, Kıble pusulası ve daha fazlası",
+        short_name: "Nur Ezan Vakti",
+        description:
+          "Modern namaz vakitleri uygulaması - Ezan vakitleri, Kıble pusulası ve daha fazlası",
         theme_color: "#065f46",
         background_color: "#fafafa",
         display: "standalone",
@@ -56,44 +66,12 @@ export default defineConfig(({ mode }) => ({
           },
         ],
       },
-      workbox: {
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,json}"],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/api\.aladhan\.com\/.*/i,
-            handler: "NetworkFirst",
-            options: {
-              cacheName: "prayer-times-cache",
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24, // 24 hours
-              },
-              networkTimeoutSeconds: 10,
-            },
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: "CacheFirst",
-            options: {
-              cacheName: "google-fonts-stylesheets",
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
-              },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-            handler: "CacheFirst",
-            options: {
-              cacheName: "google-fonts-webfonts",
-              expiration: {
-                maxEntries: 30,
-                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
-              },
-            },
-          },
-        ],
+      injectManifest: {
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,json,mp3}"],
+      },
+      devOptions: {
+        enabled: true,
+        type: "module",
       },
     }),
   ].filter(Boolean),

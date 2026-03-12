@@ -1,88 +1,118 @@
+import type { Language } from "@/lib/i18n";
+
 export interface Verse {
   arabic: string;
-  turkish: string;
+  text: string;
   source: string;
 }
 
-export const dailyVerses: Verse[] = [
+interface VerseEntry {
+  arabic: string;
+  translations: Record<Language, string>;
+  sources: Record<Language, string>;
+}
+
+const dailyVerses: VerseEntry[] = [
   {
     arabic: "إِنَّ مَعَ الْعُسْرِ يُسْرًا",
-    turkish: "Şüphesiz zorlukla beraber kolaylık vardır.",
-    source: "İnşirah Suresi, 6"
+    translations: {
+      tr: "Şüphesiz zorlukla beraber kolaylık vardır.",
+      en: "Surely, with hardship comes ease.",
+      de: "Gewiss, mit der Erschwernis kommt Erleichterung.",
+      fr: "À côté de la difficulté est certes une facilité.",
+      ar: "إِنَّ مَعَ الْعُسْرِ يُسْرًا",
+    },
+    sources: {
+      tr: "İnşirah Suresi, 6",
+      en: "Surah Ash-Sharh, 6",
+      de: "Sure Asch-Scharh, 6",
+      fr: "Sourate Ash-Sharh, 6",
+      ar: "سورة الشرح، ٦",
+    },
   },
   {
     arabic: "وَلَا تَيْأَسُوا مِن رَّوْحِ اللَّهِ",
-    turkish: "Allah'ın rahmetinden ümit kesmeyiniz.",
-    source: "Yusuf Suresi, 87"
+    translations: {
+      tr: "Allah'ın rahmetinden ümit kesmeyiniz.",
+      en: "Do not lose hope in Allah's mercy.",
+      de: "Verliert nicht die Hoffnung auf Allahs Barmherzigkeit.",
+      fr: "Ne désespérez pas de la miséricorde d'Allah.",
+      ar: "وَلَا تَيْأَسُوا مِن رَّوْحِ اللَّهِ",
+    },
+    sources: {
+      tr: "Yusuf Suresi, 87",
+      en: "Surah Yusuf, 87",
+      de: "Sure Yusuf, 87",
+      fr: "Sourate Youssouf, 87",
+      ar: "سورة يوسف، ٨٧",
+    },
   },
   {
     arabic: "فَاذْكُرُونِي أَذْكُرْكُمْ",
-    turkish: "Beni anın ki, ben de sizi anayım.",
-    source: "Bakara Suresi, 152"
-  },
-  {
-    arabic: "وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ",
-    turkish: "Kim Allah'a güvenirse, Allah ona yeter.",
-    source: "Talak Suresi, 3"
-  },
-  {
-    arabic: "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً",
-    turkish: "Rabbimiz! Bize dünyada da iyilik ver, ahirette de iyilik ver.",
-    source: "Bakara Suresi, 201"
-  },
-  {
-    arabic: "وَقُل رَّبِّ زِدْنِي عِلْمًا",
-    turkish: "De ki: Rabbim, ilmimi artır!",
-    source: "Taha Suresi, 114"
-  },
-  {
-    arabic: "إِنَّ اللَّهَ مَعَ الصَّابِرِينَ",
-    turkish: "Şüphesiz Allah sabredenlerle beraberdir.",
-    source: "Bakara Suresi, 153"
-  },
-  {
-    arabic: "وَاصْبِرْ وَمَا صَبْرُكَ إِلَّا بِاللَّهِ",
-    turkish: "Sabret! Senin sabrın ancak Allah'ın yardımıyladır.",
-    source: "Nahl Suresi, 127"
+    translations: {
+      tr: "Beni anın ki, ben de sizi anayım.",
+      en: "Remember Me, and I will remember you.",
+      de: "Gedenkt Meiner, so gedenke Ich eurer.",
+      fr: "Invoquez-Moi et Je vous invoquerai.",
+      ar: "فَاذْكُرُونِي أَذْكُرْكُمْ",
+    },
+    sources: {
+      tr: "Bakara Suresi, 152",
+      en: "Surah Al-Baqarah, 152",
+      de: "Sure Al-Baqara, 152",
+      fr: "Sourate Al-Baqara, 152",
+      ar: "سورة البقرة، ١٥٢",
+    },
   },
   {
     arabic: "ادْعُونِي أَسْتَجِبْ لَكُمْ",
-    turkish: "Bana dua edin, size cevap vereyim.",
-    source: "Mü'min Suresi, 60"
-  },
-  {
-    arabic: "وَهُوَ مَعَكُمْ أَيْنَ مَا كُنتُمْ",
-    turkish: "Nerede olursanız olun, O sizinle beraberdir.",
-    source: "Hadid Suresi, 4"
-  },
-  {
-    arabic: "فَإِنَّ ذِكْرَى تَنفَعُ الْمُؤْمِنِينَ",
-    turkish: "Çünkü hatırlatmak müminlere fayda verir.",
-    source: "Zariyat Suresi, 55"
+    translations: {
+      tr: "Bana dua edin, size cevap vereyim.",
+      en: "Call upon Me; I will respond to you.",
+      de: "Ruft Mich an, so erhöre Ich euch.",
+      fr: "Invoquez-Moi, Je vous répondrai.",
+      ar: "ادْعُونِي أَسْتَجِبْ لَكُمْ",
+    },
+    sources: {
+      tr: "Mü'min Suresi, 60",
+      en: "Surah Ghafir, 60",
+      de: "Sure Ghafir, 60",
+      fr: "Sourate Ghafir, 60",
+      ar: "سورة غافر، ٦٠",
+    },
   },
   {
     arabic: "وَلَا تَحْزَنْ إِنَّ اللَّهَ مَعَنَا",
-    turkish: "Üzülme, Allah bizimle beraberdir.",
-    source: "Tevbe Suresi, 40"
-  },
-  {
-    arabic: "قُلْ هُوَ اللَّهُ أَحَدٌ",
-    turkish: "De ki: O, Allah'tır, bir tektir.",
-    source: "İhlas Suresi, 1"
-  },
-  {
-    arabic: "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ",
-    turkish: "Hamd, âlemlerin Rabbi Allah'a mahsustur.",
-    source: "Fatiha Suresi, 2"
+    translations: {
+      tr: "Üzülme, Allah bizimle beraberdir.",
+      en: "Do not grieve; Allah is with us.",
+      de: "Sei nicht traurig, Allah ist mit uns.",
+      fr: "Ne t'afflige pas, Allah est avec nous.",
+      ar: "وَلَا تَحْزَنْ إِنَّ اللَّهَ مَعَنَا",
+    },
+    sources: {
+      tr: "Tevbe Suresi, 40",
+      en: "Surah At-Tawbah, 40",
+      de: "Sure At-Tauba, 40",
+      fr: "Sourate At-Tawbah, 40",
+      ar: "سورة التوبة، ٤٠",
+    },
   },
 ];
 
-export function getDailyVerse(): Verse {
+export function getDailyVerse(language: Language): Verse {
   const today = new Date();
   const dayOfYear = Math.floor(
-    (today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 
-    (1000 * 60 * 60 * 24)
+    (today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) /
+      (1000 * 60 * 60 * 24)
   );
+
   const index = dayOfYear % dailyVerses.length;
-  return dailyVerses[index];
+  const verse = dailyVerses[index];
+
+  return {
+    arabic: verse.arabic,
+    text: verse.translations[language],
+    source: verse.sources[language],
+  };
 }

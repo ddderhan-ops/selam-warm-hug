@@ -127,7 +127,7 @@ const translations: Record<Language, Translations> = {
     },
   },
   en: {
-    appName: 'Nur Prayer Times',
+    appName: 'Nur Ezan Vakti',
     nextPrayer: 'Next Prayer',
     atTime: 'at',
     prayerNames: {
@@ -140,7 +140,7 @@ const translations: Record<Language, Translations> = {
     },
     dailyVerse: 'Verse of the Day',
     share: 'Share',
-    shareAppText: 'Sent from Nur Prayer Times app',
+    shareAppText: 'Sent from Nur Ezan Vakti app',
     settings: 'Settings',
     notifications: 'Notifications',
     notificationsOn: 'Notifications and adhan sound active',
@@ -206,7 +206,7 @@ const translations: Record<Language, Translations> = {
     },
   },
   de: {
-    appName: 'Nur Gebetszeiten',
+    appName: 'Nur Ezan Vakti',
     nextPrayer: 'Nächstes Gebet',
     atTime: 'um',
     prayerNames: {
@@ -219,7 +219,7 @@ const translations: Record<Language, Translations> = {
     },
     dailyVerse: 'Vers des Tages',
     share: 'Teilen',
-    shareAppText: 'Gesendet von Nur Gebetszeiten App',
+    shareAppText: 'Gesendet von der Nur Ezan Vakti App',
     settings: 'Einstellungen',
     notifications: 'Benachrichtigungen',
     notificationsOn: 'Benachrichtigungen und Adhan-Sound aktiv',
@@ -285,7 +285,7 @@ const translations: Record<Language, Translations> = {
     },
   },
   fr: {
-    appName: 'Nur Heures de Prière',
+    appName: 'Nur Ezan Vakti',
     nextPrayer: 'Prochaine Prière',
     atTime: 'à',
     prayerNames: {
@@ -298,7 +298,7 @@ const translations: Record<Language, Translations> = {
     },
     dailyVerse: 'Verset du Jour',
     share: 'Partager',
-    shareAppText: 'Envoyé depuis l\'app Nur Heures de Prière',
+    shareAppText: 'Envoyé depuis l\'application Nur Ezan Vakti',
     settings: 'Paramètres',
     notifications: 'Notifications',
     notificationsOn: 'Notifications et adhan activés',
@@ -364,7 +364,7 @@ const translations: Record<Language, Translations> = {
     },
   },
   ar: {
-    appName: 'نور أوقات الصلاة',
+    appName: 'Nur Ezan Vakti',
     nextPrayer: 'الصلاة القادمة',
     atTime: 'في الساعة',
     prayerNames: {
@@ -377,7 +377,7 @@ const translations: Record<Language, Translations> = {
     },
     dailyVerse: 'آية اليوم',
     share: 'مشاركة',
-    shareAppText: 'أُرسلت من تطبيق نور أوقات الصلاة',
+    shareAppText: 'أُرسلت من تطبيق Nur Ezan Vakti',
     settings: 'الإعدادات',
     notifications: 'الإشعارات',
     notificationsOn: 'الإشعارات وصوت الأذان مفعّلة',

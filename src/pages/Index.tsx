@@ -66,9 +66,9 @@ const Index = () => {
     }
     return false;
   });
+  const [nowTimestamp, setNowTimestamp] = useState(Date.now());
 
   const lastDateRef = useRef<string>("");
-  const nextPrayerCheckRef = useRef<NodeJS.Timeout | null>(null);
 
   const { theme, toggleTheme } = useTheme();
   const { requestPermission, schedulePrayerNotifications, isSupported } =
@@ -91,33 +91,65 @@ const Index = () => {
     setLoading(true);
     setError(null);
 
-    try {
-      let data: PrayerTimesData;
+      try {
+        let data: PrayerTimesData;
+        let notificationContext: {
+          city: string;
+          latitude: number;
+          longitude: number;
+          date: string;
+          hijriDate: string;
+        } | null = null;
 
-      if (useCurrentLocation && latitude && longitude) {
-        const nearestCity = findNearestCity(latitude, longitude);
-        data = await fetchPrayerTimes(
-          { latitude, longitude },
-          nearestCity?.name
-        );
-      } else if (selectedCity) {
-        data = await fetchPrayerTimes(selectedCity);
-      } else {
-        const defaultCity = turkishCities[0];
-        data = await fetchPrayerTimes(defaultCity);
-        setSelectedCity(defaultCity);
-      }
+        if (useCurrentLocation && latitude && longitude) {
+          const nearestCity = findNearestCity(latitude, longitude);
+          data = await fetchPrayerTimes(
+            { latitude, longitude },
+            nearestCity?.name
+          );
+          notificationContext = {
+            city: data.city,
+            latitude,
+            longitude,
+            date: data.date,
+            hijriDate: data.hijriDate,
+          };
+        } else if (selectedCity) {
+          data = await fetchPrayerTimes(selectedCity);
+          notificationContext = {
+            city: data.city,
+            latitude: selectedCity.latitude,
+            longitude: selectedCity.longitude,
+            date: data.date,
+            hijriDate: data.hijriDate,
+          };
+        } else {
+          const defaultCity = turkishCities[0];
+          data = await fetchPrayerTimes(defaultCity);
+          setSelectedCity(defaultCity);
+          notificationContext = {
+            city: data.city,
+            latitude: defaultCity.latitude,
+            longitude: defaultCity.longitude,
+            date: data.date,
+            hijriDate: data.hijriDate,
+          };
+        }
 
-      setPrayerData(data);
-      lastDateRef.current = new Date().toDateString();
+        setPrayerData(data);
+        lastDateRef.current = new Date().toDateString();
 
-      if (notificationsEnabled) {
-        schedulePrayerNotifications(data.prayers, (prayer) => {
-          if (soundAlertEnabled) {
-            playAdhan();
-          }
-        });
-      }
+        if (notificationsEnabled && notificationContext) {
+          schedulePrayerNotifications(
+            data.prayers,
+            () => {
+              if (soundAlertEnabled) {
+                playAdhan();
+              }
+            },
+            notificationContext
+          );
+        }
     } catch (err) {
       setError(t.prayerTimesError);
       console.error(err);
@@ -143,29 +175,14 @@ const Index = () => {
     }
   }, [geoLoading, loadPrayerTimes]);
 
-  // Auto-transition to next prayer when current prayer time passes
+  // Live clock tick so next prayer and countdown switch without refresh
   useEffect(() => {
-    if (!prayerData) return;
+    const interval = window.setInterval(() => {
+      setNowTimestamp(Date.now());
+    }, 1000);
 
-    const checkNextPrayer = () => {
-      const now = Date.now();
-      const nextPrayer = getNextPrayer(prayerData.prayers);
-      
-      if (nextPrayer) {
-        const timeUntilNext = nextPrayer.timestamp - now;
-        
-        // If the next prayer is in the past (for tomorrow), reload data
-        if (timeUntilNext < 0) {
-          loadPrayerTimes();
-        }
-      }
-    };
-
-    // Check every second for smooth countdown transition
-    const interval = setInterval(checkNextPrayer, 1000);
-    
     return () => clearInterval(interval);
-  }, [prayerData, loadPrayerTimes]);
+  }, []);
 
   // Check for date change and refresh at midnight
   useEffect(() => {
@@ -203,6 +220,37 @@ const Index = () => {
     }
   };
 
+  const getNotificationContext = useCallback(() => {
+    if (useCurrentLocation && latitude && longitude) {
+      return {
+        city: prayerData?.city || t.currentLocation,
+        latitude,
+        longitude,
+        date: prayerData?.date,
+        hijriDate: prayerData?.hijriDate,
+      };
+    }
+
+    const fallbackCity = selectedCity || turkishCities[0];
+
+    return {
+      city: prayerData?.city || fallbackCity.name,
+      latitude: fallbackCity.latitude,
+      longitude: fallbackCity.longitude,
+      date: prayerData?.date,
+      hijriDate: prayerData?.hijriDate,
+    };
+  }, [
+    useCurrentLocation,
+    latitude,
+    longitude,
+    prayerData?.city,
+    prayerData?.date,
+    prayerData?.hijriDate,
+    selectedCity,
+    t.currentLocation,
+  ]);
+
   const handleNotificationToggle = async () => {
     if (!isSupported) {
       toast.error("Tarayıcınız bildirimleri desteklemiyor.");
@@ -221,9 +269,13 @@ const Index = () => {
         toast.success(t.notificationsOn);
 
         if (prayerData) {
-          schedulePrayerNotifications(prayerData.prayers, (prayer) => {
-            playAdhan();
-          });
+          schedulePrayerNotifications(
+            prayerData.prayers,
+            () => {
+              playAdhan();
+            },
+            getNotificationContext()
+          );
         }
       } else {
         toast.error("Bildirim izni reddedildi");
@@ -259,7 +311,7 @@ const Index = () => {
     }
   };
 
-  const nextPrayer = prayerData ? getNextPrayer(prayerData.prayers) : null;
+  const nextPrayer = prayerData ? getNextPrayer(prayerData.prayers, nowTimestamp) : null;
 
   // Show splash screen
   if (showSplash) {
