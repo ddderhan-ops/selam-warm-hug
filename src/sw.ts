@@ -110,7 +110,7 @@ async function showPrayerNotification(prayer: PrayerTime, city: string): Promise
     tag: `prayer-${prayer.nameEn}`,
     
     requireInteraction: true,
-    vibrate: [200, 120, 200],
+    
     data: {
       prayer: prayer.nameEn,
       channelId: "prayer-times-channel",
