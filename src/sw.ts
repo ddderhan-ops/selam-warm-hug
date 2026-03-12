@@ -108,7 +108,7 @@ async function showPrayerNotification(prayer: PrayerTime, city: string): Promise
     icon: NOTIFICATION_ICON,
     badge: NOTIFICATION_BADGE,
     tag: `prayer-${prayer.nameEn}`,
-    renotify: true,
+    
     requireInteraction: true,
     vibrate: [200, 120, 200],
     data: {

@@ -70,7 +70,7 @@ export function useNotification() {
       badge: "/pwa-192x192.png",
       tag: `prayer-${prayer.nameEn}`,
       requireInteraction: true,
-      renotify: true,
+      
       vibrate: [200, 120, 200],
       data: {
         sound: "/audio/ezan.mp3",
