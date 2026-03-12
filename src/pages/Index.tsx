@@ -220,6 +220,37 @@ const Index = () => {
     }
   };
 
+  const getNotificationContext = useCallback(() => {
+    if (useCurrentLocation && latitude && longitude) {
+      return {
+        city: prayerData?.city || t.currentLocation,
+        latitude,
+        longitude,
+        date: prayerData?.date,
+        hijriDate: prayerData?.hijriDate,
+      };
+    }
+
+    const fallbackCity = selectedCity || turkishCities[0];
+
+    return {
+      city: prayerData?.city || fallbackCity.name,
+      latitude: fallbackCity.latitude,
+      longitude: fallbackCity.longitude,
+      date: prayerData?.date,
+      hijriDate: prayerData?.hijriDate,
+    };
+  }, [
+    useCurrentLocation,
+    latitude,
+    longitude,
+    prayerData?.city,
+    prayerData?.date,
+    prayerData?.hijriDate,
+    selectedCity,
+    t.currentLocation,
+  ]);
+
   const handleNotificationToggle = async () => {
     if (!isSupported) {
       toast.error("Tarayıcınız bildirimleri desteklemiyor.");
@@ -238,9 +269,13 @@ const Index = () => {
         toast.success(t.notificationsOn);
 
         if (prayerData) {
-          schedulePrayerNotifications(prayerData.prayers, (prayer) => {
-            playAdhan();
-          });
+          schedulePrayerNotifications(
+            prayerData.prayers,
+            () => {
+              playAdhan();
+            },
+            getNotificationContext()
+          );
         }
       } else {
         toast.error("Bildirim izni reddedildi");
