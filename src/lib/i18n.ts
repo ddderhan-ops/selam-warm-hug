@@ -298,7 +298,7 @@ const translations: Record<Language, Translations> = {
     },
     dailyVerse: 'Verset du Jour',
     share: 'Partager',
-    shareAppText: 'Envoyé depuis l\'app Nur Heures de Prière',
+    shareAppText: 'Envoyé depuis l\'application Nur Ezan Vakti',
     settings: 'Paramètres',
     notifications: 'Notifications',
     notificationsOn: 'Notifications et adhan activés',
