@@ -221,6 +221,10 @@ const Index = () => {
   const handleCityChange = (city: City) => {
     setSelectedCity(city);
     setUseCurrentLocation(false);
+    // Update FCM token location
+    if (notificationsEnabled) {
+      updateLocation(city.name, city.latitude, city.longitude);
+    }
   };
 
   const handleUseCurrentLocation = () => {
