@@ -1,1 +1,7 @@
 project_id = "cedsrwpppozvfiomcdig"
+
+[functions.send-prayer-notification]
+verify_jwt = false
+
+[functions.check-prayer-times]
+verify_jwt = false

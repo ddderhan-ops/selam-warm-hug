@@ -11,6 +11,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useNotification } from "@/hooks/useNotification";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useAdhan } from "@/hooks/useAdhan";
+import { useFCM } from "@/hooks/useFCM";
 import { useTranslation } from "@/contexts/LanguageContext";
 import {
   fetchPrayerTimes,
