@@ -83,6 +83,17 @@ const Index = () => {
   } = useGeolocation();
   const { playAdhan } = useAdhan();
 
+  // FCM push notifications
+  const fcmCity = prayerData?.city || selectedCity?.name || "İstanbul";
+  const fcmLat = latitude || selectedCity?.latitude || 41.0082;
+  const fcmLng = longitude || selectedCity?.longitude || 28.9784;
+
+  const { updateLocation } = useFCM({
+    city: fcmCity,
+    latitude: fcmLat,
+    longitude: fcmLng,
+    enabled: notificationsEnabled,
+  });
   const handleSplashComplete = useCallback(() => {
     sessionStorage.setItem('hasSeenSplash', 'true');
     setShowSplash(false);
