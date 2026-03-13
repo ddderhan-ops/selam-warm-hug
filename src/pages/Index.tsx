@@ -11,6 +11,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useNotification } from "@/hooks/useNotification";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useAdhan } from "@/hooks/useAdhan";
+import { useFCM } from "@/hooks/useFCM";
 import { useTranslation } from "@/contexts/LanguageContext";
 import {
   fetchPrayerTimes,
@@ -82,6 +83,17 @@ const Index = () => {
   } = useGeolocation();
   const { playAdhan } = useAdhan();
 
+  // FCM push notifications
+  const fcmCity = prayerData?.city || selectedCity?.name || "İstanbul";
+  const fcmLat = latitude || selectedCity?.latitude || 41.0082;
+  const fcmLng = longitude || selectedCity?.longitude || 28.9784;
+
+  const { updateLocation } = useFCM({
+    city: fcmCity,
+    latitude: fcmLat,
+    longitude: fcmLng,
+    enabled: notificationsEnabled,
+  });
   const handleSplashComplete = useCallback(() => {
     sessionStorage.setItem('hasSeenSplash', 'true');
     setShowSplash(false);
@@ -209,6 +221,10 @@ const Index = () => {
   const handleCityChange = (city: City) => {
     setSelectedCity(city);
     setUseCurrentLocation(false);
+    // Update FCM token location
+    if (notificationsEnabled) {
+      updateLocation(city.name, city.latitude, city.longitude);
+    }
   };
 
   const handleUseCurrentLocation = () => {

@@ -14,7 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      fcm_tokens: {
+        Row: {
+          city: string
+          created_at: string
+          device_id: string
+          fcm_token: string
+          id: string
+          latitude: number
+          longitude: number
+          notifications_enabled: boolean
+          updated_at: string
+        }
+        Insert: {
+          city?: string
+          created_at?: string
+          device_id: string
+          fcm_token: string
+          id?: string
+          latitude?: number
+          longitude?: number
+          notifications_enabled?: boolean
+          updated_at?: string
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          device_id?: string
+          fcm_token?: string
+          id?: string
+          latitude?: number
+          longitude?: number
+          notifications_enabled?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
