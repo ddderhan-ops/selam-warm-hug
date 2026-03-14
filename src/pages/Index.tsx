@@ -27,7 +27,7 @@ import { toast } from "sonner";
 type View = 'main' | 'qibla';
 
 const Index = () => {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [showSplash, setShowSplash] = useState(() => {
     if (typeof window !== 'undefined') {
       const hasSeenSplash = sessionStorage.getItem('hasSeenSplash');
