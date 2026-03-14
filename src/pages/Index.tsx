@@ -138,7 +138,7 @@ const Index = () => {
           };
         } else {
           const defaultCity = turkishCities[0];
-          data = await fetchPrayerTimes(defaultCity);
+          data = await fetchPrayerTimes(defaultCity, undefined, language);
           setSelectedCity(defaultCity);
           notificationContext = {
             city: data.city,
