@@ -27,7 +27,7 @@ import { toast } from "sonner";
 type View = 'main' | 'qibla';
 
 const Index = () => {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [showSplash, setShowSplash] = useState(() => {
     if (typeof window !== 'undefined') {
       const hasSeenSplash = sessionStorage.getItem('hasSeenSplash');
@@ -117,7 +117,8 @@ const Index = () => {
           const nearestCity = findNearestCity(latitude, longitude);
           data = await fetchPrayerTimes(
             { latitude, longitude },
-            nearestCity?.name
+            nearestCity?.name,
+            language
           );
           notificationContext = {
             city: data.city,
@@ -127,7 +128,7 @@ const Index = () => {
             hijriDate: data.hijriDate,
           };
         } else if (selectedCity) {
-          data = await fetchPrayerTimes(selectedCity);
+          data = await fetchPrayerTimes(selectedCity, undefined, language);
           notificationContext = {
             city: data.city,
             latitude: selectedCity.latitude,
@@ -137,7 +138,7 @@ const Index = () => {
           };
         } else {
           const defaultCity = turkishCities[0];
-          data = await fetchPrayerTimes(defaultCity);
+          data = await fetchPrayerTimes(defaultCity, undefined, language);
           setSelectedCity(defaultCity);
           notificationContext = {
             city: data.city,
@@ -173,6 +174,7 @@ const Index = () => {
     latitude,
     longitude,
     selectedCity,
+    language,
     notificationsEnabled,
     schedulePrayerNotifications,
     soundAlertEnabled,
@@ -388,12 +390,12 @@ const Index = () => {
 
   return (
     <div 
-      className="min-h-screen bg-background"
+      className="min-h-screen bg-background overflow-x-hidden"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <div className="max-w-md mx-auto px-5 py-6 pb-8">
+      <div className="max-w-md mx-auto px-4 sm:px-5 py-4 sm:py-6 pb-8 w-full">
         <Header
           selectedCity={
             useCurrentLocation

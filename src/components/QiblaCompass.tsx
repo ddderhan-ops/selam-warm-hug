@@ -36,7 +36,7 @@ export function QiblaCompass({ latitude, longitude, onBack }: QiblaCompassProps)
     : qiblaDirection || 0;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col overflow-x-hidden">
       {/* Header */}
       <div className="p-4 flex items-center gap-3">
         <Button
@@ -68,9 +68,10 @@ export function QiblaCompass({ latitude, longitude, onBack }: QiblaCompassProps)
 
           {/* Inner compass face */}
           <div 
-            className="absolute inset-8 rounded-full bg-gradient-to-b from-secondary to-muted flex items-center justify-center transition-transform duration-100"
+            className="absolute inset-8 rounded-full bg-gradient-to-b from-secondary to-muted flex items-center justify-center"
             style={{ 
               transform: heading !== null ? `rotate(${-heading}deg)` : 'rotate(0deg)',
+              transition: 'transform 0.15s ease-out',
             }}
           >
             {/* Compass lines */}
@@ -87,9 +88,10 @@ export function QiblaCompass({ latitude, longitude, onBack }: QiblaCompassProps)
 
           {/* Qibla indicator (Kaaba icon) */}
           <div
-            className="absolute inset-0 flex items-center justify-center transition-transform duration-300"
+            className="absolute inset-0 flex items-center justify-center"
             style={{ 
               transform: `rotate(${needleRotation}deg)`,
+              transition: 'transform 0.15s ease-out',
             }}
           >
             <div className="absolute top-6 flex flex-col items-center">

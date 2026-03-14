@@ -75,9 +75,18 @@ const hijriMonthsTr: Record<string, string> = {
   "Dhu al-Hijjah": "Zilhicce",
 };
 
+const languageToLocale: Record<string, string> = {
+  tr: 'tr-TR',
+  en: 'en-US',
+  de: 'de-DE',
+  fr: 'fr-FR',
+  ar: 'ar-SA',
+};
+
 export async function fetchPrayerTimes(
   location: City | Coordinates,
-  cityName?: string
+  cityName?: string,
+  language?: string
 ): Promise<PrayerTimesData> {
   const today = new Date();
   const day = today.getDate();
@@ -114,6 +123,7 @@ export async function fetchPrayerTimes(
       };
     });
 
+    const locale = languageToLocale[language || 'tr'] || 'tr-TR';
     const options: Intl.DateTimeFormatOptions = {
       weekday: "long",
       year: "numeric",
@@ -124,7 +134,7 @@ export async function fetchPrayerTimes(
     const hijriMonthTr = hijriMonthsTr[hijri.month.en] || hijri.month.en;
 
     const prayerData: PrayerTimesData = {
-      date: today.toLocaleDateString("tr-TR", options),
+      date: today.toLocaleDateString(locale, options),
       hijriDate: `${hijri.day} ${hijriMonthTr} ${hijri.year}`,
       hijriDay: Number.parseInt(hijri.day, 10),
       hijriMonth: hijriMonthTr,
