@@ -117,7 +117,8 @@ const Index = () => {
           const nearestCity = findNearestCity(latitude, longitude);
           data = await fetchPrayerTimes(
             { latitude, longitude },
-            nearestCity?.name
+            nearestCity?.name,
+            language
           );
           notificationContext = {
             city: data.city,
