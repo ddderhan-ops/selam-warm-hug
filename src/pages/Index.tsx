@@ -128,7 +128,7 @@ const Index = () => {
             hijriDate: data.hijriDate,
           };
         } else if (selectedCity) {
-          data = await fetchPrayerTimes(selectedCity);
+          data = await fetchPrayerTimes(selectedCity, undefined, language);
           notificationContext = {
             city: data.city,
             latitude: selectedCity.latitude,
