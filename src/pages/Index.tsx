@@ -388,12 +388,12 @@ const Index = () => {
 
   return (
     <div 
-      className="min-h-screen bg-background"
+      className="min-h-screen bg-background overflow-x-hidden"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <div className="max-w-md mx-auto px-5 py-6 pb-8">
+      <div className="max-w-md mx-auto px-4 sm:px-5 py-4 sm:py-6 pb-8 w-full">
         <Header
           selectedCity={
             useCurrentLocation

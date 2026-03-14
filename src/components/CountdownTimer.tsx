@@ -38,7 +38,7 @@ export function CountdownTimer({ nextPrayer }: CountdownTimerProps) {
       </h2>
       <div className="relative">
         <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full" />
-        <p className="relative text-6xl md:text-7xl font-bold tabular-nums countdown-glow text-foreground">
+        <p className="relative text-5xl sm:text-6xl md:text-7xl font-bold tabular-nums countdown-glow text-foreground">
           {timeRemaining}
         </p>
       </div>

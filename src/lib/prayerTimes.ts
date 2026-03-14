@@ -123,6 +123,7 @@ export async function fetchPrayerTimes(
       };
     });
 
+    const locale = languageToLocale[language || 'tr'] || 'tr-TR';
     const options: Intl.DateTimeFormatOptions = {
       weekday: "long",
       year: "numeric",
@@ -133,7 +134,7 @@ export async function fetchPrayerTimes(
     const hijriMonthTr = hijriMonthsTr[hijri.month.en] || hijri.month.en;
 
     const prayerData: PrayerTimesData = {
-      date: today.toLocaleDateString("tr-TR", options),
+      date: today.toLocaleDateString(locale, options),
       hijriDate: `${hijri.day} ${hijriMonthTr} ${hijri.year}`,
       hijriDay: Number.parseInt(hijri.day, 10),
       hijriMonth: hijriMonthTr,
