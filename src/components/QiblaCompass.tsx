@@ -88,9 +88,10 @@ export function QiblaCompass({ latitude, longitude, onBack }: QiblaCompassProps)
 
           {/* Qibla indicator (Kaaba icon) */}
           <div
-            className="absolute inset-0 flex items-center justify-center transition-transform duration-300"
+            className="absolute inset-0 flex items-center justify-center"
             style={{ 
               transform: `rotate(${needleRotation}deg)`,
+              transition: 'transform 0.15s ease-out',
             }}
           >
             <div className="absolute top-6 flex flex-col items-center">
