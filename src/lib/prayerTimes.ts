@@ -75,9 +75,18 @@ const hijriMonthsTr: Record<string, string> = {
   "Dhu al-Hijjah": "Zilhicce",
 };
 
+const languageToLocale: Record<string, string> = {
+  tr: 'tr-TR',
+  en: 'en-US',
+  de: 'de-DE',
+  fr: 'fr-FR',
+  ar: 'ar-SA',
+};
+
 export async function fetchPrayerTimes(
   location: City | Coordinates,
-  cityName?: string
+  cityName?: string,
+  language?: string
 ): Promise<PrayerTimesData> {
   const today = new Date();
   const day = today.getDate();
