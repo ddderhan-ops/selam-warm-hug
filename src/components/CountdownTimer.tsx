@@ -43,7 +43,7 @@ export function CountdownTimer({ nextPrayer }: CountdownTimerProps) {
         {t.nextPrayer}
       </p>
       <h2 className="text-2xl font-semibold text-primary mb-4">
-        {nextPrayer.name}
+        {nextPrayer ? (prayerNameKeys[nextPrayer.nameEn] ? t.prayerNames[prayerNameKeys[nextPrayer.nameEn]] : nextPrayer.name) : ''}
       </h2>
       <div className="relative">
         <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full" />
