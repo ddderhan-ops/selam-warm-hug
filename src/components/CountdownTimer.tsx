@@ -7,6 +7,15 @@ interface CountdownTimerProps {
   nextPrayer: PrayerTime | null;
 }
 
+const prayerNameKeys: Record<string, 'fajr' | 'sunrise' | 'dhuhr' | 'asr' | 'maghrib' | 'isha'> = {
+  Fajr: "fajr",
+  Sunrise: "sunrise",
+  Dhuhr: "dhuhr",
+  Asr: "asr",
+  Maghrib: "maghrib",
+  Isha: "isha",
+};
+
 export function CountdownTimer({ nextPrayer }: CountdownTimerProps) {
   const { t } = useTranslation();
   const [timeRemaining, setTimeRemaining] = useState("00:00:00");
