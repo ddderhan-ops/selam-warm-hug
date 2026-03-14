@@ -174,6 +174,7 @@ const Index = () => {
     latitude,
     longitude,
     selectedCity,
+    language,
     notificationsEnabled,
     schedulePrayerNotifications,
     soundAlertEnabled,
