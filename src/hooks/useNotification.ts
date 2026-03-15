@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback } from "react";
+import { LocalNotifications } from "@capacitor/local-notifications";
 import type { PrayerTime } from "@/lib/prayerTimes";
 import { toDateKey } from "@/lib/prayerCache";
 
@@ -15,7 +16,6 @@ async function getServiceWorkerRegistration(): Promise<ServiceWorkerRegistration
   if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) {
     return null;
   }
-
   try {
     return await navigator.serviceWorker.ready;
   } catch {
@@ -25,80 +25,88 @@ async function getServiceWorkerRegistration(): Promise<ServiceWorkerRegistration
 
 export function useNotification() {
   const permissionGranted = useRef(false);
-  const scheduledTimeouts = useRef<number[]>([]);
+  const scheduledIds = useRef<number[]>([]);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && "Notification" in window) {
-      permissionGranted.current = Notification.permission === "granted";
-    }
+    // Check current permission status
+    LocalNotifications.checkPermissions().then((result) => {
+      permissionGranted.current = result.display === "granted";
+    }).catch(() => {
+      // Fallback for web
+      if ("Notification" in window) {
+        permissionGranted.current = Notification.permission === "granted";
+      }
+    });
 
     return () => {
-      scheduledTimeouts.current.forEach((timeoutId) => clearTimeout(timeoutId));
-      scheduledTimeouts.current = [];
+      // Cancel any scheduled notifications on unmount
+      if (scheduledIds.current.length > 0) {
+        LocalNotifications.cancel({
+          notifications: scheduledIds.current.map((id) => ({ id })),
+        }).catch(() => undefined);
+        scheduledIds.current = [];
+      }
     };
   }, []);
 
   const requestPermission = useCallback(async () => {
-    if (!("Notification" in window)) {
-      console.log("Bu tarayıcı bildirimleri desteklemiyor");
+    try {
+      const result = await LocalNotifications.requestPermissions();
+      permissionGranted.current = result.display === "granted";
+      return permissionGranted.current;
+    } catch {
+      // Fallback for web
+      if ("Notification" in window) {
+        if (Notification.permission === "granted") {
+          permissionGranted.current = true;
+          return true;
+        }
+        if (Notification.permission !== "denied") {
+          const permission = await Notification.requestPermission();
+          permissionGranted.current = permission === "granted";
+          return permissionGranted.current;
+        }
+      }
       return false;
     }
-
-    if (Notification.permission === "granted") {
-      permissionGranted.current = true;
-      return true;
-    }
-
-    if (Notification.permission !== "denied") {
-      const permission = await Notification.requestPermission();
-      permissionGranted.current = permission === "granted";
-      return permissionGranted.current;
-    }
-
-    return false;
   }, []);
 
   const sendNotification = useCallback(async (prayer: PrayerTime) => {
-    if (!permissionGranted.current) {
-      return null;
+    if (!permissionGranted.current) return null;
+
+    try {
+      await LocalNotifications.schedule({
+        notifications: [
+          {
+            id: Math.floor(Math.random() * 100000),
+            title: `Ezan Vakti Geldi: ${prayer.name}`,
+            body: `${prayer.name} vakti girdi. Hayırlı ibadetler.`,
+            smallIcon: "ic_notification",
+            largeIcon: "ic_launcher",
+            sound: "ezan.mp3",
+            channelId: "prayer-times-channel",
+          },
+        ],
+      });
+    } catch {
+      // Fallback: browser notification
+      const registration = await getServiceWorkerRegistration();
+      if (registration) {
+        await registration.showNotification(`Ezan Vakti Geldi: ${prayer.name}`, {
+          body: `${prayer.name} vakti girdi. Hayırlı ibadetler.`,
+          icon: "/pwa-192x192.png",
+          tag: `prayer-${prayer.nameEn}`,
+        });
+      }
     }
 
-    const title = `Ezan Vakti Geldi: ${prayer.name}`;
-    const options: NotificationOptions = {
-      body: `${prayer.name} vakti girdi. Hayırlı ibadetler.`,
-      icon: "/pwa-192x192.png",
-      badge: "/pwa-192x192.png",
-      tag: `prayer-${prayer.nameEn}`,
-      requireInteraction: true,
-      
-      
-      data: {
-        sound: "/audio/ezan.mp3",
-        channelId: "prayer-times-channel",
-        channelName: "Namaz Vakitleri",
-      },
-    };
-
-    const registration = await getServiceWorkerRegistration();
-
-    if (registration) {
-      await registration.showNotification(title, options);
-      return null;
-    }
-
-    const notification = new Notification(title, options);
-    window.setTimeout(() => notification.close(), 30_000);
-
-    return notification;
+    return null;
   }, []);
 
   const syncPrayerScheduleWithServiceWorker = useCallback(
     async (prayers: PrayerTime[], context?: NotificationScheduleContext) => {
       const registration = await getServiceWorkerRegistration();
-
-      if (!registration?.active || !context) {
-        return;
-      }
+      if (!registration?.active || !context) return;
 
       registration.active.postMessage({
         type: "CACHE_PRAYERS",
@@ -112,49 +120,84 @@ export function useNotification() {
           dateKey: context.dateKey || toDateKey(new Date()),
         },
       });
-
       registration.active.postMessage({ type: "CHECK_DUE_PRAYERS" });
-
-      if ("sync" in registration) {
-        void (
-          registration as ServiceWorkerRegistration & {
-            sync?: { register: (tag: string) => Promise<void> };
-          }
-        ).sync?.register("prayer-times-check").catch(() => undefined);
-      }
     },
     []
   );
 
   const schedulePrayerNotifications = useCallback(
-    (
+    async (
       prayers: PrayerTime[],
       onPrayerTime?: (prayer: PrayerTime) => void,
       context?: NotificationScheduleContext
     ) => {
       void syncPrayerScheduleWithServiceWorker(prayers, context);
 
-      if (!permissionGranted.current) {
-        return;
+      if (!permissionGranted.current) return;
+
+      // Cancel previously scheduled
+      if (scheduledIds.current.length > 0) {
+        await LocalNotifications.cancel({
+          notifications: scheduledIds.current.map((id) => ({ id })),
+        }).catch(() => undefined);
+        scheduledIds.current = [];
       }
 
-      scheduledTimeouts.current.forEach((timeoutId) => clearTimeout(timeoutId));
-      scheduledTimeouts.current = [];
-
       const now = Date.now();
+      const notifications: Array<{
+        id: number;
+        title: string;
+        body: string;
+        schedule: { at: Date };
+        smallIcon: string;
+        largeIcon: string;
+        sound: string;
+        channelId: string;
+      }> = [];
 
-      prayers.forEach((prayer) => {
-        const timeUntilPrayer = prayer.timestamp - now;
-
-        if (timeUntilPrayer > 0 && timeUntilPrayer < 24 * 60 * 60 * 1000) {
-          const timeoutId = window.setTimeout(async () => {
-            await sendNotification(prayer);
-            onPrayerTime?.(prayer);
-          }, timeUntilPrayer);
-
-          scheduledTimeouts.current.push(timeoutId);
+      prayers.forEach((prayer, index) => {
+        const timeUntil = prayer.timestamp - now;
+        if (timeUntil > 0 && timeUntil < 24 * 60 * 60 * 1000) {
+          const id = 5000 + index;
+          notifications.push({
+            id,
+            title: `Ezan Vakti Geldi: ${prayer.name}`,
+            body: `${prayer.name} vakti girdi. Hayırlı ibadetler.`,
+            schedule: { at: new Date(prayer.timestamp) },
+            smallIcon: "ic_notification",
+            largeIcon: "ic_launcher",
+            sound: "ezan.mp3",
+            channelId: "prayer-times-channel",
+          });
+          scheduledIds.current.push(id);
         }
       });
+
+      if (notifications.length > 0) {
+        try {
+          await LocalNotifications.schedule({ notifications: notifications as any });
+        } catch {
+          // Fallback to setTimeout for web
+          prayers.forEach((prayer) => {
+            const timeUntil = prayer.timestamp - now;
+            if (timeUntil > 0 && timeUntil < 24 * 60 * 60 * 1000) {
+              window.setTimeout(async () => {
+                await sendNotification(prayer);
+                onPrayerTime?.(prayer);
+              }, timeUntil);
+            }
+          });
+        }
+      }
+
+      // Listen for notification events to trigger callbacks
+      LocalNotifications.addListener("localNotificationReceived", () => {
+        // Find which prayer just fired
+        const closest = prayers.find(
+          (p) => Math.abs(p.timestamp - Date.now()) < 120_000
+        );
+        if (closest) onPrayerTime?.(closest);
+      }).catch(() => undefined);
     },
     [sendNotification, syncPrayerScheduleWithServiceWorker]
   );
@@ -163,9 +206,6 @@ export function useNotification() {
     requestPermission,
     sendNotification,
     schedulePrayerNotifications,
-    isSupported:
-      typeof window !== "undefined" &&
-      "Notification" in window &&
-      "serviceWorker" in navigator,
+    isSupported: true, // Capacitor always supports local notifications
   };
 }
