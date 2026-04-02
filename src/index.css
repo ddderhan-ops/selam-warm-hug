@@ -98,6 +98,64 @@
     --verse-bg: 220 20% 15%;
     --verse-border: 158 40% 25%;
   }
+
+  /* Ocean Blue — beyaz arka plan, canlı mavi detaylar */
+  .theme-ocean {
+    --primary: 200 95% 48%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 200 30% 95%;
+    --secondary-foreground: 200 95% 40%;
+    --accent: 200 95% 48%;
+    --accent-foreground: 0 0% 100%;
+    --ring: 200 95% 48%;
+    --sidebar-primary: 200 95% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 200 30% 95%;
+    --sidebar-accent-foreground: 200 95% 40%;
+    --sidebar-ring: 200 95% 48%;
+    --prayer-active: 200 95% 48%;
+    --countdown-glow: 200 95% 48%;
+    --verse-bg: 200 30% 97%;
+    --verse-border: 200 40% 85%;
+    --border: 200 25% 90%;
+    --input: 200 25% 90%;
+  }
+
+  /* Midnight — true black arka plan, neon mavi */
+  .theme-midnight {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 4%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 210 100% 56%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 220 15% 10%;
+    --secondary-foreground: 210 100% 65%;
+    --muted: 220 10% 8%;
+    --muted-foreground: 220 10% 55%;
+    --accent: 210 100% 56%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 10% 12%;
+    --input: 220 10% 12%;
+    --ring: 210 100% 56%;
+    --sidebar-background: 0 0% 0%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 210 100% 56%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 220 15% 10%;
+    --sidebar-accent-foreground: 210 100% 65%;
+    --sidebar-border: 220 10% 12%;
+    --sidebar-ring: 210 100% 56%;
+    --prayer-active: 210 100% 60%;
+    --prayer-inactive: 220 10% 45%;
+    --countdown-glow: 210 100% 56%;
+    --verse-bg: 0 0% 3%;
+    --verse-border: 210 50% 20%;
+  }
 }
 
 @layer base {
