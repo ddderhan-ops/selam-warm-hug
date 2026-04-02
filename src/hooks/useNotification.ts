@@ -185,16 +185,7 @@ export function useNotification() {
       }
 
       const now = Date.now();
-      const notifications: Array<{
-        id: number;
-        title: string;
-        body: string;
-        schedule: { at: Date };
-        smallIcon: string;
-        largeIcon: string;
-        sound: string;
-        channelId: string;
-      }> = [];
+      const notifications: Array<any> = [];
 
       prayers.forEach((prayer, index) => {
         const timeUntil = prayer.timestamp - now;
