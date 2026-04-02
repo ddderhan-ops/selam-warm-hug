@@ -7,17 +7,21 @@ interface DeviceOrientationState {
   error: string | null;
 }
 
-// Smoothly interpolate between angles (handles 0/360 wraparound)
-function lerpAngle(from: number, to: number, factor: number): number {
+const LP_ALPHA = 0.15;
+
+function lerpAngle(from: number, to: number, alpha: number): number {
   let diff = to - from;
-  // Normalize to -180..180
   while (diff > 180) diff -= 360;
   while (diff < -180) diff += 360;
-  let result = from + diff * factor;
-  // Normalize to 0..360
+  let result = from + diff * alpha;
   while (result < 0) result += 360;
   while (result >= 360) result -= 360;
   return result;
+}
+
+function lowPassFilter(prev: number | null, raw: number, alpha: number): number {
+  if (prev === null) return raw;
+  return lerpAngle(prev, raw, alpha);
 }
 
 export function useDeviceOrientation() {
@@ -29,27 +33,27 @@ export function useDeviceOrientation() {
   });
 
   const rawHeadingRef = useRef<number | null>(null);
+  const filteredHeadingRef = useRef<number | null>(null);
   const smoothHeadingRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
 
-  // Smoothing loop using requestAnimationFrame
   const smoothLoop = useCallback(() => {
-    const raw = rawHeadingRef.current;
-    if (raw === null) {
+    const filtered = filteredHeadingRef.current;
+    if (filtered === null) {
       rafRef.current = requestAnimationFrame(smoothLoop);
       return;
     }
 
     if (smoothHeadingRef.current === null) {
-      smoothHeadingRef.current = raw;
+      smoothHeadingRef.current = filtered;
     } else {
-      smoothHeadingRef.current = lerpAngle(smoothHeadingRef.current, raw, 0.1);
+      smoothHeadingRef.current = lerpAngle(smoothHeadingRef.current, filtered, 0.08);
     }
 
     setState(prev => {
       const rounded = Math.round(smoothHeadingRef.current! * 10) / 10;
-      if (prev.heading !== null && Math.abs(prev.heading - rounded) < 0.15) {
-        return prev; // skip tiny updates to avoid re-renders
+      if (prev.heading !== null && Math.abs(prev.heading - rounded) < 0.2) {
+        return prev;
       }
       return { ...prev, heading: rounded, hasPermission: true };
     });
@@ -60,7 +64,10 @@ export function useDeviceOrientation() {
   const handleOrientation = useCallback((event: DeviceOrientationEvent) => {
     let heading: number | null = null;
 
-    if ('webkitCompassHeading' in event) {
+    // Absolute orientation (Rotation Vector eşdeğeri)
+    if ((event as any).absolute === true && event.alpha !== null) {
+      heading = 360 - event.alpha;
+    } else if ('webkitCompassHeading' in event) {
       heading = (event as any).webkitCompassHeading;
     } else if (event.alpha !== null) {
       heading = 360 - event.alpha;
@@ -68,6 +75,11 @@ export function useDeviceOrientation() {
 
     if (heading !== null) {
       rawHeadingRef.current = heading;
+      filteredHeadingRef.current = lowPassFilter(
+        filteredHeadingRef.current,
+        heading,
+        LP_ALPHA
+      );
     }
   }, []);
 
@@ -81,8 +93,10 @@ export function useDeviceOrientation() {
       if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
         const permission = await (DeviceOrientationEvent as any).requestPermission();
         if (permission === 'granted') {
+          try {
+            window.addEventListener('deviceorientationabsolute', handleOrientation as EventListener, true);
+          } catch { /* desteklenmiyorsa yoksay */ }
           window.addEventListener('deviceorientation', handleOrientation, true);
-          // Start smoothing loop
           rafRef.current = requestAnimationFrame(smoothLoop);
           setState(prev => ({ ...prev, hasPermission: true }));
           return true;
@@ -91,6 +105,9 @@ export function useDeviceOrientation() {
           return false;
         }
       } else {
+        try {
+          window.addEventListener('deviceorientationabsolute', handleOrientation as EventListener, true);
+        } catch { /* yoksay */ }
         window.addEventListener('deviceorientation', handleOrientation, true);
         rafRef.current = requestAnimationFrame(smoothLoop);
         setState(prev => ({ ...prev, hasPermission: true }));
@@ -104,6 +121,7 @@ export function useDeviceOrientation() {
 
   useEffect(() => {
     return () => {
+      window.removeEventListener('deviceorientationabsolute', handleOrientation as EventListener, true);
       window.removeEventListener('deviceorientation', handleOrientation, true);
       if (rafRef.current !== null) {
         cancelAnimationFrame(rafRef.current);

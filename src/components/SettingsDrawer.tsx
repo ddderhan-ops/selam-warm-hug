@@ -1,4 +1,4 @@
-import { Bell, BellOff, Volume2, VolumeX, Globe, ChevronRight } from 'lucide-react';
+import { Bell, BellOff, Volume2, VolumeX, Globe, Palette } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import {
   Drawer,
@@ -18,12 +18,15 @@ import { Button } from '@/components/ui/button';
 import { Settings } from 'lucide-react';
 import { useTranslation } from '@/contexts/LanguageContext';
 import { languageNames, type Language } from '@/lib/i18n';
+import type { Theme } from '@/hooks/useTheme';
 
 interface SettingsDrawerProps {
   notificationsEnabled: boolean;
   onNotificationToggle: () => void;
   soundAlertEnabled: boolean;
   onSoundAlertToggle: () => void;
+  theme: Theme;
+  onThemeChange: (theme: Theme) => void;
 }
 
 export function SettingsDrawer({
@@ -31,10 +34,18 @@ export function SettingsDrawer({
   onNotificationToggle,
   soundAlertEnabled,
   onSoundAlertToggle,
+  theme,
+  onThemeChange,
 }: SettingsDrawerProps) {
   const { t, language, setLanguage } = useTranslation();
 
   const languages: Language[] = ['tr', 'en', 'de', 'fr', 'ar'];
+
+  const themeOptions: { value: Theme; label: string }[] = [
+    { value: 'default', label: 'Default' },
+    { value: 'ocean', label: 'Ocean Blue' },
+    { value: 'midnight', label: 'Midnight' },
+  ];
 
   return (
     <Drawer>
@@ -87,6 +98,26 @@ export function SettingsDrawer({
                 checked={soundAlertEnabled}
                 onCheckedChange={onSoundAlertToggle}
               />
+            </div>
+
+            {/* Theme */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Palette className="w-5 h-5 text-muted-foreground" />
+                <span className="font-medium">{t.themeLabel || 'Tema'}</span>
+              </div>
+              <Select value={theme} onValueChange={(v) => onThemeChange(v as Theme)}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {themeOptions.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Language */}

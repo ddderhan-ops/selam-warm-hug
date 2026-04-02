@@ -1,23 +1,24 @@
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import type { Theme } from "@/hooks/useTheme";
 
 interface ThemeToggleProps {
-  theme: "light" | "dark";
-  onToggle: () => void;
+  theme: Theme;
+  onCycle: () => void;
 }
 
-export function ThemeToggle({ theme, onToggle }: ThemeToggleProps) {
+export function ThemeToggle({ theme, onCycle }: ThemeToggleProps) {
   return (
     <Button
       variant="ghost"
       size="icon"
-      onClick={onToggle}
+      onClick={onCycle}
       className="rounded-full w-10 h-10 hover:bg-secondary"
     >
-      {theme === "light" ? (
-        <Moon className="w-5 h-5 text-foreground" />
-      ) : (
+      {theme === "midnight" ? (
         <Sun className="w-5 h-5 text-foreground" />
+      ) : (
+        <Moon className="w-5 h-5 text-foreground" />
       )}
     </Button>
   );

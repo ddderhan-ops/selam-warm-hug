@@ -3,6 +3,26 @@ import { LocalNotifications } from "@capacitor/local-notifications";
 import type { PrayerTime } from "@/lib/prayerTimes";
 import { toDateKey } from "@/lib/prayerCache";
 
+const PRAYER_CHANNEL_ID = "prayer-times-channel";
+
+async function ensureNotificationChannel(): Promise<void> {
+  try {
+    await LocalNotifications.createChannel({
+      id: PRAYER_CHANNEL_ID,
+      name: "Namaz Vakitleri",
+      description: "Ezan vakitlerinde bildirim ve ses uyarısı",
+      sound: "ezan.mp3",
+      importance: 5,
+      visibility: 1,
+      lights: true,
+      lightColor: "#065f46",
+      vibration: true,
+    });
+  } catch {
+    // Web ortamında createChannel desteklenmez
+  }
+}
+
 interface NotificationScheduleContext {
   city: string;
   latitude: number;
@@ -26,20 +46,26 @@ async function getServiceWorkerRegistration(): Promise<ServiceWorkerRegistration
 export function useNotification() {
   const permissionGranted = useRef(false);
   const scheduledIds = useRef<number[]>([]);
+  const channelReady = useRef(false);
 
   useEffect(() => {
-    // Check current permission status
-    LocalNotifications.checkPermissions().then((result) => {
-      permissionGranted.current = result.display === "granted";
-    }).catch(() => {
-      // Fallback for web
-      if ("Notification" in window) {
-        permissionGranted.current = Notification.permission === "granted";
+    const init = async () => {
+      try {
+        const result = await LocalNotifications.checkPermissions();
+        permissionGranted.current = result.display === "granted";
+      } catch {
+        if ("Notification" in window) {
+          permissionGranted.current = Notification.permission === "granted";
+        }
       }
-    });
+      if (!channelReady.current) {
+        await ensureNotificationChannel();
+        channelReady.current = true;
+      }
+    };
+    init();
 
     return () => {
-      // Cancel any scheduled notifications on unmount
       if (scheduledIds.current.length > 0) {
         LocalNotifications.cancel({
           notifications: scheduledIds.current.map((id) => ({ id })),
@@ -53,9 +79,22 @@ export function useNotification() {
     try {
       const result = await LocalNotifications.requestPermissions();
       permissionGranted.current = result.display === "granted";
+
+      if (permissionGranted.current) {
+        try {
+          const exactResult = await LocalNotifications.checkExactNotificationSetting();
+          if (exactResult.exact_alarm === "denied") {
+            await LocalNotifications.changeExactNotificationSetting();
+          }
+        } catch { /* web/eski Android */ }
+        if (!channelReady.current) {
+          await ensureNotificationChannel();
+          channelReady.current = true;
+        }
+      }
+
       return permissionGranted.current;
     } catch {
-      // Fallback for web
       if ("Notification" in window) {
         if (Notification.permission === "granted") {
           permissionGranted.current = true;
@@ -84,7 +123,9 @@ export function useNotification() {
             smallIcon: "ic_notification",
             largeIcon: "ic_launcher",
             sound: "ezan.mp3",
-            channelId: "prayer-times-channel",
+            channelId: PRAYER_CHANNEL_ID,
+            ongoing: true,
+            autoCancel: true,
           },
         ],
       });
@@ -144,16 +185,7 @@ export function useNotification() {
       }
 
       const now = Date.now();
-      const notifications: Array<{
-        id: number;
-        title: string;
-        body: string;
-        schedule: { at: Date };
-        smallIcon: string;
-        largeIcon: string;
-        sound: string;
-        channelId: string;
-      }> = [];
+      const notifications: Array<any> = [];
 
       prayers.forEach((prayer, index) => {
         const timeUntil = prayer.timestamp - now;
@@ -163,11 +195,16 @@ export function useNotification() {
             id,
             title: `Ezan Vakti Geldi: ${prayer.name}`,
             body: `${prayer.name} vakti girdi. Hayırlı ibadetler.`,
-            schedule: { at: new Date(prayer.timestamp) },
+            schedule: {
+              at: new Date(prayer.timestamp),
+              allowWhileIdle: true,
+            },
             smallIcon: "ic_notification",
             largeIcon: "ic_launcher",
             sound: "ezan.mp3",
-            channelId: "prayer-times-channel",
+            channelId: PRAYER_CHANNEL_ID,
+            ongoing: true,
+            autoCancel: true,
           });
           scheduledIds.current.push(id);
         }
