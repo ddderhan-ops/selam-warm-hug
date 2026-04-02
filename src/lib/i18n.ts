@@ -41,6 +41,7 @@ export interface Translations {
   adhanActive: string;
   swipeForQibla: string;
   back: string;
+  themeLabel: string;
   hijriMonths: Record<string, string>;
   weekdays: Record<string, string>;
   months: Record<string, string>;
@@ -88,6 +89,7 @@ const translations: Record<Language, Translations> = {
     adhanActive: 'Ezan sesi aktif',
     swipeForQibla: 'Kıble pusulası için kaydırın →',
     back: 'Geri',
+    themeLabel: 'Tema',
     hijriMonths: {
       Muharram: 'Muharrem',
       Safar: 'Safer',
@@ -167,6 +169,7 @@ const translations: Record<Language, Translations> = {
     adhanActive: 'Adhan sound active',
     swipeForQibla: 'Swipe for Qibla compass →',
     back: 'Back',
+    themeLabel: 'Theme',
     hijriMonths: {
       Muharram: 'Muharram',
       Safar: 'Safar',
@@ -246,6 +249,7 @@ const translations: Record<Language, Translations> = {
     adhanActive: 'Adhan-Sound aktiv',
     swipeForQibla: 'Für Qibla-Kompass wischen →',
     back: 'Zurück',
+    themeLabel: 'Thema',
     hijriMonths: {
       Muharram: 'Muharram',
       Safar: 'Safar',
@@ -325,6 +329,7 @@ const translations: Record<Language, Translations> = {
     adhanActive: 'Adhan actif',
     swipeForQibla: 'Glissez pour la boussole Qibla →',
     back: 'Retour',
+    themeLabel: 'Thème',
     hijriMonths: {
       Muharram: 'Mouharram',
       Safar: 'Safar',
@@ -404,6 +409,7 @@ const translations: Record<Language, Translations> = {
     adhanActive: 'صوت الأذان مفعّل',
     swipeForQibla: '← اسحب لبوصلة القبلة',
     back: 'رجوع',
+    themeLabel: 'السمة',
     hijriMonths: {
       Muharram: 'محرّم',
       Safar: 'صفر',
