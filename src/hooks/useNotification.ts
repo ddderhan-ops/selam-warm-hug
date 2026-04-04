@@ -136,12 +136,20 @@ export function useNotification() {
         ],
       });
     } catch {
+      // Fallback: use SW showNotification for persistent background delivery
       const registration = await getServiceWorkerRegistration();
       if (registration) {
         await registration.showNotification(`Ezan Vakti Geldi: ${prayer.name}`, {
           body: `${prayer.name} vakti girdi. Hayırlı ibadetler.`,
           icon: "/pwa-192x192.png",
+          badge: "/pwa-192x192.png",
           tag: `prayer-${prayer.nameEn}`,
+          requireInteraction: true,
+          data: {
+            channelId: PRAYER_CHANNEL_ID,
+            sound: "/audio/ezan.mp3",
+            url: "/",
+          },
         });
       }
     }
