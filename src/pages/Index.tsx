@@ -71,7 +71,7 @@ const Index = () => {
 
   const lastDateRef = useRef<string>("");
 
-  const { colorTheme, setColorTheme, darkMode, toggleDarkMode } = useTheme();
+  const { colorTheme, setColorTheme, darkMode, toggleDarkMode } = useTheme(); // v2
 
   const { requestPermission, schedulePrayerNotifications, isSupported } =
     useNotification();
