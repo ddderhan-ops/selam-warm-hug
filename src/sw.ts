@@ -167,7 +167,11 @@ async function checkDuePrayerNotifications(): Promise<void> {
 }
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil(checkDuePrayerNotifications());
+  event.waitUntil(
+    checkDuePrayerNotifications().then(() => {
+      startPeriodicCheck();
+    })
+  );
 });
 
 self.addEventListener("message", (event) => {
