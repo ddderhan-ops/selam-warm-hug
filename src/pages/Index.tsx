@@ -71,13 +71,7 @@ const Index = () => {
 
   const lastDateRef = useRef<string>("");
 
-  const { theme, setTheme } = useTheme();
-
-  const cycleTheme = useCallback(() => {
-    const order: Array<"default" | "ocean" | "midnight"> = ["default", "ocean", "midnight"];
-    const idx = order.indexOf(theme);
-    setTheme(order[(idx + 1) % order.length]);
-  }, [theme, setTheme]);
+  const { colorTheme, setColorTheme, darkMode, toggleDarkMode } = useTheme();
 
   const { requestPermission, schedulePrayerNotifications, isSupported } =
     useNotification();
