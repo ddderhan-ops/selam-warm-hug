@@ -419,8 +419,8 @@ const Index = () => {
               onNotificationToggle={handleNotificationToggle}
               soundAlertEnabled={soundAlertEnabled}
               onSoundAlertToggle={handleSoundAlertToggle}
-              theme={theme}
-              onThemeChange={setTheme}
+              colorTheme={colorTheme}
+              onColorThemeChange={setColorTheme}
             />
           }
         />
