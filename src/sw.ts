@@ -44,7 +44,8 @@ interface MessagePayload {
   };
 }
 
-const DUE_WINDOW_MS = 60 * 1000;
+const DUE_WINDOW_MS = 90 * 1000;
+const CHECK_INTERVAL_MS = 30 * 1000;
 const NOTIFICATION_ICON = "/pwa-192x192.png";
 const NOTIFICATION_BADGE = "/pwa-192x192.png";
 const ADHAN_SOUND_PATH = "/audio/ezan.mp3";
@@ -53,6 +54,23 @@ self.skipWaiting();
 clientsClaim();
 cleanupOutdatedCaches();
 precacheAndRoute(self.__WB_MANIFEST);
+
+// Periodic self-check: every 30s scan cached prayer times for due notifications
+let checkIntervalId: ReturnType<typeof setInterval> | null = null;
+
+function startPeriodicCheck() {
+  if (checkIntervalId !== null) return;
+  checkIntervalId = setInterval(() => {
+    checkDuePrayerNotifications().catch(() => undefined);
+  }, CHECK_INTERVAL_MS);
+}
+
+function stopPeriodicCheck() {
+  if (checkIntervalId !== null) {
+    clearInterval(checkIntervalId);
+    checkIntervalId = null;
+  }
+}
 
 registerRoute(
   ({ url }) => /^https:\/\/api\.aladhan\.com\/.*/i.test(url.href),
