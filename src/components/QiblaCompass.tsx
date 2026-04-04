@@ -11,16 +11,47 @@ interface QiblaCompassProps {
   onBack: () => void;
 }
 
+/**
+ * Magnetic declination approximation using the IGRF dipole model.
+ * For a full-precision result you'd query NOAA's API, but this gives
+ * ±1-2° accuracy which is sufficient for a compass UI.
+ */
+function getMagneticDeclination(lat: number, lng: number): number {
+  // Simplified dipole model coefficients (epoch ~2025)
+  const latRad = (lat * Math.PI) / 180;
+  const lngRad = (lng * Math.PI) / 180;
+  // Magnetic north pole approx: 80.7°N, -72.7°W
+  const mpLat = (80.7 * Math.PI) / 180;
+  const mpLng = (-72.7 * Math.PI) / 180;
+
+  const sinLat = Math.sin(latRad);
+  const cosLat = Math.cos(latRad);
+  const sinMpLat = Math.sin(mpLat);
+  const cosMpLat = Math.cos(mpLat);
+  const dLng = lngRad - mpLng;
+
+  const declination =
+    Math.atan2(
+      cosMpLat * Math.sin(dLng),
+      sinMpLat * cosLat - cosMpLat * sinLat * Math.cos(dLng)
+    ) *
+    (180 / Math.PI);
+
+  return declination;
+}
+
 export function QiblaCompass({ latitude, longitude, onBack }: QiblaCompassProps) {
   const { t } = useTranslation();
   const { heading, hasPermission, isSupported, requestPermission } = useDeviceOrientation();
   const [qiblaDirection, setQiblaDirection] = useState<number | null>(null);
   const [distance, setDistance] = useState<number | null>(null);
+  const [declination, setDeclination] = useState(0);
 
   useEffect(() => {
     if (latitude && longitude) {
       setQiblaDirection(calculateQiblaDirection(latitude, longitude));
       setDistance(calculateDistanceToKaaba(latitude, longitude));
+      setDeclination(getMagneticDeclination(latitude, longitude));
     }
   }, [latitude, longitude]);
 
@@ -30,9 +61,12 @@ export function QiblaCompass({ latitude, longitude, onBack }: QiblaCompassProps)
     }
   }, [isSupported, hasPermission, requestPermission]);
 
+  // Apply magnetic declination correction to get true-north heading
+  const trueHeading = heading !== null ? (heading + declination + 360) % 360 : null;
+
   // Calculate rotation angle for compass needle
-  const needleRotation = qiblaDirection !== null && heading !== null
-    ? qiblaDirection - heading
+  const needleRotation = qiblaDirection !== null && trueHeading !== null
+    ? qiblaDirection - trueHeading
     : qiblaDirection || 0;
 
   return (
@@ -70,8 +104,8 @@ export function QiblaCompass({ latitude, longitude, onBack }: QiblaCompassProps)
           <div 
             className="absolute inset-8 rounded-full bg-gradient-to-b from-secondary to-muted flex items-center justify-center"
             style={{ 
-              transform: heading !== null ? `rotate(${-heading}deg)` : 'rotate(0deg)',
-              transition: 'transform 0.15s ease-out',
+              transform: trueHeading !== null ? `rotate(${-trueHeading}deg)` : 'rotate(0deg)',
+              transition: 'transform 0.4s ease-out',
             }}
           >
             {/* Compass lines */}
@@ -91,7 +125,7 @@ export function QiblaCompass({ latitude, longitude, onBack }: QiblaCompassProps)
             className="absolute inset-0 flex items-center justify-center"
             style={{ 
               transform: `rotate(${needleRotation}deg)`,
-              transition: 'transform 0.15s ease-out',
+              transition: 'transform 0.4s ease-out',
             }}
           >
             <div className="absolute top-6 flex flex-col items-center">

@@ -9,15 +9,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ReactNode } from "react";
-import type { Theme } from "@/hooks/useTheme";
 
 interface HeaderProps {
   selectedCity: City;
   onCityChange: (city: City) => void;
   date: string;
   hijriDate: string;
-  theme: Theme;
-  onThemeCycle: () => void;
+  darkMode: boolean;
+  onDarkModeToggle: () => void;
   notificationsEnabled: boolean;
   onNotificationToggle: () => void;
   useCurrentLocation?: boolean;
@@ -31,8 +30,8 @@ export function Header({
   onCityChange,
   date,
   hijriDate,
-  theme,
-  onThemeCycle,
+  darkMode,
+  onDarkModeToggle,
   useCurrentLocation,
   onUseCurrentLocation,
   hasLocationPermission,
@@ -75,7 +74,7 @@ export function Header({
         </div>
         <div className="flex items-center gap-1">
           {settingsButton}
-          <ThemeToggle theme={theme} onCycle={onThemeCycle} />
+          <ThemeToggle darkMode={darkMode} onToggle={onDarkModeToggle} />
         </div>
       </div>
       <div className="space-y-0.5">

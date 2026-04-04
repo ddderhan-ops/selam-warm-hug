@@ -8,34 +8,24 @@
   :root {
     --background: 0 0% 98%;
     --foreground: 220 13% 18%;
-
     --card: 0 0% 100%;
     --card-foreground: 220 13% 18%;
-
     --popover: 0 0% 100%;
     --popover-foreground: 220 13% 18%;
-
     --primary: 161 88% 20%;
     --primary-foreground: 0 0% 100%;
-
     --secondary: 160 20% 95%;
     --secondary-foreground: 161 88% 20%;
-
     --muted: 160 10% 96%;
     --muted-foreground: 220 9% 46%;
-
     --accent: 161 88% 20%;
     --accent-foreground: 0 0% 100%;
-
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-
     --border: 160 20% 90%;
     --input: 160 20% 90%;
     --ring: 161 88% 20%;
-
     --radius: 1rem;
-
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 220 13% 18%;
     --sidebar-primary: 161 88% 20%;
@@ -44,8 +34,6 @@
     --sidebar-accent-foreground: 161 88% 20%;
     --sidebar-border: 160 20% 90%;
     --sidebar-ring: 161 88% 20%;
-
-    /* Custom tokens */
     --prayer-active: 161 88% 20%;
     --prayer-inactive: 220 9% 46%;
     --countdown-glow: 161 88% 20%;
@@ -53,35 +41,27 @@
     --verse-border: 161 40% 85%;
   }
 
+  /* ===== DARK base (default green dark) ===== */
   .dark {
     --background: 220 20% 10%;
     --foreground: 0 0% 95%;
-
     --card: 220 20% 13%;
     --card-foreground: 0 0% 95%;
-
     --popover: 220 20% 13%;
     --popover-foreground: 0 0% 95%;
-
     --primary: 158 64% 40%;
     --primary-foreground: 0 0% 100%;
-
     --secondary: 220 20% 18%;
     --secondary-foreground: 158 64% 50%;
-
     --muted: 220 20% 18%;
     --muted-foreground: 220 10% 60%;
-
     --accent: 158 64% 40%;
     --accent-foreground: 0 0% 100%;
-
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
-
     --border: 220 20% 20%;
     --input: 220 20% 20%;
     --ring: 158 64% 40%;
-
     --sidebar-background: 220 20% 10%;
     --sidebar-foreground: 0 0% 95%;
     --sidebar-primary: 158 64% 40%;
@@ -90,8 +70,6 @@
     --sidebar-accent-foreground: 158 64% 50%;
     --sidebar-border: 220 20% 20%;
     --sidebar-ring: 158 64% 40%;
-
-    /* Custom tokens dark */
     --prayer-active: 158 64% 50%;
     --prayer-inactive: 220 10% 50%;
     --countdown-glow: 158 64% 40%;
@@ -99,7 +77,7 @@
     --verse-border: 158 40% 25%;
   }
 
-  /* Ocean Blue — beyaz arka plan, canlı mavi detaylar */
+  /* ===== OCEAN BLUE — light ===== */
   .theme-ocean {
     --primary: 200 95% 48%;
     --primary-foreground: 0 0% 100%;
@@ -121,8 +99,66 @@
     --input: 200 25% 90%;
   }
 
-  /* Midnight — true black arka plan, neon mavi */
+  /* ===== OCEAN BLUE — dark ===== */
+  .dark.theme-ocean {
+    --background: 210 25% 9%;
+    --foreground: 0 0% 95%;
+    --card: 210 25% 12%;
+    --card-foreground: 0 0% 95%;
+    --popover: 210 25% 12%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 200 90% 55%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 210 20% 18%;
+    --secondary-foreground: 200 90% 60%;
+    --muted: 210 20% 16%;
+    --muted-foreground: 210 15% 55%;
+    --accent: 200 90% 55%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 210 20% 20%;
+    --input: 210 20% 20%;
+    --ring: 200 90% 55%;
+    --sidebar-background: 210 25% 9%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 200 90% 55%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 210 20% 18%;
+    --sidebar-accent-foreground: 200 90% 60%;
+    --sidebar-border: 210 20% 20%;
+    --sidebar-ring: 200 90% 55%;
+    --prayer-active: 200 90% 55%;
+    --prayer-inactive: 210 15% 45%;
+    --countdown-glow: 200 90% 55%;
+    --verse-bg: 210 25% 11%;
+    --verse-border: 200 40% 25%;
+  }
+
+  /* ===== MIDNIGHT — light (deep blue accent on white) ===== */
   .theme-midnight {
+    --primary: 210 100% 56%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 30% 95%;
+    --secondary-foreground: 210 100% 45%;
+    --accent: 210 100% 56%;
+    --accent-foreground: 0 0% 100%;
+    --ring: 210 100% 56%;
+    --sidebar-primary: 210 100% 56%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 30% 95%;
+    --sidebar-accent-foreground: 210 100% 45%;
+    --sidebar-ring: 210 100% 56%;
+    --prayer-active: 210 100% 56%;
+    --countdown-glow: 210 100% 56%;
+    --verse-bg: 210 30% 97%;
+    --verse-border: 210 40% 85%;
+    --border: 210 25% 90%;
+    --input: 210 25% 90%;
+  }
+
+  /* ===== MIDNIGHT — dark (true black + neon blue) ===== */
+  .dark.theme-midnight {
     --background: 0 0% 0%;
     --foreground: 0 0% 100%;
     --card: 0 0% 4%;
@@ -155,6 +191,64 @@
     --countdown-glow: 210 100% 56%;
     --verse-bg: 0 0% 3%;
     --verse-border: 210 50% 20%;
+  }
+
+  /* ===== EMERALD GREEN — light ===== */
+  .theme-emerald {
+    --primary: 145 80% 36%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 145 25% 95%;
+    --secondary-foreground: 145 80% 30%;
+    --accent: 145 80% 36%;
+    --accent-foreground: 0 0% 100%;
+    --ring: 145 80% 36%;
+    --sidebar-primary: 145 80% 36%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 145 25% 95%;
+    --sidebar-accent-foreground: 145 80% 30%;
+    --sidebar-ring: 145 80% 36%;
+    --prayer-active: 145 80% 36%;
+    --countdown-glow: 145 80% 36%;
+    --verse-bg: 145 25% 97%;
+    --verse-border: 145 35% 85%;
+    --border: 145 20% 90%;
+    --input: 145 20% 90%;
+  }
+
+  /* ===== EMERALD GREEN — dark (true black + phosphorescent green) ===== */
+  .dark.theme-emerald {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 4%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 145 100% 50%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 145 15% 10%;
+    --secondary-foreground: 145 100% 60%;
+    --muted: 145 10% 8%;
+    --muted-foreground: 145 10% 55%;
+    --accent: 145 100% 50%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 145 10% 12%;
+    --input: 145 10% 12%;
+    --ring: 145 100% 50%;
+    --sidebar-background: 0 0% 0%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 145 100% 50%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 145 15% 10%;
+    --sidebar-accent-foreground: 145 100% 60%;
+    --sidebar-border: 145 10% 12%;
+    --sidebar-ring: 145 100% 50%;
+    --prayer-active: 145 100% 55%;
+    --prayer-inactive: 145 10% 45%;
+    --countdown-glow: 145 100% 50%;
+    --verse-bg: 0 0% 3%;
+    --verse-border: 145 50% 18%;
   }
 }
 
