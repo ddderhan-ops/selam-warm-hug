@@ -51,8 +51,8 @@ export function useDeviceOrientation() {
     }
 
     setState(prev => {
-      const rounded = Math.round(smoothHeadingRef.current! * 10) / 10;
-      if (prev.heading !== null && Math.abs(prev.heading - rounded) < 0.2) {
+      const rounded = Math.round(smoothHeadingRef.current!);
+      if (prev.heading !== null && Math.abs(prev.heading - rounded) < 1) {
         return prev;
       }
       return { ...prev, heading: rounded, hasPermission: true };

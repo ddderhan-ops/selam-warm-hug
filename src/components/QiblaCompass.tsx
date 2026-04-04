@@ -125,7 +125,7 @@ export function QiblaCompass({ latitude, longitude, onBack }: QiblaCompassProps)
             className="absolute inset-0 flex items-center justify-center"
             style={{ 
               transform: `rotate(${needleRotation}deg)`,
-              transition: 'transform 0.4s ease-out',
+              transition: 'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)',
             }}
           >
             <div className="absolute top-6 flex flex-col items-center">

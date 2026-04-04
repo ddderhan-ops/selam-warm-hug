@@ -162,19 +162,24 @@ export function useNotification() {
       const registration = await getServiceWorkerRegistration();
       if (!registration?.active || !context) return;
 
-      registration.active.postMessage({
-        type: "CACHE_PRAYERS",
-        payload: {
-          prayers,
-          city: context.city,
-          latitude: context.latitude,
-          longitude: context.longitude,
-          date: context.date,
-          hijriDate: context.hijriDate,
-          dateKey: context.dateKey || toDateKey(new Date()),
-        },
-      });
-      registration.active.postMessage({ type: "CHECK_DUE_PRAYERS" });
+      try {
+        registration.active.postMessage({
+          type: "CACHE_PRAYERS",
+          payload: {
+            prayers,
+            city: context.city,
+            latitude: context.latitude,
+            longitude: context.longitude,
+            date: context.date,
+            hijriDate: context.hijriDate,
+            dateKey: context.dateKey || toDateKey(new Date()),
+          },
+        });
+        registration.active.postMessage({ type: "CHECK_DUE_PRAYERS" });
+        console.log("[Notification] Prayer times synced with Service Worker");
+      } catch (err) {
+        console.warn("[Notification] SW sync failed:", err);
+      }
     },
     []
   );
