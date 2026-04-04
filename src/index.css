@@ -157,40 +157,40 @@
     --input: 210 25% 90%;
   }
 
-  /* ===== MIDNIGHT — dark (true black + neon blue) ===== */
+  /* ===== MIDNIGHT — dark (deep navy + neon blue) ===== */
   .dark.theme-midnight {
-    --background: 0 0% 0%;
-    --foreground: 0 0% 100%;
-    --card: 0 0% 4%;
-    --card-foreground: 0 0% 100%;
-    --popover: 0 0% 4%;
-    --popover-foreground: 0 0% 100%;
-    --primary: 210 100% 56%;
-    --primary-foreground: 0 0% 0%;
-    --secondary: 220 15% 10%;
-    --secondary-foreground: 210 100% 65%;
-    --muted: 220 10% 8%;
-    --muted-foreground: 220 10% 55%;
-    --accent: 210 100% 56%;
-    --accent-foreground: 0 0% 0%;
+    --background: 225 40% 4%;
+    --foreground: 210 30% 95%;
+    --card: 225 35% 7%;
+    --card-foreground: 210 30% 95%;
+    --popover: 225 35% 7%;
+    --popover-foreground: 210 30% 95%;
+    --primary: 215 100% 60%;
+    --primary-foreground: 225 40% 4%;
+    --secondary: 225 30% 12%;
+    --secondary-foreground: 215 100% 65%;
+    --muted: 225 25% 10%;
+    --muted-foreground: 220 15% 50%;
+    --accent: 215 100% 60%;
+    --accent-foreground: 225 40% 4%;
     --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 10% 12%;
-    --input: 220 10% 12%;
-    --ring: 210 100% 56%;
-    --sidebar-background: 0 0% 0%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 210 100% 56%;
-    --sidebar-primary-foreground: 0 0% 0%;
-    --sidebar-accent: 220 15% 10%;
-    --sidebar-accent-foreground: 210 100% 65%;
-    --sidebar-border: 220 10% 12%;
-    --sidebar-ring: 210 100% 56%;
-    --prayer-active: 210 100% 60%;
-    --prayer-inactive: 220 10% 45%;
-    --countdown-glow: 210 100% 56%;
-    --verse-bg: 0 0% 3%;
-    --verse-border: 210 50% 20%;
+    --border: 225 25% 14%;
+    --input: 225 25% 14%;
+    --ring: 215 100% 60%;
+    --sidebar-background: 225 40% 4%;
+    --sidebar-foreground: 210 30% 95%;
+    --sidebar-primary: 215 100% 60%;
+    --sidebar-primary-foreground: 225 40% 4%;
+    --sidebar-accent: 225 30% 12%;
+    --sidebar-accent-foreground: 215 100% 65%;
+    --sidebar-border: 225 25% 14%;
+    --sidebar-ring: 215 100% 60%;
+    --prayer-active: 215 100% 60%;
+    --prayer-inactive: 225 15% 40%;
+    --countdown-glow: 215 100% 60%;
+    --verse-bg: 225 35% 6%;
+    --verse-border: 215 50% 22%;
   }
 
   /* ===== EMERALD GREEN — light ===== */

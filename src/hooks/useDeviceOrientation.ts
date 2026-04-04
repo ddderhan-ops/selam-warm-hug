@@ -7,7 +7,7 @@ interface DeviceOrientationState {
   error: string | null;
 }
 
-const LP_ALPHA = 0.15;
+const LP_ALPHA = 0.08;
 
 function lerpAngle(from: number, to: number, alpha: number): number {
   let diff = to - from;
@@ -47,12 +47,12 @@ export function useDeviceOrientation() {
     if (smoothHeadingRef.current === null) {
       smoothHeadingRef.current = filtered;
     } else {
-      smoothHeadingRef.current = lerpAngle(smoothHeadingRef.current, filtered, 0.08);
+      smoothHeadingRef.current = lerpAngle(smoothHeadingRef.current, filtered, 0.04);
     }
 
     setState(prev => {
-      const rounded = Math.round(smoothHeadingRef.current! * 10) / 10;
-      if (prev.heading !== null && Math.abs(prev.heading - rounded) < 0.2) {
+      const rounded = Math.round(smoothHeadingRef.current!);
+      if (prev.heading !== null && Math.abs(prev.heading - rounded) < 1) {
         return prev;
       }
       return { ...prev, heading: rounded, hasPermission: true };
