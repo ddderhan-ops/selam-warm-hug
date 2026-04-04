@@ -406,8 +406,8 @@ const Index = () => {
           onCityChange={handleCityChange}
           date={prayerData?.date || ""}
           hijriDate={prayerData?.hijriDate || ""}
-          theme={theme}
-          onThemeCycle={cycleTheme}
+          darkMode={darkMode}
+          onDarkModeToggle={toggleDarkMode}
           notificationsEnabled={notificationsEnabled}
           onNotificationToggle={handleNotificationToggle}
           useCurrentLocation={useCurrentLocation}
