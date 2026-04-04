@@ -207,6 +207,7 @@ self.addEventListener("message", (event) => {
   }
 
   if (message?.type === "CHECK_DUE_PRAYERS") {
+    startPeriodicCheck();
     event.waitUntil(checkDuePrayerNotifications());
   }
 });
