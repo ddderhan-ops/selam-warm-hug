@@ -7,7 +7,7 @@ interface DeviceOrientationState {
   error: string | null;
 }
 
-const LP_ALPHA = 0.15;
+const LP_ALPHA = 0.08;
 
 function lerpAngle(from: number, to: number, alpha: number): number {
   let diff = to - from;
