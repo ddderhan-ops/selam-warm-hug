@@ -47,7 +47,7 @@ export function useDeviceOrientation() {
     if (smoothHeadingRef.current === null) {
       smoothHeadingRef.current = filtered;
     } else {
-      smoothHeadingRef.current = lerpAngle(smoothHeadingRef.current, filtered, 0.08);
+      smoothHeadingRef.current = lerpAngle(smoothHeadingRef.current, filtered, 0.04);
     }
 
     setState(prev => {
