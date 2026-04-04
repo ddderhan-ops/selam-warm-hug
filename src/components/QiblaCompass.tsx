@@ -105,7 +105,7 @@ export function QiblaCompass({ latitude, longitude, onBack }: QiblaCompassProps)
             className="absolute inset-8 rounded-full bg-gradient-to-b from-secondary to-muted flex items-center justify-center"
             style={{ 
               transform: trueHeading !== null ? `rotate(${-trueHeading}deg)` : 'rotate(0deg)',
-              transition: 'transform 0.4s ease-out',
+              transition: 'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)',
             }}
           >
             {/* Compass lines */}
