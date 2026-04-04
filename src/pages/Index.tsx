@@ -71,13 +71,7 @@ const Index = () => {
 
   const lastDateRef = useRef<string>("");
 
-  const { theme, setTheme } = useTheme();
-
-  const cycleTheme = useCallback(() => {
-    const order: Array<"default" | "ocean" | "midnight"> = ["default", "ocean", "midnight"];
-    const idx = order.indexOf(theme);
-    setTheme(order[(idx + 1) % order.length]);
-  }, [theme, setTheme]);
+  const { colorTheme, setColorTheme, darkMode, toggleDarkMode } = useTheme();
 
   const { requestPermission, schedulePrayerNotifications, isSupported } =
     useNotification();
@@ -412,8 +406,8 @@ const Index = () => {
           onCityChange={handleCityChange}
           date={prayerData?.date || ""}
           hijriDate={prayerData?.hijriDate || ""}
-          theme={theme}
-          onThemeCycle={cycleTheme}
+          darkMode={darkMode}
+          onDarkModeToggle={toggleDarkMode}
           notificationsEnabled={notificationsEnabled}
           onNotificationToggle={handleNotificationToggle}
           useCurrentLocation={useCurrentLocation}
@@ -425,8 +419,8 @@ const Index = () => {
               onNotificationToggle={handleNotificationToggle}
               soundAlertEnabled={soundAlertEnabled}
               onSoundAlertToggle={handleSoundAlertToggle}
-              theme={theme}
-              onThemeChange={setTheme}
+              colorTheme={colorTheme}
+              onColorThemeChange={setColorTheme}
             />
           }
         />

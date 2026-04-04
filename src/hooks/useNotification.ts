@@ -5,6 +5,20 @@ import { toDateKey } from "@/lib/prayerCache";
 
 const PRAYER_CHANNEL_ID = "prayer-times-channel";
 
+// Fixed IDs per prayer to prevent duplicates
+const PRAYER_FIXED_IDS: Record<string, number> = {
+  Fajr: 1,
+  Sunrise: 2,
+  Dhuhr: 3,
+  Asr: 4,
+  Maghrib: 5,
+  Isha: 6,
+};
+
+function getPrayerNotificationId(prayer: PrayerTime): number {
+  return PRAYER_FIXED_IDS[prayer.nameEn] || Math.floor(Math.random() * 100000);
+}
+
 async function ensureNotificationChannel(): Promise<void> {
   try {
     await LocalNotifications.createChannel({
@@ -45,7 +59,6 @@ async function getServiceWorkerRegistration(): Promise<ServiceWorkerRegistration
 
 export function useNotification() {
   const permissionGranted = useRef(false);
-  const scheduledIds = useRef<number[]>([]);
   const channelReady = useRef(false);
 
   useEffect(() => {
@@ -64,15 +77,6 @@ export function useNotification() {
       }
     };
     init();
-
-    return () => {
-      if (scheduledIds.current.length > 0) {
-        LocalNotifications.cancel({
-          notifications: scheduledIds.current.map((id) => ({ id })),
-        }).catch(() => undefined);
-        scheduledIds.current = [];
-      }
-    };
   }, []);
 
   const requestPermission = useCallback(async () => {
@@ -113,11 +117,13 @@ export function useNotification() {
   const sendNotification = useCallback(async (prayer: PrayerTime) => {
     if (!permissionGranted.current) return null;
 
+    const id = getPrayerNotificationId(prayer);
+
     try {
       await LocalNotifications.schedule({
         notifications: [
           {
-            id: Math.floor(Math.random() * 100000),
+            id,
             title: `Ezan Vakti Geldi: ${prayer.name}`,
             body: `${prayer.name} vakti girdi. Hayırlı ibadetler.`,
             smallIcon: "ic_notification",
@@ -130,7 +136,6 @@ export function useNotification() {
         ],
       });
     } catch {
-      // Fallback: browser notification
       const registration = await getServiceWorkerRegistration();
       if (registration) {
         await registration.showNotification(`Ezan Vakti Geldi: ${prayer.name}`, {
@@ -176,21 +181,22 @@ export function useNotification() {
 
       if (!permissionGranted.current) return;
 
-      // Cancel previously scheduled
-      if (scheduledIds.current.length > 0) {
+      // Cancel ALL pending notifications before scheduling new ones
+      try {
         await LocalNotifications.cancel({
-          notifications: scheduledIds.current.map((id) => ({ id })),
-        }).catch(() => undefined);
-        scheduledIds.current = [];
+          notifications: Object.values(PRAYER_FIXED_IDS).map((id) => ({ id })),
+        });
+      } catch {
+        // ignore on web
       }
 
       const now = Date.now();
       const notifications: Array<any> = [];
 
-      prayers.forEach((prayer, index) => {
+      prayers.forEach((prayer) => {
         const timeUntil = prayer.timestamp - now;
         if (timeUntil > 0 && timeUntil < 24 * 60 * 60 * 1000) {
-          const id = 5000 + index;
+          const id = getPrayerNotificationId(prayer);
           notifications.push({
             id,
             title: `Ezan Vakti Geldi: ${prayer.name}`,
@@ -206,7 +212,6 @@ export function useNotification() {
             ongoing: true,
             autoCancel: true,
           });
-          scheduledIds.current.push(id);
         }
       });
 
@@ -229,7 +234,6 @@ export function useNotification() {
 
       // Listen for notification events to trigger callbacks
       LocalNotifications.addListener("localNotificationReceived", () => {
-        // Find which prayer just fired
         const closest = prayers.find(
           (p) => Math.abs(p.timestamp - Date.now()) < 120_000
         );
@@ -243,6 +247,6 @@ export function useNotification() {
     requestPermission,
     sendNotification,
     schedulePrayerNotifications,
-    isSupported: true, // Capacitor always supports local notifications
+    isSupported: true,
   };
 }

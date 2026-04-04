@@ -18,15 +18,15 @@ import { Button } from '@/components/ui/button';
 import { Settings } from 'lucide-react';
 import { useTranslation } from '@/contexts/LanguageContext';
 import { languageNames, type Language } from '@/lib/i18n';
-import type { Theme } from '@/hooks/useTheme';
+import type { ColorTheme } from '@/hooks/useTheme';
 
 interface SettingsDrawerProps {
   notificationsEnabled: boolean;
   onNotificationToggle: () => void;
   soundAlertEnabled: boolean;
   onSoundAlertToggle: () => void;
-  theme: Theme;
-  onThemeChange: (theme: Theme) => void;
+  colorTheme: ColorTheme;
+  onColorThemeChange: (theme: ColorTheme) => void;
 }
 
 export function SettingsDrawer({
@@ -34,17 +34,18 @@ export function SettingsDrawer({
   onNotificationToggle,
   soundAlertEnabled,
   onSoundAlertToggle,
-  theme,
-  onThemeChange,
+  colorTheme,
+  onColorThemeChange,
 }: SettingsDrawerProps) {
   const { t, language, setLanguage } = useTranslation();
 
   const languages: Language[] = ['tr', 'en', 'de', 'fr', 'ar'];
 
-  const themeOptions: { value: Theme; label: string }[] = [
+  const themeOptions: { value: ColorTheme; label: string }[] = [
     { value: 'default', label: 'Default' },
     { value: 'ocean', label: 'Ocean Blue' },
     { value: 'midnight', label: 'Midnight' },
+    { value: 'emerald', label: 'Emerald Green' },
   ];
 
   return (
@@ -100,14 +101,14 @@ export function SettingsDrawer({
               />
             </div>
 
-            {/* Theme */}
+            {/* Color Theme */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Palette className="w-5 h-5 text-muted-foreground" />
                 <span className="font-medium">{t.themeLabel || 'Tema'}</span>
               </div>
-              <Select value={theme} onValueChange={(v) => onThemeChange(v as Theme)}>
-                <SelectTrigger className="w-[140px]">
+              <Select value={colorTheme} onValueChange={(v) => onColorThemeChange(v as ColorTheme)}>
+                <SelectTrigger className="w-[150px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
