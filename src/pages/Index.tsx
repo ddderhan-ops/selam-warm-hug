@@ -224,7 +224,8 @@ const Index = () => {
     }
     localStorage.setItem("useCurrentLocation", String(useCurrentLocation));
     localStorage.setItem("soundAlertEnabled", String(soundAlertEnabled));
-  }, [selectedCity, useCurrentLocation, soundAlertEnabled]);
+    localStorage.setItem("notificationsEnabled", String(notificationsEnabled));
+  }, [selectedCity, useCurrentLocation, soundAlertEnabled, notificationsEnabled]);
 
   const handleCityChange = (city: City) => {
     setSelectedCity(city);
