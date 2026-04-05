@@ -60,7 +60,12 @@ const Index = () => {
   const [prayerData, setPrayerData] = useState<PrayerTimesData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("notificationsEnabled") === "true";
+    }
+    return false;
+  });
   const [soundAlertEnabled, setSoundAlertEnabled] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("soundAlertEnabled") === "true";
@@ -219,7 +224,8 @@ const Index = () => {
     }
     localStorage.setItem("useCurrentLocation", String(useCurrentLocation));
     localStorage.setItem("soundAlertEnabled", String(soundAlertEnabled));
-  }, [selectedCity, useCurrentLocation, soundAlertEnabled]);
+    localStorage.setItem("notificationsEnabled", String(notificationsEnabled));
+  }, [selectedCity, useCurrentLocation, soundAlertEnabled, notificationsEnabled]);
 
   const handleCityChange = (city: City) => {
     setSelectedCity(city);
