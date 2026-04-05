@@ -220,8 +220,21 @@ const Index = () => {
     return () => clearInterval(interval);
   }, [loadPrayerTimes]);
 
-  // Save preferences to both localStorage and Capacitor Preferences
+  // Hydrate from Capacitor Preferences on mount FIRST (async, overrides localStorage)
   useEffect(() => {
+    const hydrate = async () => {
+      const notif = await readPreference("notificationsEnabled");
+      if (notif !== null) setNotificationsEnabled(notif === "true");
+      const sound = await readPreference("soundAlertEnabled");
+      if (sound !== null) setSoundAlertEnabled(sound === "true");
+      setHydrated(true);
+    };
+    hydrate();
+  }, []);
+
+  // Save preferences ONLY after hydration is complete (prevents overwriting stored values)
+  useEffect(() => {
+    if (!hydrated) return;
     if (selectedCity) {
       const cityJson = JSON.stringify(selectedCity);
       localStorage.setItem("selectedCity", cityJson);
@@ -233,17 +246,20 @@ const Index = () => {
     setPreference("useCurrentLocation", String(useCurrentLocation));
     setPreference("soundAlertEnabled", String(soundAlertEnabled));
     setPreference("notificationsEnabled", String(notificationsEnabled));
-  }, [selectedCity, useCurrentLocation, soundAlertEnabled, notificationsEnabled, setPreference]);
+  }, [hydrated, selectedCity, useCurrentLocation, soundAlertEnabled, notificationsEnabled, setPreference]);
 
-  // Hydrate from Capacitor Preferences on mount (async, overrides localStorage)
+  // Re-sync notification state when app comes to foreground
   useEffect(() => {
-    const hydrate = async () => {
-      const notif = await readPreference("notificationsEnabled");
-      if (notif !== null) setNotificationsEnabled(notif === "true");
-      const sound = await readPreference("soundAlertEnabled");
-      if (sound !== null) setSoundAlertEnabled(sound === "true");
+    const handleVisibility = async () => {
+      if (document.visibilityState === "visible") {
+        const notif = await readPreference("notificationsEnabled");
+        if (notif !== null) setNotificationsEnabled(notif === "true");
+        const sound = await readPreference("soundAlertEnabled");
+        if (sound !== null) setSoundAlertEnabled(sound === "true");
+      }
     };
-    hydrate();
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, []);
 
   const handleCityChange = (city: City) => {
