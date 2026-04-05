@@ -23,11 +23,13 @@ import {
 } from "@/lib/prayerTimes";
 import { Loader2, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
+import { usePreferences, readPreference } from "@/hooks/usePreferences";
 
 type View = 'main' | 'qibla';
 
 const Index = () => {
   const { t, language } = useTranslation();
+  const { setPreference } = usePreferences();
   const [showSplash, setShowSplash] = useState(() => {
     if (typeof window !== 'undefined') {
       const hasSeenSplash = sessionStorage.getItem('hasSeenSplash');
