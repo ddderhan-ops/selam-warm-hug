@@ -23,11 +23,13 @@ import {
 } from "@/lib/prayerTimes";
 import { Loader2, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
+import { usePreferences, readPreference } from "@/hooks/usePreferences";
 
 type View = 'main' | 'qibla';
 
 const Index = () => {
   const { t, language } = useTranslation();
+  const { setPreference } = usePreferences();
   const [showSplash, setShowSplash] = useState(() => {
     if (typeof window !== 'undefined') {
       const hasSeenSplash = sessionStorage.getItem('hasSeenSplash');
@@ -217,15 +219,31 @@ const Index = () => {
     return () => clearInterval(interval);
   }, [loadPrayerTimes]);
 
-  // Save preferences
+  // Save preferences to both localStorage and Capacitor Preferences
   useEffect(() => {
     if (selectedCity) {
-      localStorage.setItem("selectedCity", JSON.stringify(selectedCity));
+      const cityJson = JSON.stringify(selectedCity);
+      localStorage.setItem("selectedCity", cityJson);
+      setPreference("selectedCity", cityJson);
     }
     localStorage.setItem("useCurrentLocation", String(useCurrentLocation));
     localStorage.setItem("soundAlertEnabled", String(soundAlertEnabled));
     localStorage.setItem("notificationsEnabled", String(notificationsEnabled));
-  }, [selectedCity, useCurrentLocation, soundAlertEnabled, notificationsEnabled]);
+    setPreference("useCurrentLocation", String(useCurrentLocation));
+    setPreference("soundAlertEnabled", String(soundAlertEnabled));
+    setPreference("notificationsEnabled", String(notificationsEnabled));
+  }, [selectedCity, useCurrentLocation, soundAlertEnabled, notificationsEnabled, setPreference]);
+
+  // Hydrate from Capacitor Preferences on mount (async, overrides localStorage)
+  useEffect(() => {
+    const hydrate = async () => {
+      const notif = await readPreference("notificationsEnabled");
+      if (notif !== null) setNotificationsEnabled(notif === "true");
+      const sound = await readPreference("soundAlertEnabled");
+      if (sound !== null) setSoundAlertEnabled(sound === "true");
+    };
+    hydrate();
+  }, []);
 
   const handleCityChange = (city: City) => {
     setSelectedCity(city);
