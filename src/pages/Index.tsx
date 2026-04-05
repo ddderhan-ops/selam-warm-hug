@@ -75,6 +75,7 @@ const Index = () => {
     return false;
   });
   const [nowTimestamp, setNowTimestamp] = useState(Date.now());
+  const [hydrated, setHydrated] = useState(false);
 
   const lastDateRef = useRef<string>("");
 
