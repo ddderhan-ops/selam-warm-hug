@@ -27,6 +27,15 @@ import { usePreferences, readPreference } from "@/hooks/usePreferences";
 
 type View = 'main' | 'qibla';
 
+const NOTIFICATION_PREFERENCE_KEY = "notificationsEnabled";
+const SOUND_ALERT_PREFERENCE_KEY = "soundAlertEnabled";
+
+function getStoredBoolean(key: string, fallback = false) {
+  if (typeof window === "undefined") return fallback;
+  const value = localStorage.getItem(key);
+  return value === null ? fallback : value === "true";
+}
+
 const Index = () => {
   const { t, language } = useTranslation();
   const { setPreference } = usePreferences();
@@ -62,8 +71,12 @@ const Index = () => {
   const [prayerData, setPrayerData] = useState<PrayerTimesData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-  const [soundAlertEnabled, setSoundAlertEnabled] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(() =>
+    getStoredBoolean(NOTIFICATION_PREFERENCE_KEY)
+  );
+  const [soundAlertEnabled, setSoundAlertEnabled] = useState(() =>
+    getStoredBoolean(SOUND_ALERT_PREFERENCE_KEY)
+  );
   const [nowTimestamp, setNowTimestamp] = useState(Date.now());
   const [hydrated, setHydrated] = useState(false);
 
@@ -93,6 +106,38 @@ const Index = () => {
     longitude: fcmLng,
     enabled: notificationsEnabled,
   });
+
+  const readNotificationSwitchState = useCallback(async () => {
+    const [notifValue, soundValue] = await Promise.all([
+      readPreference(NOTIFICATION_PREFERENCE_KEY),
+      readPreference(SOUND_ALERT_PREFERENCE_KEY),
+    ]);
+
+    return {
+      notificationsEnabled:
+        notifValue !== null
+          ? notifValue === "true"
+          : getStoredBoolean(NOTIFICATION_PREFERENCE_KEY),
+      soundAlertEnabled:
+        soundValue !== null
+          ? soundValue === "true"
+          : getStoredBoolean(SOUND_ALERT_PREFERENCE_KEY),
+    };
+  }, []);
+
+  const persistNotificationSwitchState = useCallback(
+    async (notificationsOn: boolean, soundOn: boolean) => {
+      localStorage.setItem(NOTIFICATION_PREFERENCE_KEY, String(notificationsOn));
+      localStorage.setItem(SOUND_ALERT_PREFERENCE_KEY, String(soundOn));
+
+      await Promise.all([
+        setPreference(NOTIFICATION_PREFERENCE_KEY, String(notificationsOn)),
+        setPreference(SOUND_ALERT_PREFERENCE_KEY, String(soundOn)),
+      ]);
+    },
+    [setPreference]
+  );
+
   const handleSplashComplete = useCallback(() => {
     sessionStorage.setItem('hasSeenSplash', 'true');
     setShowSplash(false);
@@ -210,26 +255,40 @@ const Index = () => {
     return () => clearInterval(interval);
   }, [loadPrayerTimes]);
 
-  // Hydrate from Capacitor Preferences on mount FIRST (async, overrides localStorage)
+  // Hydrate notification state from native storage on mount and sync the visual switch immediately.
   useEffect(() => {
-    // Immediate sync read from localStorage so button doesn't flash
-    const lsNotif = localStorage.getItem("notificationsEnabled");
-    const lsSound = localStorage.getItem("soundAlertEnabled");
-    if (lsNotif !== null) setNotificationsEnabled(lsNotif === "true");
-    if (lsSound !== null) setSoundAlertEnabled(lsSound === "true");
+    let isActive = true;
 
-    // Then async read from Capacitor Preferences (higher priority)
     const hydrate = async () => {
-      const notif = await readPreference("notificationsEnabled");
-      if (notif !== null) setNotificationsEnabled(notif === "true");
-      const sound = await readPreference("soundAlertEnabled");
-      if (sound !== null) setSoundAlertEnabled(sound === "true");
-      setHydrated(true);
-    };
-    hydrate();
-  }, []);
+      try {
+        const nextState = await readNotificationSwitchState();
+        if (!isActive) return;
 
-  // Save preferences ONLY after hydration is complete (prevents overwriting stored values)
+        setNotificationsEnabled(nextState.notificationsEnabled);
+        setSoundAlertEnabled(nextState.soundAlertEnabled);
+        localStorage.setItem(
+          NOTIFICATION_PREFERENCE_KEY,
+          String(nextState.notificationsEnabled)
+        );
+        localStorage.setItem(
+          SOUND_ALERT_PREFERENCE_KEY,
+          String(nextState.soundAlertEnabled)
+        );
+      } finally {
+        if (isActive) {
+          setHydrated(true);
+        }
+      }
+    };
+
+    hydrate();
+
+    return () => {
+      isActive = false;
+    };
+  }, [readNotificationSwitchState]);
+
+  // Save non-notification preferences only after hydration is complete.
   useEffect(() => {
     if (!hydrated) return;
     if (selectedCity) {
@@ -238,26 +297,37 @@ const Index = () => {
       setPreference("selectedCity", cityJson);
     }
     localStorage.setItem("useCurrentLocation", String(useCurrentLocation));
-    localStorage.setItem("soundAlertEnabled", String(soundAlertEnabled));
-    localStorage.setItem("notificationsEnabled", String(notificationsEnabled));
     setPreference("useCurrentLocation", String(useCurrentLocation));
-    setPreference("soundAlertEnabled", String(soundAlertEnabled));
-    setPreference("notificationsEnabled", String(notificationsEnabled));
-  }, [hydrated, selectedCity, useCurrentLocation, soundAlertEnabled, notificationsEnabled, setPreference]);
+  }, [hydrated, selectedCity, useCurrentLocation, setPreference]);
 
   // Re-sync notification state when app comes to foreground
   useEffect(() => {
+    let isActive = true;
+
     const handleVisibility = async () => {
-      if (document.visibilityState === "visible") {
-        const notif = await readPreference("notificationsEnabled");
-        if (notif !== null) setNotificationsEnabled(notif === "true");
-        const sound = await readPreference("soundAlertEnabled");
-        if (sound !== null) setSoundAlertEnabled(sound === "true");
-      }
+      if (document.visibilityState !== "visible") return;
+
+      const nextState = await readNotificationSwitchState();
+      if (!isActive) return;
+
+      setNotificationsEnabled(nextState.notificationsEnabled);
+      setSoundAlertEnabled(nextState.soundAlertEnabled);
+      localStorage.setItem(
+        NOTIFICATION_PREFERENCE_KEY,
+        String(nextState.notificationsEnabled)
+      );
+      localStorage.setItem(
+        SOUND_ALERT_PREFERENCE_KEY,
+        String(nextState.soundAlertEnabled)
+      );
     };
+
     document.addEventListener("visibilitychange", handleVisibility);
-    return () => document.removeEventListener("visibilitychange", handleVisibility);
-  }, []);
+    return () => {
+      isActive = false;
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [readNotificationSwitchState]);
 
   const handleCityChange = (city: City) => {
     setSelectedCity(city);
@@ -308,21 +378,26 @@ const Index = () => {
     t.currentLocation,
   ]);
 
-  const handleNotificationToggle = async () => {
+  const handleNotificationToggle = async (nextChecked?: boolean) => {
+    const shouldEnable =
+      typeof nextChecked === "boolean" ? nextChecked : !notificationsEnabled;
+
     if (!isSupported) {
       toast.error("Tarayıcınız bildirimleri desteklemiyor.");
       return;
     }
 
-    if (notificationsEnabled) {
+    if (!shouldEnable) {
       setNotificationsEnabled(false);
       setSoundAlertEnabled(false);
+      await persistNotificationSwitchState(false, false);
       toast.info(t.notificationsOff);
     } else {
       const granted = await requestPermission();
       if (granted) {
         setNotificationsEnabled(true);
         setSoundAlertEnabled(true);
+        await persistNotificationSwitchState(true, true);
         toast.success(t.notificationsOn);
 
         if (prayerData) {
@@ -335,13 +410,20 @@ const Index = () => {
           );
         }
       } else {
+        setNotificationsEnabled(false);
+        setSoundAlertEnabled(false);
+        await persistNotificationSwitchState(false, false);
         toast.error("Bildirim izni reddedildi");
       }
     }
   };
 
-  const handleSoundAlertToggle = () => {
-    setSoundAlertEnabled(!soundAlertEnabled);
+  const handleSoundAlertToggle = async (nextChecked?: boolean) => {
+    const nextSoundEnabled =
+      typeof nextChecked === "boolean" ? nextChecked : !soundAlertEnabled;
+
+    setSoundAlertEnabled(nextSoundEnabled);
+    await persistNotificationSwitchState(notificationsEnabled, nextSoundEnabled);
   };
 
   // Swipe handlers
