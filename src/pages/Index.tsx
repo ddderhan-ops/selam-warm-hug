@@ -212,6 +212,13 @@ const Index = () => {
 
   // Hydrate from Capacitor Preferences on mount FIRST (async, overrides localStorage)
   useEffect(() => {
+    // Immediate sync read from localStorage so button doesn't flash
+    const lsNotif = localStorage.getItem("notificationsEnabled");
+    const lsSound = localStorage.getItem("soundAlertEnabled");
+    if (lsNotif !== null) setNotificationsEnabled(lsNotif === "true");
+    if (lsSound !== null) setSoundAlertEnabled(lsSound === "true");
+
+    // Then async read from Capacitor Preferences (higher priority)
     const hydrate = async () => {
       const notif = await readPreference("notificationsEnabled");
       if (notif !== null) setNotificationsEnabled(notif === "true");
