@@ -62,18 +62,8 @@ const Index = () => {
   const [prayerData, setPrayerData] = useState<PrayerTimesData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("notificationsEnabled") === "true";
-    }
-    return false;
-  });
-  const [soundAlertEnabled, setSoundAlertEnabled] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("soundAlertEnabled") === "true";
-    }
-    return false;
-  });
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [soundAlertEnabled, setSoundAlertEnabled] = useState(false);
   const [nowTimestamp, setNowTimestamp] = useState(Date.now());
   const [hydrated, setHydrated] = useState(false);
 
