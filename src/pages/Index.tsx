@@ -62,18 +62,8 @@ const Index = () => {
   const [prayerData, setPrayerData] = useState<PrayerTimesData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("notificationsEnabled") === "true";
-    }
-    return false;
-  });
-  const [soundAlertEnabled, setSoundAlertEnabled] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("soundAlertEnabled") === "true";
-    }
-    return false;
-  });
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [soundAlertEnabled, setSoundAlertEnabled] = useState(false);
   const [nowTimestamp, setNowTimestamp] = useState(Date.now());
   const [hydrated, setHydrated] = useState(false);
 
@@ -222,6 +212,13 @@ const Index = () => {
 
   // Hydrate from Capacitor Preferences on mount FIRST (async, overrides localStorage)
   useEffect(() => {
+    // Immediate sync read from localStorage so button doesn't flash
+    const lsNotif = localStorage.getItem("notificationsEnabled");
+    const lsSound = localStorage.getItem("soundAlertEnabled");
+    if (lsNotif !== null) setNotificationsEnabled(lsNotif === "true");
+    if (lsSound !== null) setSoundAlertEnabled(lsSound === "true");
+
+    // Then async read from Capacitor Preferences (higher priority)
     const hydrate = async () => {
       const notif = await readPreference("notificationsEnabled");
       if (notif !== null) setNotificationsEnabled(notif === "true");
