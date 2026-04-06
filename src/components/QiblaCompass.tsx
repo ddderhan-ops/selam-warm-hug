@@ -48,7 +48,7 @@ export function QiblaCompass({ latitude, longitude, onBack }: QiblaCompassProps)
   const [declination, setDeclination] = useState(0);
 
   useEffect(() => {
-    if (latitude && longitude) {
+    if (latitude !== null && longitude !== null) {
       setQiblaDirection(calculateQiblaDirection(latitude, longitude));
       setDistance(calculateDistanceToKaaba(latitude, longitude));
       setDeclination(getMagneticDeclination(latitude, longitude));
@@ -105,7 +105,8 @@ export function QiblaCompass({ latitude, longitude, onBack }: QiblaCompassProps)
             className="absolute inset-8 rounded-full bg-gradient-to-b from-secondary to-muted flex items-center justify-center"
             style={{ 
               transform: trueHeading !== null ? `rotate(${-trueHeading}deg)` : 'rotate(0deg)',
-              transition: 'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)',
+              transition: 'transform 280ms cubic-bezier(0.22, 1, 0.36, 1)',
+              willChange: 'transform',
             }}
           >
             {/* Compass lines */}
@@ -125,7 +126,8 @@ export function QiblaCompass({ latitude, longitude, onBack }: QiblaCompassProps)
             className="absolute inset-0 flex items-center justify-center"
             style={{ 
               transform: `rotate(${needleRotation}deg)`,
-              transition: 'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)',
+              transition: 'transform 280ms cubic-bezier(0.22, 1, 0.36, 1)',
+              willChange: 'transform',
             }}
           >
             <div className="absolute top-6 flex flex-col items-center">
