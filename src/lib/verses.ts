@@ -63,6 +63,8 @@ const dailyVerses: VerseEntry[] = [
       de: "Gedenkt Meiner, so gedenke Ich eurer.",
       fr: "Invoquez-Moi et Je vous invoquerai.",
       ar: "فَاذْكُرُونِي أَذْكُرْكُمْ",
+      es: "Recordadme y Yo os recordaré.",
+      pt: "Lembrai-vos de Mim e Eu Me lembrarei de vós.",
     },
     sources: {
       tr: "Bakara Suresi, 152",
@@ -70,6 +72,8 @@ const dailyVerses: VerseEntry[] = [
       de: "Sure Al-Baqara, 152",
       fr: "Sourate Al-Baqara, 152",
       ar: "سورة البقرة، ١٥٢",
+      es: "Sura Al-Baqarah, 152",
+      pt: "Sura Al-Baqarah, 152",
     },
   },
   {
