@@ -42,6 +42,8 @@ const dailyVerses: VerseEntry[] = [
       de: "Verliert nicht die Hoffnung auf Allahs Barmherzigkeit.",
       fr: "Ne désespérez pas de la miséricorde d'Allah.",
       ar: "وَلَا تَيْأَسُوا مِن رَّوْحِ اللَّهِ",
+      es: "No perdáis la esperanza en la misericordia de Allah.",
+      pt: "Não percam a esperança na misericórdia de Allah.",
     },
     sources: {
       tr: "Yusuf Suresi, 87",
@@ -49,6 +51,8 @@ const dailyVerses: VerseEntry[] = [
       de: "Sure Yusuf, 87",
       fr: "Sourate Youssouf, 87",
       ar: "سورة يوسف، ٨٧",
+      es: "Sura Yusuf, 87",
+      pt: "Sura Yusuf, 87",
     },
   },
   {
