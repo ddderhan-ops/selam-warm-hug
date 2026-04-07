@@ -7,11 +7,13 @@ import { AdPlaceholder } from "@/components/AdPlaceholder";
 import { SplashScreen } from "@/components/SplashScreen";
 import { QiblaCompass } from "@/components/QiblaCompass";
 import { SettingsDrawer } from "@/components/SettingsDrawer";
+import { ReligiousDaysPage } from "@/components/ReligiousDaysPage";
 import { useTheme } from "@/hooks/useTheme";
 import { useNotification } from "@/hooks/useNotification";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useAdhan } from "@/hooks/useAdhan";
 import { useFCM } from "@/hooks/useFCM";
+import { useInterstitialAd } from "@/hooks/useInterstitialAd";
 import { useTranslation } from "@/contexts/LanguageContext";
 import {
   fetchPrayerTimes,
@@ -21,14 +23,15 @@ import {
   type City,
   type PrayerTimesData,
 } from "@/lib/prayerTimes";
-import { Loader2, ChevronRight } from "lucide-react";
+import { Loader2, ChevronRight, Calendar } from "lucide-react";
 import { toast } from "sonner";
 import { usePreferences, readPreference } from "@/hooks/usePreferences";
 
-type View = 'main' | 'qibla';
+type View = 'main' | 'qibla' | 'religious';
 
 const NOTIFICATION_PREFERENCE_KEY = "notificationsEnabled";
 const SOUND_ALERT_PREFERENCE_KEY = "soundAlertEnabled";
+const PRE_ALERT_PREFERENCE_KEY = "preAlertEnabled";
 
 function getStoredBoolean(key: string, fallback = false) {
   if (typeof window === "undefined") return fallback;
@@ -71,31 +74,23 @@ const Index = () => {
   const [prayerData, setPrayerData] = useState<PrayerTimesData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(() =>
-    getStoredBoolean(NOTIFICATION_PREFERENCE_KEY)
-  );
-  const [soundAlertEnabled, setSoundAlertEnabled] = useState(() =>
-    getStoredBoolean(SOUND_ALERT_PREFERENCE_KEY)
-  );
+
+  // Initialize from localStorage synchronously, then async hydrate from Preferences
+  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean | null>(null);
+  const [soundAlertEnabled, setSoundAlertEnabled] = useState<boolean | null>(null);
+  const [preAlertEnabled, setPreAlertEnabled] = useState<boolean | null>(null);
   const [nowTimestamp, setNowTimestamp] = useState(Date.now());
   const [hydrated, setHydrated] = useState(false);
 
   const lastDateRef = useRef<string>("");
+  const homeAdShownRef = useRef(false);
 
-  const { colorTheme, setColorTheme, darkMode, toggleDarkMode } = useTheme(); // v2
-
-  const { requestPermission, schedulePrayerNotifications, isSupported } =
-    useNotification();
-  const {
-    latitude,
-    longitude,
-    loading: geoLoading,
-    permissionDenied,
-    requestLocation,
-  } = useGeolocation();
+  const { colorTheme, setColorTheme, darkMode, toggleDarkMode } = useTheme();
+  const { requestPermission, schedulePrayerNotifications, isSupported } = useNotification();
+  const { latitude, longitude, loading: geoLoading, permissionDenied, requestLocation } = useGeolocation();
   const { playAdhan } = useAdhan();
+  const { tryShowAd } = useInterstitialAd();
 
-  // FCM push notifications
   const fcmCity = prayerData?.city || selectedCity?.name || "İstanbul";
   const fcmLat = latitude || selectedCity?.latitude || 41.0082;
   const fcmLng = longitude || selectedCity?.longitude || 28.9784;
@@ -104,36 +99,66 @@ const Index = () => {
     city: fcmCity,
     latitude: fcmLat,
     longitude: fcmLng,
-    enabled: notificationsEnabled,
+    enabled: notificationsEnabled === true,
   });
 
-  const readNotificationSwitchState = useCallback(async () => {
-    const [notifValue, soundValue] = await Promise.all([
-      readPreference(NOTIFICATION_PREFERENCE_KEY),
-      readPreference(SOUND_ALERT_PREFERENCE_KEY),
-    ]);
+  // Hydrate all toggle states from Preferences on mount — until done, render null states
+  useEffect(() => {
+    let isActive = true;
 
-    return {
-      notificationsEnabled:
-        notifValue !== null
-          ? notifValue === "true"
-          : getStoredBoolean(NOTIFICATION_PREFERENCE_KEY),
-      soundAlertEnabled:
-        soundValue !== null
-          ? soundValue === "true"
-          : getStoredBoolean(SOUND_ALERT_PREFERENCE_KEY),
+    const hydrate = async () => {
+      try {
+        const [notifValue, soundValue, preAlertValue] = await Promise.all([
+          readPreference(NOTIFICATION_PREFERENCE_KEY),
+          readPreference(SOUND_ALERT_PREFERENCE_KEY),
+          readPreference(PRE_ALERT_PREFERENCE_KEY),
+        ]);
+        if (!isActive) return;
+
+        const n = notifValue !== null ? notifValue === "true" : getStoredBoolean(NOTIFICATION_PREFERENCE_KEY);
+        const s = soundValue !== null ? soundValue === "true" : getStoredBoolean(SOUND_ALERT_PREFERENCE_KEY);
+        const p = preAlertValue !== null ? preAlertValue === "true" : getStoredBoolean(PRE_ALERT_PREFERENCE_KEY);
+
+        setNotificationsEnabled(n);
+        setSoundAlertEnabled(s);
+        setPreAlertEnabled(p);
+
+        // Sync back to localStorage
+        localStorage.setItem(NOTIFICATION_PREFERENCE_KEY, String(n));
+        localStorage.setItem(SOUND_ALERT_PREFERENCE_KEY, String(s));
+        localStorage.setItem(PRE_ALERT_PREFERENCE_KEY, String(p));
+      } finally {
+        if (isActive) setHydrated(true);
+      }
     };
+
+    hydrate();
+    return () => { isActive = false; };
   }, []);
 
-  const persistNotificationSwitchState = useCallback(
-    async (notificationsOn: boolean, soundOn: boolean) => {
-      localStorage.setItem(NOTIFICATION_PREFERENCE_KEY, String(notificationsOn));
-      localStorage.setItem(SOUND_ALERT_PREFERENCE_KEY, String(soundOn));
-
-      await Promise.all([
-        setPreference(NOTIFICATION_PREFERENCE_KEY, String(notificationsOn)),
-        setPreference(SOUND_ALERT_PREFERENCE_KEY, String(soundOn)),
+  // Re-sync when app comes to foreground
+  useEffect(() => {
+    let isActive = true;
+    const handleVisibility = async () => {
+      if (document.visibilityState !== "visible") return;
+      const [notifValue, soundValue, preAlertValue] = await Promise.all([
+        readPreference(NOTIFICATION_PREFERENCE_KEY),
+        readPreference(SOUND_ALERT_PREFERENCE_KEY),
+        readPreference(PRE_ALERT_PREFERENCE_KEY),
       ]);
+      if (!isActive) return;
+      if (notifValue !== null) setNotificationsEnabled(notifValue === "true");
+      if (soundValue !== null) setSoundAlertEnabled(soundValue === "true");
+      if (preAlertValue !== null) setPreAlertEnabled(preAlertValue === "true");
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => { isActive = false; document.removeEventListener("visibilitychange", handleVisibility); };
+  }, []);
+
+  const persistToggle = useCallback(
+    async (key: string, value: boolean) => {
+      localStorage.setItem(key, String(value));
+      await setPreference(key, String(value));
     },
     [setPreference]
   );
@@ -147,148 +172,63 @@ const Index = () => {
     setLoading(true);
     setError(null);
 
-      try {
-        let data: PrayerTimesData;
-        let notificationContext: {
-          city: string;
-          latitude: number;
-          longitude: number;
-          date: string;
-          hijriDate: string;
-        } | null = null;
+    try {
+      let data: PrayerTimesData;
+      let notificationContext: {
+        city: string; latitude: number; longitude: number; date: string; hijriDate: string;
+      } | null = null;
 
-        if (useCurrentLocation && latitude && longitude) {
-          const nearestCity = findNearestCity(latitude, longitude);
-          data = await fetchPrayerTimes(
-            { latitude, longitude },
-            nearestCity?.name,
-            language
-          );
-          notificationContext = {
-            city: data.city,
-            latitude,
-            longitude,
-            date: data.date,
-            hijriDate: data.hijriDate,
-          };
-        } else if (selectedCity) {
-          data = await fetchPrayerTimes(selectedCity, undefined, language);
-          notificationContext = {
-            city: data.city,
-            latitude: selectedCity.latitude,
-            longitude: selectedCity.longitude,
-            date: data.date,
-            hijriDate: data.hijriDate,
-          };
-        } else {
-          const defaultCity = turkishCities[0];
-          data = await fetchPrayerTimes(defaultCity, undefined, language);
-          setSelectedCity(defaultCity);
-          notificationContext = {
-            city: data.city,
-            latitude: defaultCity.latitude,
-            longitude: defaultCity.longitude,
-            date: data.date,
-            hijriDate: data.hijriDate,
-          };
-        }
+      if (useCurrentLocation && latitude && longitude) {
+        const nearestCity = findNearestCity(latitude, longitude);
+        data = await fetchPrayerTimes({ latitude, longitude }, nearestCity?.name, language);
+        notificationContext = { city: data.city, latitude, longitude, date: data.date, hijriDate: data.hijriDate };
+      } else if (selectedCity) {
+        data = await fetchPrayerTimes(selectedCity, undefined, language);
+        notificationContext = { city: data.city, latitude: selectedCity.latitude, longitude: selectedCity.longitude, date: data.date, hijriDate: data.hijriDate };
+      } else {
+        const defaultCity = turkishCities[0];
+        data = await fetchPrayerTimes(defaultCity, undefined, language);
+        setSelectedCity(defaultCity);
+        notificationContext = { city: data.city, latitude: defaultCity.latitude, longitude: defaultCity.longitude, date: data.date, hijriDate: data.hijriDate };
+      }
 
-        setPrayerData(data);
-        lastDateRef.current = new Date().toDateString();
+      setPrayerData(data);
+      lastDateRef.current = new Date().toDateString();
 
-        if (notificationsEnabled && notificationContext) {
-          schedulePrayerNotifications(
-            data.prayers,
-            () => {
-              if (soundAlertEnabled) {
-                playAdhan();
-              }
-            },
-            notificationContext
-          );
-        }
+      if (notificationsEnabled && notificationContext) {
+        schedulePrayerNotifications(
+          data.prayers,
+          () => { if (soundAlertEnabled) playAdhan(); },
+          notificationContext
+        );
+      }
     } catch (err) {
       setError(t.prayerTimesError);
       console.error(err);
     } finally {
       setLoading(false);
     }
-  }, [
-    useCurrentLocation,
-    latitude,
-    longitude,
-    selectedCity,
-    language,
-    notificationsEnabled,
-    schedulePrayerNotifications,
-    soundAlertEnabled,
-    playAdhan,
-    t.prayerTimesError,
-  ]);
+  }, [useCurrentLocation, latitude, longitude, selectedCity, language, notificationsEnabled, schedulePrayerNotifications, soundAlertEnabled, playAdhan, t.prayerTimesError]);
 
-  // Load prayer times when location or city changes
   useEffect(() => {
-    if (!geoLoading) {
-      loadPrayerTimes();
-    }
+    if (!geoLoading) loadPrayerTimes();
   }, [geoLoading, loadPrayerTimes]);
 
-  // Live clock tick so next prayer and countdown switch without refresh
   useEffect(() => {
-    const interval = window.setInterval(() => {
-      setNowTimestamp(Date.now());
-    }, 1000);
-
+    const interval = window.setInterval(() => setNowTimestamp(Date.now()), 1000);
     return () => clearInterval(interval);
   }, []);
 
-  // Check for date change and refresh at midnight
   useEffect(() => {
     const checkDateChange = () => {
       const currentDate = new Date().toDateString();
-      if (lastDateRef.current && lastDateRef.current !== currentDate) {
-        loadPrayerTimes();
-      }
+      if (lastDateRef.current && lastDateRef.current !== currentDate) loadPrayerTimes();
     };
-
     const interval = setInterval(checkDateChange, 60000);
     return () => clearInterval(interval);
   }, [loadPrayerTimes]);
 
-  // Hydrate notification state from native storage on mount and sync the visual switch immediately.
-  useEffect(() => {
-    let isActive = true;
-
-    const hydrate = async () => {
-      try {
-        const nextState = await readNotificationSwitchState();
-        if (!isActive) return;
-
-        setNotificationsEnabled(nextState.notificationsEnabled);
-        setSoundAlertEnabled(nextState.soundAlertEnabled);
-        localStorage.setItem(
-          NOTIFICATION_PREFERENCE_KEY,
-          String(nextState.notificationsEnabled)
-        );
-        localStorage.setItem(
-          SOUND_ALERT_PREFERENCE_KEY,
-          String(nextState.soundAlertEnabled)
-        );
-      } finally {
-        if (isActive) {
-          setHydrated(true);
-        }
-      }
-    };
-
-    hydrate();
-
-    return () => {
-      isActive = false;
-    };
-  }, [readNotificationSwitchState]);
-
-  // Save non-notification preferences only after hydration is complete.
+  // Save non-notification preferences after hydration
   useEffect(() => {
     if (!hydrated) return;
     if (selectedCity) {
@@ -300,42 +240,18 @@ const Index = () => {
     setPreference("useCurrentLocation", String(useCurrentLocation));
   }, [hydrated, selectedCity, useCurrentLocation, setPreference]);
 
-  // Re-sync notification state when app comes to foreground
+  // Show home interstitial once per day after first load
   useEffect(() => {
-    let isActive = true;
-
-    const handleVisibility = async () => {
-      if (document.visibilityState !== "visible") return;
-
-      const nextState = await readNotificationSwitchState();
-      if (!isActive) return;
-
-      setNotificationsEnabled(nextState.notificationsEnabled);
-      setSoundAlertEnabled(nextState.soundAlertEnabled);
-      localStorage.setItem(
-        NOTIFICATION_PREFERENCE_KEY,
-        String(nextState.notificationsEnabled)
-      );
-      localStorage.setItem(
-        SOUND_ALERT_PREFERENCE_KEY,
-        String(nextState.soundAlertEnabled)
-      );
-    };
-
-    document.addEventListener("visibilitychange", handleVisibility);
-    return () => {
-      isActive = false;
-      document.removeEventListener("visibilitychange", handleVisibility);
-    };
-  }, [readNotificationSwitchState]);
+    if (!homeAdShownRef.current && prayerData && hydrated) {
+      homeAdShownRef.current = true;
+      setTimeout(() => tryShowAd('home'), 2000);
+    }
+  }, [prayerData, hydrated, tryShowAd]);
 
   const handleCityChange = (city: City) => {
     setSelectedCity(city);
     setUseCurrentLocation(false);
-    // Update FCM token location
-    if (notificationsEnabled) {
-      updateLocation(city.name, city.latitude, city.longitude);
-    }
+    if (notificationsEnabled) updateLocation(city.name, city.latitude, city.longitude);
   };
 
   const handleUseCurrentLocation = () => {
@@ -349,38 +265,14 @@ const Index = () => {
 
   const getNotificationContext = useCallback(() => {
     if (useCurrentLocation && latitude && longitude) {
-      return {
-        city: prayerData?.city || t.currentLocation,
-        latitude,
-        longitude,
-        date: prayerData?.date,
-        hijriDate: prayerData?.hijriDate,
-      };
+      return { city: prayerData?.city || t.currentLocation, latitude, longitude, date: prayerData?.date, hijriDate: prayerData?.hijriDate };
     }
-
     const fallbackCity = selectedCity || turkishCities[0];
-
-    return {
-      city: prayerData?.city || fallbackCity.name,
-      latitude: fallbackCity.latitude,
-      longitude: fallbackCity.longitude,
-      date: prayerData?.date,
-      hijriDate: prayerData?.hijriDate,
-    };
-  }, [
-    useCurrentLocation,
-    latitude,
-    longitude,
-    prayerData?.city,
-    prayerData?.date,
-    prayerData?.hijriDate,
-    selectedCity,
-    t.currentLocation,
-  ]);
+    return { city: prayerData?.city || fallbackCity.name, latitude: fallbackCity.latitude, longitude: fallbackCity.longitude, date: prayerData?.date, hijriDate: prayerData?.hijriDate };
+  }, [useCurrentLocation, latitude, longitude, prayerData?.city, prayerData?.date, prayerData?.hijriDate, selectedCity, t.currentLocation]);
 
   const handleNotificationToggle = async (nextChecked?: boolean) => {
-    const shouldEnable =
-      typeof nextChecked === "boolean" ? nextChecked : !notificationsEnabled;
+    const shouldEnable = typeof nextChecked === "boolean" ? nextChecked : !notificationsEnabled;
 
     if (!isSupported) {
       toast.error("Tarayıcınız bildirimleri desteklemiyor.");
@@ -390,86 +282,88 @@ const Index = () => {
     if (!shouldEnable) {
       setNotificationsEnabled(false);
       setSoundAlertEnabled(false);
-      await persistNotificationSwitchState(false, false);
+      setPreAlertEnabled(false);
+      await Promise.all([
+        persistToggle(NOTIFICATION_PREFERENCE_KEY, false),
+        persistToggle(SOUND_ALERT_PREFERENCE_KEY, false),
+        persistToggle(PRE_ALERT_PREFERENCE_KEY, false),
+      ]);
       toast.info(t.notificationsOff);
     } else {
       const granted = await requestPermission();
       if (granted) {
         setNotificationsEnabled(true);
         setSoundAlertEnabled(true);
-        await persistNotificationSwitchState(true, true);
+        setPreAlertEnabled(true);
+        await Promise.all([
+          persistToggle(NOTIFICATION_PREFERENCE_KEY, true),
+          persistToggle(SOUND_ALERT_PREFERENCE_KEY, true),
+          persistToggle(PRE_ALERT_PREFERENCE_KEY, true),
+        ]);
         toast.success(t.notificationsOn);
 
         if (prayerData) {
-          schedulePrayerNotifications(
-            prayerData.prayers,
-            () => {
-              playAdhan();
-            },
-            getNotificationContext()
-          );
+          schedulePrayerNotifications(prayerData.prayers, () => { playAdhan(); }, getNotificationContext());
         }
       } else {
         setNotificationsEnabled(false);
         setSoundAlertEnabled(false);
-        await persistNotificationSwitchState(false, false);
+        setPreAlertEnabled(false);
+        await Promise.all([
+          persistToggle(NOTIFICATION_PREFERENCE_KEY, false),
+          persistToggle(SOUND_ALERT_PREFERENCE_KEY, false),
+          persistToggle(PRE_ALERT_PREFERENCE_KEY, false),
+        ]);
         toast.error("Bildirim izni reddedildi");
       }
     }
   };
 
   const handleSoundAlertToggle = async (nextChecked?: boolean) => {
-    const nextSoundEnabled =
-      typeof nextChecked === "boolean" ? nextChecked : !soundAlertEnabled;
-
-    setSoundAlertEnabled(nextSoundEnabled);
-    await persistNotificationSwitchState(notificationsEnabled, nextSoundEnabled);
+    const next = typeof nextChecked === "boolean" ? nextChecked : !soundAlertEnabled;
+    setSoundAlertEnabled(next);
+    await persistToggle(SOUND_ALERT_PREFERENCE_KEY, next);
   };
 
-  // Swipe handlers
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
+  const handlePreAlertToggle = async (nextChecked?: boolean) => {
+    const next = typeof nextChecked === "boolean" ? nextChecked : !preAlertEnabled;
+    setPreAlertEnabled(next);
+    await persistToggle(PRE_ALERT_PREFERENCE_KEY, next);
   };
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
-
+  const handleTouchStart = (e: React.TouchEvent) => { setTouchEnd(null); setTouchStart(e.targetTouches[0].clientX); };
+  const handleTouchMove = (e: React.TouchEvent) => { setTouchEnd(e.targetTouches[0].clientX); };
   const handleTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
-    
     const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > 80;
-    const isRightSwipe = distance < -80;
+    if (distance > 80 && currentView === 'main') setCurrentView('qibla');
+    else if (distance < -80 && currentView === 'qibla') setCurrentView('main');
+  };
 
-    if (isLeftSwipe && currentView === 'main') {
-      setCurrentView('qibla');
-    } else if (isRightSwipe && currentView === 'qibla') {
-      setCurrentView('main');
-    }
+  const handleCompassView = () => {
+    tryShowAd('compass');
+    setCurrentView('qibla');
   };
 
   const nextPrayer = prayerData ? getNextPrayer(prayerData.prayers, nowTimestamp) : null;
 
-  // Show splash screen
-  if (showSplash) {
-    return <SplashScreen onComplete={handleSplashComplete} />;
+  if (showSplash) return <SplashScreen onComplete={handleSplashComplete} />;
+
+  if (currentView === 'religious' && prayerData) {
+    return (
+      <ReligiousDaysPage
+        hijriDay={prayerData.hijriDay}
+        hijriMonth={prayerData.hijriMonth}
+        hijriYear={prayerData.hijriYear}
+        onBack={() => setCurrentView('main')}
+      />
+    );
   }
 
-  // Show Qibla compass
   if (currentView === 'qibla') {
     return (
-      <div
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      >
-        <QiblaCompass
-          latitude={latitude}
-          longitude={longitude}
-          onBack={() => setCurrentView('main')}
-        />
+      <div onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
+        <QiblaCompass latitude={latitude} longitude={longitude} onBack={() => setCurrentView('main')} />
       </div>
     );
   }
@@ -501,9 +395,7 @@ const Index = () => {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="text-center">
           <p className="text-destructive mb-4">{error}</p>
-          <button onClick={loadPrayerTimes} className="text-primary underline">
-            {t.retry}
-          </button>
+          <button onClick={loadPrayerTimes} className="text-primary underline">{t.retry}</button>
         </div>
       </div>
     );
@@ -528,17 +420,19 @@ const Index = () => {
           hijriDate={prayerData?.hijriDate || ""}
           darkMode={darkMode}
           onDarkModeToggle={toggleDarkMode}
-          notificationsEnabled={notificationsEnabled}
+          notificationsEnabled={notificationsEnabled === true}
           onNotificationToggle={handleNotificationToggle}
           useCurrentLocation={useCurrentLocation}
           onUseCurrentLocation={handleUseCurrentLocation}
           hasLocationPermission={!permissionDenied && latitude !== null}
           settingsButton={
             <SettingsDrawer
-              notificationsEnabled={notificationsEnabled}
+              notificationsEnabled={notificationsEnabled === true}
               onNotificationToggle={handleNotificationToggle}
-              soundAlertEnabled={soundAlertEnabled}
+              soundAlertEnabled={soundAlertEnabled === true}
               onSoundAlertToggle={handleSoundAlertToggle}
+              preAlertEnabled={preAlertEnabled === true}
+              onPreAlertToggle={handlePreAlertToggle}
               colorTheme={colorTheme}
               onColorThemeChange={setColorTheme}
             />
@@ -548,19 +442,25 @@ const Index = () => {
         <CountdownTimer nextPrayer={nextPrayer} />
 
         <div className="mt-6 mb-8">
-          <PrayerTimesList
-            prayers={prayerData?.prayers || []}
-            nextPrayer={nextPrayer}
-          />
+          <PrayerTimesList prayers={prayerData?.prayers || []} nextPrayer={nextPrayer} />
         </div>
 
-        {/* Swipe hint */}
-        <div 
-          className="flex items-center justify-center gap-2 text-muted-foreground text-sm mb-4 cursor-pointer hover:text-primary transition-colors"
-          onClick={() => setCurrentView('qibla')}
-        >
-          <span>{t.swipeForQibla}</span>
-          <ChevronRight className="w-4 h-4" />
+        {/* Action buttons row */}
+        <div className="flex items-center justify-center gap-4 mb-4">
+          <div 
+            className="flex items-center gap-2 text-muted-foreground text-sm cursor-pointer hover:text-primary transition-colors"
+            onClick={handleCompassView}
+          >
+            <span>{t.swipeForQibla}</span>
+            <ChevronRight className="w-4 h-4" />
+          </div>
+          <div 
+            className="flex items-center gap-2 text-muted-foreground text-sm cursor-pointer hover:text-primary transition-colors"
+            onClick={() => setCurrentView('religious')}
+          >
+            <Calendar className="w-4 h-4" />
+            <span>{t.religiousDays}</span>
+          </div>
         </div>
 
         <AdPlaceholder />
@@ -568,13 +468,9 @@ const Index = () => {
         <DailyVerse />
 
         <footer className="mt-8 text-center">
-          <p className="text-muted-foreground/60 text-xs">
-            {t.dataSource}
-          </p>
+          <p className="text-muted-foreground/60 text-xs">{t.dataSource}</p>
           {soundAlertEnabled && notificationsEnabled && (
-            <p className="text-primary/60 text-xs mt-1">
-              🔔 {t.adhanActive}
-            </p>
+            <p className="text-primary/60 text-xs mt-1">🔔 {t.adhanActive}</p>
           )}
         </footer>
       </div>
