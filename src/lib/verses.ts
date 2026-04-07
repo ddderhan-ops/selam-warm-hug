@@ -21,6 +21,8 @@ const dailyVerses: VerseEntry[] = [
       de: "Gewiss, mit der Erschwernis kommt Erleichterung.",
       fr: "À côté de la difficulté est certes une facilité.",
       ar: "إِنَّ مَعَ الْعُسْرِ يُسْرًا",
+      es: "Ciertamente, con la dificultad viene la facilidad.",
+      pt: "Certamente, com a dificuldade vem a facilidade.",
     },
     sources: {
       tr: "İnşirah Suresi, 6",
@@ -28,6 +30,8 @@ const dailyVerses: VerseEntry[] = [
       de: "Sure Asch-Scharh, 6",
       fr: "Sourate Ash-Sharh, 6",
       ar: "سورة الشرح، ٦",
+      es: "Sura Ash-Sharh, 6",
+      pt: "Sura Ash-Sharh, 6",
     },
   },
   {
