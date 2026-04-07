@@ -81,6 +81,8 @@ const languageToLocale: Record<string, string> = {
   de: 'de-DE',
   fr: 'fr-FR',
   ar: 'ar-SA',
+  es: 'es-ES',
+  pt: 'pt-BR',
 };
 
 export async function fetchPrayerTimes(

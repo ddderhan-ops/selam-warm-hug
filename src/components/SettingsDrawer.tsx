@@ -1,4 +1,4 @@
-import { Bell, BellOff, Volume2, VolumeX, Globe, Palette } from 'lucide-react';
+import { Bell, BellOff, Volume2, VolumeX, Globe, Palette, Clock } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import {
   Drawer,
@@ -25,6 +25,8 @@ interface SettingsDrawerProps {
   onNotificationToggle: () => void;
   soundAlertEnabled: boolean;
   onSoundAlertToggle: () => void;
+  preAlertEnabled: boolean;
+  onPreAlertToggle: () => void;
   colorTheme: ColorTheme;
   onColorThemeChange: (theme: ColorTheme) => void;
 }
@@ -34,12 +36,14 @@ export function SettingsDrawer({
   onNotificationToggle,
   soundAlertEnabled,
   onSoundAlertToggle,
+  preAlertEnabled,
+  onPreAlertToggle,
   colorTheme,
   onColorThemeChange,
 }: SettingsDrawerProps) {
   const { t, language, setLanguage } = useTranslation();
 
-  const languages: Language[] = ['tr', 'en', 'de', 'fr', 'ar'];
+  const languages: Language[] = ['tr', 'en', 'de', 'fr', 'ar', 'es', 'pt'];
 
   const themeOptions: { value: ColorTheme; label: string }[] = [
     { value: 'default', label: 'Default' },
@@ -98,6 +102,21 @@ export function SettingsDrawer({
               <Switch
                 checked={soundAlertEnabled}
                 onCheckedChange={onSoundAlertToggle}
+              />
+            </div>
+
+            {/* 15 min Pre-Alert */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Clock className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <span className="font-medium block">{t.preAlert}</span>
+                  <span className="text-xs text-muted-foreground">{t.preAlertDesc}</span>
+                </div>
+              </div>
+              <Switch
+                checked={preAlertEnabled}
+                onCheckedChange={onPreAlertToggle}
               />
             </div>
 

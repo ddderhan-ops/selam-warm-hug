@@ -66,8 +66,8 @@ export function useGeolocation() {
       },
       {
         enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 300000, // 5 minutes cache
+        timeout: 15000,
+        maximumAge: 60000, // 1 minute cache for fresher data
       }
     );
   }, []);

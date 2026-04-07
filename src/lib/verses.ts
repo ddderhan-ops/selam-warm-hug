@@ -21,6 +21,8 @@ const dailyVerses: VerseEntry[] = [
       de: "Gewiss, mit der Erschwernis kommt Erleichterung.",
       fr: "À côté de la difficulté est certes une facilité.",
       ar: "إِنَّ مَعَ الْعُسْرِ يُسْرًا",
+      es: "Ciertamente, con la dificultad viene la facilidad.",
+      pt: "Certamente, com a dificuldade vem a facilidade.",
     },
     sources: {
       tr: "İnşirah Suresi, 6",
@@ -28,6 +30,8 @@ const dailyVerses: VerseEntry[] = [
       de: "Sure Asch-Scharh, 6",
       fr: "Sourate Ash-Sharh, 6",
       ar: "سورة الشرح، ٦",
+      es: "Sura Ash-Sharh, 6",
+      pt: "Sura Ash-Sharh, 6",
     },
   },
   {
@@ -38,6 +42,8 @@ const dailyVerses: VerseEntry[] = [
       de: "Verliert nicht die Hoffnung auf Allahs Barmherzigkeit.",
       fr: "Ne désespérez pas de la miséricorde d'Allah.",
       ar: "وَلَا تَيْأَسُوا مِن رَّوْحِ اللَّهِ",
+      es: "No perdáis la esperanza en la misericordia de Allah.",
+      pt: "Não percam a esperança na misericórdia de Allah.",
     },
     sources: {
       tr: "Yusuf Suresi, 87",
@@ -45,6 +51,8 @@ const dailyVerses: VerseEntry[] = [
       de: "Sure Yusuf, 87",
       fr: "Sourate Youssouf, 87",
       ar: "سورة يوسف، ٨٧",
+      es: "Sura Yusuf, 87",
+      pt: "Sura Yusuf, 87",
     },
   },
   {
@@ -55,6 +63,8 @@ const dailyVerses: VerseEntry[] = [
       de: "Gedenkt Meiner, so gedenke Ich eurer.",
       fr: "Invoquez-Moi et Je vous invoquerai.",
       ar: "فَاذْكُرُونِي أَذْكُرْكُمْ",
+      es: "Recordadme y Yo os recordaré.",
+      pt: "Lembrai-vos de Mim e Eu Me lembrarei de vós.",
     },
     sources: {
       tr: "Bakara Suresi, 152",
@@ -62,6 +72,8 @@ const dailyVerses: VerseEntry[] = [
       de: "Sure Al-Baqara, 152",
       fr: "Sourate Al-Baqara, 152",
       ar: "سورة البقرة، ١٥٢",
+      es: "Sura Al-Baqarah, 152",
+      pt: "Sura Al-Baqarah, 152",
     },
   },
   {
@@ -72,6 +84,8 @@ const dailyVerses: VerseEntry[] = [
       de: "Ruft Mich an, so erhöre Ich euch.",
       fr: "Invoquez-Moi, Je vous répondrai.",
       ar: "ادْعُونِي أَسْتَجِبْ لَكُمْ",
+      es: "Invocadme y Yo os responderé.",
+      pt: "Invocai-Me e Eu vos responderei.",
     },
     sources: {
       tr: "Mü'min Suresi, 60",
@@ -79,6 +93,8 @@ const dailyVerses: VerseEntry[] = [
       de: "Sure Ghafir, 60",
       fr: "Sourate Ghafir, 60",
       ar: "سورة غافر، ٦٠",
+      es: "Sura Ghafir, 60",
+      pt: "Sura Ghafir, 60",
     },
   },
   {
@@ -89,6 +105,8 @@ const dailyVerses: VerseEntry[] = [
       de: "Sei nicht traurig, Allah ist mit uns.",
       fr: "Ne t'afflige pas, Allah est avec nous.",
       ar: "وَلَا تَحْزَنْ إِنَّ اللَّهَ مَعَنَا",
+      es: "No te aflijas; Allah está con nosotros.",
+      pt: "Não te aflijas; Allah está conosco.",
     },
     sources: {
       tr: "Tevbe Suresi, 40",
@@ -96,6 +114,8 @@ const dailyVerses: VerseEntry[] = [
       de: "Sure At-Tauba, 40",
       fr: "Sourate At-Tawbah, 40",
       ar: "سورة التوبة، ٤٠",
+      es: "Sura At-Tawbah, 40",
+      pt: "Sura At-Tawbah, 40",
     },
   },
 ];
