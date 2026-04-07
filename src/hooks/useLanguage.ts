@@ -5,7 +5,7 @@ export function useLanguage() {
   const [language, setLanguageState] = useState<Language>(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('language') as Language | null;
-      if (stored && ['tr', 'en', 'de', 'fr', 'ar'].includes(stored)) {
+      if (stored && ['tr', 'en', 'de', 'fr', 'ar', 'es', 'pt'].includes(stored)) {
         return stored;
       }
       return detectBrowserLanguage();
