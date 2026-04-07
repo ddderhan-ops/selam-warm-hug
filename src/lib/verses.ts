@@ -105,6 +105,8 @@ const dailyVerses: VerseEntry[] = [
       de: "Sei nicht traurig, Allah ist mit uns.",
       fr: "Ne t'afflige pas, Allah est avec nous.",
       ar: "وَلَا تَحْزَنْ إِنَّ اللَّهَ مَعَنَا",
+      es: "No te aflijas; Allah está con nosotros.",
+      pt: "Não te aflijas; Allah está conosco.",
     },
     sources: {
       tr: "Tevbe Suresi, 40",
@@ -112,6 +114,8 @@ const dailyVerses: VerseEntry[] = [
       de: "Sure At-Tauba, 40",
       fr: "Sourate At-Tawbah, 40",
       ar: "سورة التوبة، ٤٠",
+      es: "Sura At-Tawbah, 40",
+      pt: "Sura At-Tawbah, 40",
     },
   },
 ];
