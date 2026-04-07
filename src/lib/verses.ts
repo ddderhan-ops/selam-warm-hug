@@ -84,6 +84,8 @@ const dailyVerses: VerseEntry[] = [
       de: "Ruft Mich an, so erhöre Ich euch.",
       fr: "Invoquez-Moi, Je vous répondrai.",
       ar: "ادْعُونِي أَسْتَجِبْ لَكُمْ",
+      es: "Invocadme y Yo os responderé.",
+      pt: "Invocai-Me e Eu vos responderei.",
     },
     sources: {
       tr: "Mü'min Suresi, 60",
@@ -91,6 +93,8 @@ const dailyVerses: VerseEntry[] = [
       de: "Sure Ghafir, 60",
       fr: "Sourate Ghafir, 60",
       ar: "سورة غافر، ٦٠",
+      es: "Sura Ghafir, 60",
+      pt: "Sura Ghafir, 60",
     },
   },
   {
