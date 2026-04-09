@@ -1,4 +1,5 @@
-import { ArrowLeft, Calendar, Star } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowLeft, Calendar, Star, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/contexts/LanguageContext';
 import { religiousDays, getReligiousDayName } from '@/lib/religiousDays';
@@ -16,8 +17,10 @@ const hijriMonthOrder = [
   'Ramadan', 'Shawwal', "Dhu al-Qi'dah", "Dhu al-Hijjah",
 ];
 
+// Average Hijri month length ≈ 29.53 days
+const AVG_HIJRI_MONTH_DAYS = 29.53;
+
 function getHijriMonthIndex(monthName: string): number {
-  // Try matching Turkish/translated month names to their index
   const trMonths: Record<string, number> = {
     'Muharrem': 1, 'Safer': 2, 'Rebiülevvel': 3, 'Rebiülahir': 4,
     'Cemaziyelevvel': 5, 'Cemaziyelahir': 6, 'Recep': 7, 'Şaban': 8,
@@ -28,22 +31,50 @@ function getHijriMonthIndex(monthName: string): number {
   return idx >= 0 ? idx + 1 : 1;
 }
 
+function estimateDaysUntil(
+  currentMonth: number, currentDay: number,
+  targetMonth: number, targetDay: number
+): number {
+  let monthDiff = targetMonth - currentMonth;
+  if (monthDiff < 0 || (monthDiff === 0 && targetDay < currentDay)) {
+    monthDiff += 12; // next Hijri year
+  }
+  
+  if (monthDiff === 0) return targetDay - currentDay;
+  
+  // Days remaining in current month + full months in between + target day
+  const daysLeftInCurrentMonth = Math.round(AVG_HIJRI_MONTH_DAYS) - currentDay;
+  const fullMonthsBetween = monthDiff - 1;
+  return daysLeftInCurrentMonth + Math.round(fullMonthsBetween * AVG_HIJRI_MONTH_DAYS) + targetDay;
+}
+
+function formatCountdown(totalDays: number, t: any): string {
+  if (totalDays <= 0) return t.today || 'Bugün';
+  const days = totalDays;
+  if (days === 1) return `1 ${t.dayUnit || 'gün'}`;
+  return `${days} ${t.dayUnit || 'gün'}`;
+}
+
 export function ReligiousDaysPage({ hijriDay, hijriMonth, hijriYear, onBack }: ReligiousDaysPageProps) {
   const { t, language } = useTranslation();
   const currentHijriMonth = getHijriMonthIndex(hijriMonth);
+  const [now, setNow] = useState(Date.now());
 
-  // Sort: upcoming first, then past
-  const sortedDays = [...religiousDays].sort((a, b) => {
-    const aUpcoming = a.hijriMonth > currentHijriMonth || (a.hijriMonth === currentHijriMonth && a.hijriDay >= hijriDay);
-    const bUpcoming = b.hijriMonth > currentHijriMonth || (b.hijriMonth === currentHijriMonth && b.hijriDay >= hijriDay);
-    if (aUpcoming && !bUpcoming) return -1;
-    if (!aUpcoming && bUpcoming) return 1;
-    return (a.hijriMonth - b.hijriMonth) || (a.hijriDay - b.hijriDay);
-  });
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Calculate days until each day and sort by nearest
+  const daysWithCountdown = religiousDays.map((day) => {
+    const daysUntil = estimateDaysUntil(currentHijriMonth, hijriDay, day.hijriMonth, day.hijriDay);
+    const isToday = day.hijriMonth === currentHijriMonth && day.hijriDay === hijriDay;
+    return { ...day, daysUntil, isToday };
+  }).sort((a, b) => a.daysUntil - b.daysUntil);
 
   const localizedMonthName = (monthIdx: number) => {
     const key = hijriMonthOrder[monthIdx - 1];
-    return t.hijriMonths[key] || key;
+    return t.hijriMonths?.[key] || key;
   };
 
   return (
@@ -71,34 +102,36 @@ export function ReligiousDaysPage({ hijriDay, hijriMonth, hijriYear, onBack }: R
 
       <div className="flex-1 px-4 pb-8">
         <div className="space-y-3 mt-4">
-          {sortedDays.map((day) => {
-            const isUpcoming = day.hijriMonth > currentHijriMonth || 
-              (day.hijriMonth === currentHijriMonth && day.hijriDay >= hijriDay);
-            const isToday = day.hijriMonth === currentHijriMonth && day.hijriDay === hijriDay;
-
-            return (
-              <div
-                key={day.nameKey}
-                className={`bg-card border rounded-2xl p-4 flex items-center gap-4 transition-all ${
-                  isToday ? 'border-primary bg-primary/5 shadow-md' : 
-                  isUpcoming ? 'border-border' : 'border-border/50 opacity-60'
-                }`}
-              >
-                <div className="text-2xl w-10 text-center">{day.icon}</div>
-                <div className="flex-1">
-                  <p className={`font-semibold ${isToday ? 'text-primary' : ''}`}>
-                    {getReligiousDayName(day, language)}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {day.hijriDay} {localizedMonthName(day.hijriMonth)}
-                  </p>
-                </div>
-                {isToday && (
+          {daysWithCountdown.map((day) => (
+            <div
+              key={day.nameKey}
+              className={`bg-card border rounded-2xl p-4 flex items-center gap-4 transition-all ${
+                day.isToday ? 'border-primary bg-primary/5 shadow-md' : 'border-border'
+              }`}
+            >
+              <div className="text-2xl w-10 text-center">{day.icon}</div>
+              <div className="flex-1">
+                <p className={`font-semibold ${day.isToday ? 'text-primary' : ''}`}>
+                  {getReligiousDayName(day, language)}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {day.hijriDay} {localizedMonthName(day.hijriMonth)}
+                </p>
+              </div>
+              <div className="text-right flex items-center gap-1.5">
+                {day.isToday ? (
                   <Star className="w-5 h-5 text-primary fill-primary" />
+                ) : (
+                  <>
+                    <Clock className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm font-medium text-muted-foreground">
+                      {formatCountdown(day.daysUntil, t)}
+                    </span>
+                  </>
                 )}
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       </div>
     </div>

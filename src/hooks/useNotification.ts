@@ -188,16 +188,22 @@ export function useNotification() {
     async (
       prayers: PrayerTime[],
       onPrayerTime?: (prayer: PrayerTime) => void,
-      context?: NotificationScheduleContext
+      context?: NotificationScheduleContext,
+      options?: { preAlertEnabled?: boolean; onPreAlert?: (prayer: PrayerTime) => void }
     ) => {
       void syncPrayerScheduleWithServiceWorker(prayers, context);
 
       if (!permissionGranted.current) return;
 
       // Cancel ALL pending notifications before scheduling new ones
+      // IDs 1-6 = exact time, 101-106 = pre-alert (15 min before)
       try {
+        const allIds = [
+          ...Object.values(PRAYER_FIXED_IDS),
+          ...Object.values(PRAYER_FIXED_IDS).map((id) => id + 100),
+        ];
         await LocalNotifications.cancel({
-          notifications: Object.values(PRAYER_FIXED_IDS).map((id) => ({ id })),
+          notifications: allIds.map((id) => ({ id })),
         });
       } catch {
         // ignore on web
@@ -205,24 +211,43 @@ export function useNotification() {
 
       const now = Date.now();
       const notifications: Array<any> = [];
+      const PRE_ALERT_MS = 15 * 60 * 1000;
 
       prayers.forEach((prayer) => {
         const timeUntil = prayer.timestamp - now;
+
+        // Exact time notification
         if (timeUntil > 0 && timeUntil < 24 * 60 * 60 * 1000) {
           const id = getPrayerNotificationId(prayer);
           notifications.push({
             id,
             title: `Ezan Vakti Geldi: ${prayer.name}`,
             body: `${prayer.name} vakti girdi. Hayırlı ibadetler.`,
-            schedule: {
-              at: new Date(prayer.timestamp),
-              allowWhileIdle: true,
-            },
+            schedule: { at: new Date(prayer.timestamp), allowWhileIdle: true },
             smallIcon: "ic_notification",
             largeIcon: "ic_launcher",
             sound: "ezan.mp3",
             channelId: PRAYER_CHANNEL_ID,
             ongoing: true,
+            autoCancel: true,
+          });
+        }
+
+        // Pre-alert notification (15 min before)
+        const preAlertTime = prayer.timestamp - PRE_ALERT_MS;
+        const preTimeUntil = preAlertTime - now;
+        if (options?.preAlertEnabled && preTimeUntil > 0 && preTimeUntil < 24 * 60 * 60 * 1000) {
+          const preId = getPrayerNotificationId(prayer) + 100;
+          notifications.push({
+            id: preId,
+            title: `${prayer.name} vaktine 15 dakika`,
+            body: `${prayer.name} vakti yaklaşıyor. Hazırlıklarınızı yapın.`,
+            schedule: { at: new Date(preAlertTime), allowWhileIdle: true },
+            smallIcon: "ic_notification",
+            largeIcon: "ic_launcher",
+            sound: "uyari.mp3",
+            channelId: PRAYER_CHANNEL_ID,
+            ongoing: false,
             autoCancel: true,
           });
         }
@@ -241,16 +266,34 @@ export function useNotification() {
                 onPrayerTime?.(prayer);
               }, timeUntil);
             }
+            // Pre-alert fallback
+            const preAlertTime = prayer.timestamp - PRE_ALERT_MS;
+            const preTimeUntil = preAlertTime - now;
+            if (options?.preAlertEnabled && preTimeUntil > 0 && preTimeUntil < 24 * 60 * 60 * 1000) {
+              window.setTimeout(() => {
+                options.onPreAlert?.(prayer);
+              }, preTimeUntil);
+            }
           });
         }
       }
 
       // Listen for notification events to trigger callbacks
-      LocalNotifications.addListener("localNotificationReceived", () => {
+      LocalNotifications.addListener("localNotificationReceived", (notification) => {
+        const isPreAlert = notification.id > 100;
         const closest = prayers.find(
-          (p) => Math.abs(p.timestamp - Date.now()) < 120_000
+          (p) => {
+            const targetTime = isPreAlert ? p.timestamp - PRE_ALERT_MS : p.timestamp;
+            return Math.abs(targetTime - Date.now()) < 120_000;
+          }
         );
-        if (closest) onPrayerTime?.(closest);
+        if (closest) {
+          if (isPreAlert) {
+            options?.onPreAlert?.(closest);
+          } else {
+            onPrayerTime?.(closest);
+          }
+        }
       }).catch(() => undefined);
     },
     [sendNotification, syncPrayerScheduleWithServiceWorker]

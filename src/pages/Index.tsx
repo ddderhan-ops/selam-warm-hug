@@ -88,7 +88,7 @@ const Index = () => {
   const { colorTheme, setColorTheme, darkMode, toggleDarkMode } = useTheme();
   const { requestPermission, schedulePrayerNotifications, isSupported } = useNotification();
   const { latitude, longitude, loading: geoLoading, permissionDenied, requestLocation } = useGeolocation();
-  const { playAdhan } = useAdhan();
+  const { playAdhan, playPreAlert } = useAdhan();
   const { tryShowAd } = useInterstitialAd();
 
   const fcmCity = prayerData?.city || selectedCity?.name || "İstanbul";
@@ -199,7 +199,11 @@ const Index = () => {
         schedulePrayerNotifications(
           data.prayers,
           () => { if (soundAlertEnabled) playAdhan(); },
-          notificationContext
+          notificationContext,
+          {
+            preAlertEnabled: preAlertEnabled === true,
+            onPreAlert: () => { if (soundAlertEnabled) playPreAlert(); },
+          }
         );
       }
     } catch (err) {
@@ -208,7 +212,7 @@ const Index = () => {
     } finally {
       setLoading(false);
     }
-  }, [useCurrentLocation, latitude, longitude, selectedCity, language, notificationsEnabled, schedulePrayerNotifications, soundAlertEnabled, playAdhan, t.prayerTimesError]);
+  }, [useCurrentLocation, latitude, longitude, selectedCity, language, notificationsEnabled, preAlertEnabled, schedulePrayerNotifications, soundAlertEnabled, playAdhan, playPreAlert, t.prayerTimesError]);
 
   useEffect(() => {
     if (!geoLoading) loadPrayerTimes();
@@ -303,7 +307,15 @@ const Index = () => {
         toast.success(t.notificationsOn);
 
         if (prayerData) {
-          schedulePrayerNotifications(prayerData.prayers, () => { playAdhan(); }, getNotificationContext());
+          schedulePrayerNotifications(
+            prayerData.prayers,
+            () => { playAdhan(); },
+            getNotificationContext(),
+            {
+              preAlertEnabled: true,
+              onPreAlert: () => { playPreAlert(); },
+            }
+          );
         }
       } else {
         setNotificationsEnabled(false);
