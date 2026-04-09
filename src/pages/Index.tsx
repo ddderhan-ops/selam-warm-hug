@@ -199,7 +199,11 @@ const Index = () => {
         schedulePrayerNotifications(
           data.prayers,
           () => { if (soundAlertEnabled) playAdhan(); },
-          notificationContext
+          notificationContext,
+          {
+            preAlertEnabled: preAlertEnabled === true,
+            onPreAlert: () => { if (soundAlertEnabled) playPreAlert(); },
+          }
         );
       }
     } catch (err) {
