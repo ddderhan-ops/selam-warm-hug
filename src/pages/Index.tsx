@@ -212,7 +212,7 @@ const Index = () => {
     } finally {
       setLoading(false);
     }
-  }, [useCurrentLocation, latitude, longitude, selectedCity, language, notificationsEnabled, schedulePrayerNotifications, soundAlertEnabled, playAdhan, t.prayerTimesError]);
+  }, [useCurrentLocation, latitude, longitude, selectedCity, language, notificationsEnabled, preAlertEnabled, schedulePrayerNotifications, soundAlertEnabled, playAdhan, playPreAlert, t.prayerTimesError]);
 
   useEffect(() => {
     if (!geoLoading) loadPrayerTimes();
