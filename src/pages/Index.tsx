@@ -88,7 +88,7 @@ const Index = () => {
   const { colorTheme, setColorTheme, darkMode, toggleDarkMode } = useTheme();
   const { requestPermission, schedulePrayerNotifications, isSupported } = useNotification();
   const { latitude, longitude, loading: geoLoading, permissionDenied, requestLocation } = useGeolocation();
-  const { playAdhan } = useAdhan();
+  const { playAdhan, playPreAlert } = useAdhan();
   const { tryShowAd } = useInterstitialAd();
 
   const fcmCity = prayerData?.city || selectedCity?.name || "İstanbul";
