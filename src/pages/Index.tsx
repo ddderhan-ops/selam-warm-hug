@@ -307,7 +307,15 @@ const Index = () => {
         toast.success(t.notificationsOn);
 
         if (prayerData) {
-          schedulePrayerNotifications(prayerData.prayers, () => { playAdhan(); }, getNotificationContext());
+          schedulePrayerNotifications(
+            prayerData.prayers,
+            () => { playAdhan(); },
+            getNotificationContext(),
+            {
+              preAlertEnabled: true,
+              onPreAlert: () => { playPreAlert(); },
+            }
+          );
         }
       } else {
         setNotificationsEnabled(false);
