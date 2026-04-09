@@ -233,23 +233,25 @@ export function useNotification() {
           });
         }
 
-        // Pre-alert notification (15 min before)
-        const preAlertTime = prayer.timestamp - PRE_ALERT_MS;
-        const preTimeUntil = preAlertTime - now;
-        if (options?.preAlertEnabled && preTimeUntil > 0 && preTimeUntil < 24 * 60 * 60 * 1000) {
-          const preId = getPrayerNotificationId(prayer) + 100;
-          notifications.push({
-            id: preId,
-            title: `${prayer.name} vaktine 15 dakika`,
-            body: `${prayer.name} vakti yaklaşıyor. Hazırlıklarınızı yapın.`,
-            schedule: { at: new Date(preAlertTime), allowWhileIdle: true },
-            smallIcon: "ic_notification",
-            largeIcon: "ic_launcher",
-            sound: "uyari.mp3",
-            channelId: PRAYER_CHANNEL_ID,
-            ongoing: false,
-            autoCancel: true,
-          });
+        // Pre-alert notification (15 min before) — only if preAlertEnabled
+        if (options?.preAlertEnabled) {
+          const preAlertTime = prayer.timestamp - PRE_ALERT_MS;
+          const preTimeUntil = preAlertTime - now;
+          if (preTimeUntil > 0 && preTimeUntil < 24 * 60 * 60 * 1000) {
+            const preId = getPrayerNotificationId(prayer) + 100;
+            notifications.push({
+              id: preId,
+              title: `${prayer.name} vaktine 15 dakika`,
+              body: `${prayer.name} vakti yaklaşıyor. Hazırlıklarınızı yapın.`,
+              schedule: { at: new Date(preAlertTime), allowWhileIdle: true },
+              smallIcon: "ic_notification",
+              largeIcon: "ic_launcher",
+              sound: "uyari.mp3",
+              channelId: PRAYER_CHANNEL_ID,
+              ongoing: false,
+              autoCancel: true,
+            });
+          }
         }
       });
 
@@ -266,13 +268,15 @@ export function useNotification() {
                 onPrayerTime?.(prayer);
               }, timeUntil);
             }
-            // Pre-alert fallback
-            const preAlertTime = prayer.timestamp - PRE_ALERT_MS;
-            const preTimeUntil = preAlertTime - now;
-            if (options?.preAlertEnabled && preTimeUntil > 0 && preTimeUntil < 24 * 60 * 60 * 1000) {
-              window.setTimeout(() => {
-                options.onPreAlert?.(prayer);
-              }, preTimeUntil);
+            // Pre-alert fallback — only if preAlertEnabled
+            if (options?.preAlertEnabled) {
+              const preAlertTime = prayer.timestamp - PRE_ALERT_MS;
+              const preTimeUntil = preAlertTime - now;
+              if (preTimeUntil > 0 && preTimeUntil < 24 * 60 * 60 * 1000) {
+                window.setTimeout(() => {
+                  options.onPreAlert?.(prayer);
+                }, preTimeUntil);
+              }
             }
           });
         }
