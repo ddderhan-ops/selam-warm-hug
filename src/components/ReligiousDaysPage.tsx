@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, Calendar, Star, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/contexts/LanguageContext';
-import { religiousDays, getReligiousDayName } from '@/lib/religiousDays';
+import { religiousDays, getReligiousDayName, parseGregorianDate } from '@/lib/religiousDays';
 
 interface ReligiousDaysPageProps {
   hijriDay: number;
@@ -17,65 +17,59 @@ const hijriMonthOrder = [
   'Ramadan', 'Shawwal', "Dhu al-Qi'dah", "Dhu al-Hijjah",
 ];
 
-// Average Hijri month length ≈ 29.53 days
-const AVG_HIJRI_MONTH_DAYS = 29.53;
-
-function getHijriMonthIndex(monthName: string): number {
-  const trMonths: Record<string, number> = {
-    'Muharrem': 1, 'Safer': 2, 'Rebiülevvel': 3, 'Rebiülahir': 4,
-    'Cemaziyelevvel': 5, 'Cemaziyelahir': 6, 'Recep': 7, 'Şaban': 8,
-    'Ramazan': 9, 'Şevval': 10, 'Zilkade': 11, 'Zilhicce': 12,
-  };
-  if (trMonths[monthName]) return trMonths[monthName];
-  const idx = hijriMonthOrder.indexOf(monthName);
-  return idx >= 0 ? idx + 1 : 1;
+function daysUntil(targetDateStr: string): number {
+  const target = parseGregorianDate(targetDateStr);
+  if (!target) return 9999;
+  const now = new Date();
+  const todayUTC = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  const diff = target.getTime() - todayUTC;
+  return Math.ceil(diff / (1000 * 60 * 60 * 24));
 }
 
-function estimateDaysUntil(
-  currentMonth: number, currentDay: number,
-  targetMonth: number, targetDay: number
-): number {
-  let monthDiff = targetMonth - currentMonth;
-  if (monthDiff < 0 || (monthDiff === 0 && targetDay < currentDay)) {
-    monthDiff += 12; // next Hijri year
-  }
-  
-  if (monthDiff === 0) return targetDay - currentDay;
-  
-  // Days remaining in current month + full months in between + target day
-  const daysLeftInCurrentMonth = Math.round(AVG_HIJRI_MONTH_DAYS) - currentDay;
-  const fullMonthsBetween = monthDiff - 1;
-  return daysLeftInCurrentMonth + Math.round(fullMonthsBetween * AVG_HIJRI_MONTH_DAYS) + targetDay;
-}
-
-function formatCountdown(totalDays: number, t: any): string {
-  if (totalDays <= 0) return t.today || 'Bugün';
-  const days = totalDays;
+function formatCountdown(days: number, t: any): string {
+  if (days <= 0) return t.today || 'Bugün';
   if (days === 1) return `1 ${t.dayUnit || 'gün'}`;
   return `${days} ${t.dayUnit || 'gün'}`;
 }
 
+function formatGregorianDate(dateStr: string, language: string): string {
+  const d = parseGregorianDate(dateStr);
+  if (!d) return dateStr;
+  return d.toLocaleDateString(language === 'tr' ? 'tr-TR' : language, {
+    day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
+  });
+}
+
 export function ReligiousDaysPage({ hijriDay, hijriMonth, hijriYear, onBack }: ReligiousDaysPageProps) {
   const { t, language } = useTranslation();
-  const currentHijriMonth = getHijriMonthIndex(hijriMonth);
-  const [now, setNow] = useState(Date.now());
+  const [, setTick] = useState(0);
 
   useEffect(() => {
-    const interval = setInterval(() => setNow(Date.now()), 60_000);
+    const interval = setInterval(() => setTick((n) => n + 1), 60_000);
     return () => clearInterval(interval);
   }, []);
 
-  // Calculate days until each day and sort by nearest
-  const daysWithCountdown = religiousDays.map((day) => {
-    const daysUntil = estimateDaysUntil(currentHijriMonth, hijriDay, day.hijriMonth, day.hijriDay);
-    const isToday = day.hijriMonth === currentHijriMonth && day.hijriDay === hijriDay;
-    return { ...day, daysUntil, isToday };
-  }).sort((a, b) => a.daysUntil - b.daysUntil);
+  // Filter out past days and sort by nearest
+  const upcomingDays = religiousDays
+    .map((day) => ({ ...day, daysLeft: daysUntil(day.gregorianDate2026) }))
+    .filter((day) => day.daysLeft >= 0)
+    .sort((a, b) => a.daysLeft - b.daysLeft);
 
   const localizedMonthName = (monthIdx: number) => {
     const key = hijriMonthOrder[monthIdx - 1];
     return t.hijriMonths?.[key] || key;
   };
+
+  const currentHijriMonthIdx = (() => {
+    const trMonths: Record<string, number> = {
+      'Muharrem': 1, 'Safer': 2, 'Rebiülevvel': 3, 'Rebiülahir': 4,
+      'Cemaziyelevvel': 5, 'Cemaziyelahir': 6, 'Recep': 7, 'Şaban': 8,
+      'Ramazan': 9, 'Şevval': 10, 'Zilkade': 11, 'Zilhicce': 12,
+    };
+    if (trMonths[hijriMonth]) return trMonths[hijriMonth];
+    const idx = hijriMonthOrder.indexOf(hijriMonth);
+    return idx >= 0 ? idx + 1 : 1;
+  })();
 
   return (
     <div className="min-h-screen bg-background flex flex-col overflow-x-hidden">
@@ -94,45 +88,52 @@ export function ReligiousDaysPage({ hijriDay, hijriMonth, hijriYear, onBack }: R
           <div>
             <p className="text-sm text-muted-foreground">{t.hijriCalendar}</p>
             <p className="text-lg font-semibold">
-              {hijriDay} {localizedMonthName(currentHijriMonth)} {hijriYear}
+              {hijriDay} {localizedMonthName(currentHijriMonthIdx)} {hijriYear}
             </p>
           </div>
         </div>
       </div>
 
       <div className="flex-1 px-4 pb-8">
-        <div className="space-y-3 mt-4">
-          {daysWithCountdown.map((day) => (
-            <div
-              key={day.nameKey}
-              className={`bg-card border rounded-2xl p-4 flex items-center gap-4 transition-all ${
-                day.isToday ? 'border-primary bg-primary/5 shadow-md' : 'border-border'
-              }`}
-            >
-              <div className="text-2xl w-10 text-center">{day.icon}</div>
-              <div className="flex-1">
-                <p className={`font-semibold ${day.isToday ? 'text-primary' : ''}`}>
-                  {getReligiousDayName(day, language)}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {day.hijriDay} {localizedMonthName(day.hijriMonth)}
-                </p>
-              </div>
-              <div className="text-right flex items-center gap-1.5">
-                {day.isToday ? (
-                  <Star className="w-5 h-5 text-primary fill-primary" />
-                ) : (
-                  <>
-                    <Clock className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm font-medium text-muted-foreground">
-                      {formatCountdown(day.daysUntil, t)}
-                    </span>
-                  </>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+        {upcomingDays.length === 0 ? (
+          <p className="text-center text-muted-foreground mt-8">{t.noUpcomingEvents}</p>
+        ) : (
+          <div className="space-y-3 mt-4">
+            {upcomingDays.map((day) => {
+              const isToday = day.daysLeft === 0;
+              return (
+                <div
+                  key={day.nameKey}
+                  className={`bg-card border rounded-2xl p-4 flex items-center gap-4 transition-all ${
+                    isToday ? 'border-primary bg-primary/5 shadow-md' : 'border-border'
+                  }`}
+                >
+                  <div className="text-2xl w-10 text-center">{day.icon}</div>
+                  <div className="flex-1 min-w-0">
+                    <p className={`font-semibold ${isToday ? 'text-primary' : ''}`}>
+                      {getReligiousDayName(day, language)}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {day.hijriDay} {localizedMonthName(day.hijriMonth)} · {formatGregorianDate(day.gregorianDate2026, language)}
+                    </p>
+                  </div>
+                  <div className="text-right flex items-center gap-1.5 shrink-0">
+                    {isToday ? (
+                      <Star className="w-5 h-5 text-primary fill-primary" />
+                    ) : (
+                      <>
+                        <Clock className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
+                          {formatCountdown(day.daysLeft, t)}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
