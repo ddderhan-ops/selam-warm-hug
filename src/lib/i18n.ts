@@ -48,6 +48,8 @@ export interface Translations {
   religiousDaysTitle: string;
   hijriCalendar: string;
   noUpcomingEvents: string;
+  dayUnit: string;
+  today: string;
   hijriMonths: Record<string, string>;
   weekdays: Record<string, string>;
   months: Record<string, string>;
