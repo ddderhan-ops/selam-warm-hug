@@ -355,6 +355,25 @@ const Index = () => {
     const next = typeof nextChecked === "boolean" ? nextChecked : !preAlertEnabled;
     setPreAlertEnabled(next);
     await persistToggle(PRE_ALERT_PREFERENCE_KEY, next);
+
+    // Re-schedule to add/remove pre-alert notifications
+    if (notificationsEnabled && prayerData) {
+      schedulePrayerNotifications(
+        prayerData.prayers,
+        () => {
+          const soundOn = localStorage.getItem(SOUND_ALERT_PREFERENCE_KEY) === "true";
+          if (soundOn) playAdhan();
+        },
+        getNotificationContext(),
+        {
+          preAlertEnabled: next,
+          onPreAlert: () => {
+            const soundOn = localStorage.getItem(SOUND_ALERT_PREFERENCE_KEY) === "true";
+            if (soundOn && next) playPreAlert();
+          },
+        }
+      );
+    }
   };
 
   const handleTouchStart = (e: React.TouchEvent) => { setTouchEnd(null); setTouchStart(e.targetTouches[0].clientX); };
