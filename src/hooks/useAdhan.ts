@@ -1,49 +1,73 @@
 import { useRef, useCallback } from "react";
 
 const ADHAN_AUDIO_PATH = "/audio/ezan.mp3";
+const PRE_ALERT_AUDIO_PATH = "/audio/uyari.mp3";
 
 export function useAdhan() {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const adhanRef = useRef<HTMLAudioElement | null>(null);
+  const preAlertRef = useRef<HTMLAudioElement | null>(null);
 
-  const getAudio = useCallback(() => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio(ADHAN_AUDIO_PATH);
-      audioRef.current.volume = 0.85;
-      audioRef.current.preload = "auto";
+  const getAdhanAudio = useCallback(() => {
+    if (!adhanRef.current) {
+      adhanRef.current = new Audio(ADHAN_AUDIO_PATH);
+      adhanRef.current.volume = 0.85;
+      adhanRef.current.preload = "auto";
     }
+    return adhanRef.current;
+  }, []);
 
-    return audioRef.current;
+  const getPreAlertAudio = useCallback(() => {
+    if (!preAlertRef.current) {
+      preAlertRef.current = new Audio(PRE_ALERT_AUDIO_PATH);
+      preAlertRef.current.volume = 0.85;
+      preAlertRef.current.preload = "auto";
+    }
+    return preAlertRef.current;
+  }, []);
+
+  const stopAll = useCallback(() => {
+    if (adhanRef.current) {
+      adhanRef.current.pause();
+      adhanRef.current.currentTime = 0;
+    }
+    if (preAlertRef.current) {
+      preAlertRef.current.pause();
+      preAlertRef.current.currentTime = 0;
+    }
   }, []);
 
   const playAdhan = useCallback(async () => {
+    stopAll();
     try {
-      const audio = getAudio();
-
-      audio.pause();
+      const audio = getAdhanAudio();
       audio.currentTime = 0;
       await audio.play();
 
+      // Replay once when ended
       const replay = () => {
         audio.currentTime = 0;
-        void audio.play().catch((error) => {
-          console.error("Ezan sesi ikinci kez çalınamadı:", error);
-        });
+        void audio.play().catch((e) => console.error("Ezan tekrar çalınamadı:", e));
       };
-
       audio.addEventListener("ended", replay, { once: true });
     } catch (error) {
       console.error("Ezan sesi çalınamadı:", error);
     }
-  }, [getAudio]);
+  }, [getAdhanAudio, stopAll]);
+
+  const playPreAlert = useCallback(async () => {
+    stopAll();
+    try {
+      const audio = getPreAlertAudio();
+      audio.currentTime = 0;
+      await audio.play();
+    } catch (error) {
+      console.error("Uyarı sesi çalınamadı:", error);
+    }
+  }, [getPreAlertAudio, stopAll]);
 
   const stopAdhan = useCallback(() => {
-    if (!audioRef.current) {
-      return;
-    }
+    stopAll();
+  }, [stopAll]);
 
-    audioRef.current.pause();
-    audioRef.current.currentTime = 0;
-  }, []);
-
-  return { playAdhan, stopAdhan };
+  return { playAdhan, playPreAlert, stopAdhan };
 }
