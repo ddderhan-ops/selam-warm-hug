@@ -104,6 +104,8 @@ const translations: Record<Language, Translations> = {
     religiousDaysTitle: 'Dini Günler ve Hicri Takvim',
     hijriCalendar: 'Hicri Takvim',
     noUpcomingEvents: 'Yaklaşan özel gün bulunmuyor',
+    dayUnit: 'gün',
+    today: 'Bugün',
     hijriMonths: {
       Muharram: 'Muharrem',
       Safar: 'Safer',
@@ -190,6 +192,8 @@ const translations: Record<Language, Translations> = {
     religiousDaysTitle: 'Religious Days & Hijri Calendar',
     hijriCalendar: 'Hijri Calendar',
     noUpcomingEvents: 'No upcoming special days',
+    dayUnit: 'days',
+    today: 'Today',
     hijriMonths: {
       Muharram: 'Muharram',
       Safar: 'Safar',
@@ -276,6 +280,8 @@ const translations: Record<Language, Translations> = {
     religiousDaysTitle: 'Religiöse Tage & Hijri-Kalender',
     hijriCalendar: 'Hijri-Kalender',
     noUpcomingEvents: 'Keine bevorstehenden besonderen Tage',
+    dayUnit: 'Tage',
+    today: 'Heute',
     hijriMonths: {
       Muharram: 'Muharram',
       Safar: 'Safar',
@@ -362,6 +368,8 @@ const translations: Record<Language, Translations> = {
     religiousDaysTitle: 'Jours Religieux & Calendrier Hijri',
     hijriCalendar: 'Calendrier Hijri',
     noUpcomingEvents: 'Aucun jour spécial à venir',
+    dayUnit: 'jours',
+    today: "Aujourd'hui",
     hijriMonths: {
       Muharram: 'Mouharram',
       Safar: 'Safar',
@@ -448,6 +456,8 @@ const translations: Record<Language, Translations> = {
     religiousDaysTitle: 'الأيام الدينية والتقويم الهجري',
     hijriCalendar: 'التقويم الهجري',
     noUpcomingEvents: 'لا توجد مناسبات قادمة',
+    dayUnit: 'يوم',
+    today: 'اليوم',
     hijriMonths: {
       Muharram: 'محرّم',
       Safar: 'صفر',
@@ -534,6 +544,8 @@ const translations: Record<Language, Translations> = {
     religiousDaysTitle: 'Días Religiosos y Calendario Hijri',
     hijriCalendar: 'Calendario Hijri',
     noUpcomingEvents: 'No hay días especiales próximos',
+    dayUnit: 'días',
+    today: 'Hoy',
     hijriMonths: {
       Muharram: 'Muharram',
       Safar: 'Safar',
@@ -620,6 +632,8 @@ const translations: Record<Language, Translations> = {
     religiousDaysTitle: 'Dias Religiosos e Calendário Hijri',
     hijriCalendar: 'Calendário Hijri',
     noUpcomingEvents: 'Nenhum dia especial próximo',
+    dayUnit: 'dias',
+    today: 'Hoje',
     hijriMonths: {
       Muharram: 'Muharram',
       Safar: 'Safar',
