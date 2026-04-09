@@ -198,11 +198,18 @@ const Index = () => {
       if (notificationsEnabled && notificationContext) {
         schedulePrayerNotifications(
           data.prayers,
-          () => { if (soundAlertEnabled) playAdhan(); },
+          () => {
+            const soundOn = localStorage.getItem(SOUND_ALERT_PREFERENCE_KEY) === "true";
+            if (soundOn) playAdhan();
+          },
           notificationContext,
           {
             preAlertEnabled: preAlertEnabled === true,
-            onPreAlert: () => { if (soundAlertEnabled) playPreAlert(); },
+            onPreAlert: () => {
+              const soundOn = localStorage.getItem(SOUND_ALERT_PREFERENCE_KEY) === "true";
+              const preOn = localStorage.getItem(PRE_ALERT_PREFERENCE_KEY) === "true";
+              if (soundOn && preOn) playPreAlert();
+            },
           }
         );
       }
@@ -309,11 +316,18 @@ const Index = () => {
         if (prayerData) {
           schedulePrayerNotifications(
             prayerData.prayers,
-            () => { playAdhan(); },
+            () => {
+              const soundOn = localStorage.getItem(SOUND_ALERT_PREFERENCE_KEY) === "true";
+              if (soundOn) playAdhan();
+            },
             getNotificationContext(),
             {
               preAlertEnabled: true,
-              onPreAlert: () => { playPreAlert(); },
+              onPreAlert: () => {
+                const soundOn = localStorage.getItem(SOUND_ALERT_PREFERENCE_KEY) === "true";
+                const preOn = localStorage.getItem(PRE_ALERT_PREFERENCE_KEY) === "true";
+                if (soundOn && preOn) playPreAlert();
+              },
             }
           );
         }
