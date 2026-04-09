@@ -188,7 +188,8 @@ export function useNotification() {
     async (
       prayers: PrayerTime[],
       onPrayerTime?: (prayer: PrayerTime) => void,
-      context?: NotificationScheduleContext
+      context?: NotificationScheduleContext,
+      options?: { preAlertEnabled?: boolean; onPreAlert?: (prayer: PrayerTime) => void }
     ) => {
       void syncPrayerScheduleWithServiceWorker(prayers, context);
 
