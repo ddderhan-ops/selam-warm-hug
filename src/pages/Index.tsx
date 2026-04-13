@@ -335,10 +335,11 @@ const Index = () => {
             getNotificationContext(),
             {
               preAlertEnabled: true,
+              preAlertMinutes,
               onPreAlert: () => {
                 const soundOn = localStorage.getItem(SOUND_ALERT_PREFERENCE_KEY) === "true";
                 const preOn = localStorage.getItem(PRE_ALERT_PREFERENCE_KEY) === "true";
-                if (soundOn && preOn) playPreAlert();
+                if (soundOn && preOn) playPreAlert(alertSound);
               },
             }
           );
@@ -379,9 +380,10 @@ const Index = () => {
         getNotificationContext(),
         {
           preAlertEnabled: next,
+          preAlertMinutes,
           onPreAlert: () => {
             const soundOn = localStorage.getItem(SOUND_ALERT_PREFERENCE_KEY) === "true";
-            if (soundOn && next) playPreAlert();
+            if (soundOn && next) playPreAlert(alertSound);
           },
         }
       );
