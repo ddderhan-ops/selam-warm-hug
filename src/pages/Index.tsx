@@ -51,23 +51,7 @@ const Index = () => {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   
-  const [selectedCity, setSelectedCity] = useState<City | null>(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("selectedCity");
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        return turkishCities.find((c) => c.name === parsed.name) || null;
-      }
-    }
-    return null;
-  });
-
-  const [useCurrentLocation, setUseCurrentLocation] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("useCurrentLocation") === "true";
-    }
-    return true;
-  });
+  const [locationName, setLocationName] = useState<string>('');
 
   const [prayerData, setPrayerData] = useState<PrayerTimesData | null>(null);
   const [loading, setLoading] = useState(true);
