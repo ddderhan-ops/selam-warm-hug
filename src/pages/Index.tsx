@@ -239,6 +239,17 @@ const Index = () => {
     return () => clearInterval(interval);
   }, [loadPrayerTimes]);
 
+  // Auto dark mode: dark between Maghrib and Fajr
+  useEffect(() => {
+    if (!autoDarkMode || !prayerData) return;
+    const now = Date.now();
+    const maghrib = prayerData.prayers.find(p => p.nameEn === 'Maghrib');
+    const fajr = prayerData.prayers.find(p => p.nameEn === 'Fajr');
+    if (!maghrib || !fajr) return;
+    const isNight = now >= maghrib.timestamp || now < fajr.timestamp;
+    setDarkMode(isNight);
+  }, [autoDarkMode, prayerData, nowTimestamp, setDarkMode]);
+
   // Save non-notification preferences after hydration
   useEffect(() => {
     if (!hydrated) return;
