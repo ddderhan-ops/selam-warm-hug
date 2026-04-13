@@ -44,6 +44,9 @@ export interface Translations {
   swipeForQibla: string;
   back: string;
   themeLabel: string;
+  themeDefault: string;
+  themeOcean: string;
+  themeBronze: string;
   religiousDays: string;
   religiousDaysTitle: string;
   hijriCalendar: string;
@@ -80,8 +83,8 @@ const translations: Record<Language, Translations> = {
     notificationsOff: 'Bildirimler kapatıldı',
     soundAlert: 'Sesli Uyarı',
     soundAlertDesc: 'Vakit girdiğinde "Allahu Ekber" sesi çalsın',
-    preAlert: '15 dk Öncesi Uyarı',
-    preAlertDesc: 'Vakitten 15 dakika önce kısa uyarı sesi',
+    preAlert: 'Vakit Öncesi Hatırlatıcı',
+    preAlertDesc: 'Vakitten {min} dakika önce uyar',
     language: 'Dil',
     selectCity: 'Şehir seç...',
     currentLocation: 'Mevcut Konum',
@@ -171,8 +174,8 @@ const translations: Record<Language, Translations> = {
     notificationsOff: 'Notifications disabled',
     soundAlert: 'Sound Alert',
     soundAlertDesc: 'Play "Allahu Akbar" sound when prayer time arrives',
-    preAlert: '15 min Pre-Alert',
-    preAlertDesc: 'Short alert sound 15 minutes before prayer',
+    preAlert: 'Pre-Prayer Reminder',
+    preAlertDesc: 'Alert {min} minutes before prayer time',
     language: 'Language',
     selectCity: 'Select city...',
     currentLocation: 'Current Location',
@@ -262,8 +265,8 @@ const translations: Record<Language, Translations> = {
     notificationsOff: 'Benachrichtigungen deaktiviert',
     soundAlert: 'Tonalarm',
     soundAlertDesc: '"Allahu Akbar" Sound bei Gebetszeit abspielen',
-    preAlert: '15 Min Voralarm',
-    preAlertDesc: 'Kurzer Alarmton 15 Minuten vor dem Gebet',
+    preAlert: 'Gebetserinnerung',
+    preAlertDesc: '{min} Minuten vor der Gebetszeit warnen',
     language: 'Sprache',
     selectCity: 'Stadt wählen...',
     currentLocation: 'Aktueller Standort',
@@ -353,8 +356,8 @@ const translations: Record<Language, Translations> = {
     notificationsOff: 'Notifications désactivées',
     soundAlert: 'Alerte Sonore',
     soundAlertDesc: 'Jouer "Allahu Akbar" à l\'heure de la prière',
-    preAlert: 'Pré-alerte 15 min',
-    preAlertDesc: 'Alerte sonore courte 15 minutes avant la prière',
+    preAlert: 'Rappel avant la prière',
+    preAlertDesc: 'Alerte {min} minutes avant la prière',
     language: 'Langue',
     selectCity: 'Choisir une ville...',
     currentLocation: 'Position Actuelle',
@@ -444,8 +447,8 @@ const translations: Record<Language, Translations> = {
     notificationsOff: 'الإشعارات معطّلة',
     soundAlert: 'التنبيه الصوتي',
     soundAlertDesc: 'تشغيل صوت "الله أكبر" عند وقت الصلاة',
-    preAlert: 'تنبيه مسبق 15 دقيقة',
-    preAlertDesc: 'تنبيه قصير قبل 15 دقيقة من الصلاة',
+    preAlert: 'تذكير قبل الصلاة',
+    preAlertDesc: 'تنبيه قبل {min} دقيقة من وقت الصلاة',
     language: 'اللغة',
     selectCity: 'اختر المدينة...',
     currentLocation: 'الموقع الحالي',
@@ -535,8 +538,8 @@ const translations: Record<Language, Translations> = {
     notificationsOff: 'Notificaciones desactivadas',
     soundAlert: 'Alerta Sonora',
     soundAlertDesc: 'Reproducir "Allahu Akbar" a la hora de la oración',
-    preAlert: 'Pre-alerta 15 min',
-    preAlertDesc: 'Alerta corta 15 minutos antes de la oración',
+    preAlert: 'Recordatorio previo',
+    preAlertDesc: 'Alerta {min} minutos antes de la oración',
     language: 'Idioma',
     selectCity: 'Seleccionar ciudad...',
     currentLocation: 'Ubicación Actual',
@@ -626,8 +629,8 @@ const translations: Record<Language, Translations> = {
     notificationsOff: 'Notificações desativadas',
     soundAlert: 'Alerta Sonoro',
     soundAlertDesc: 'Tocar "Allahu Akbar" na hora da oração',
-    preAlert: 'Pré-alerta 15 min',
-    preAlertDesc: 'Alerta curto 15 minutos antes da oração',
+    preAlert: 'Lembrete prévio',
+    preAlertDesc: 'Alerta {min} minutos antes da oração',
     language: 'Idioma',
     selectCity: 'Selecionar cidade...',
     currentLocation: 'Localização Atual',
