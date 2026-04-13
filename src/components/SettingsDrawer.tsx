@@ -1,24 +1,22 @@
-import { Bell, BellOff, Volume2, VolumeX, Globe, Palette, Clock } from 'lucide-react';
+import { Bell, BellOff, Volume2, VolumeX, Globe, Palette, Clock, Play, Moon } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
+import { Slider } from '@/components/ui/slider';
 import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
+  Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger,
 } from '@/components/ui/drawer';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Settings } from 'lucide-react';
 import { useTranslation } from '@/contexts/LanguageContext';
 import { languageNames, type Language } from '@/lib/i18n';
-import type { ColorTheme } from '@/hooks/useTheme';
+import {
+  type ColorTheme,
+  type AlertSound,
+  ALERT_SOUND_FILES,
+  ALERT_SOUND_LABELS,
+} from '@/hooks/useTheme';
 
 interface SettingsDrawerProps {
   notificationsEnabled: boolean;
@@ -29,6 +27,13 @@ interface SettingsDrawerProps {
   onPreAlertToggle: () => void;
   colorTheme: ColorTheme;
   onColorThemeChange: (theme: ColorTheme) => void;
+  preAlertMinutes: number;
+  onPreAlertMinutesChange: (min: number) => void;
+  alertSound: AlertSound;
+  onAlertSoundChange: (sound: AlertSound) => void;
+  onPreviewSound: (path: string) => void;
+  autoDarkMode: boolean;
+  onAutoDarkModeToggle: () => void;
 }
 
 export function SettingsDrawer({
@@ -40,6 +45,13 @@ export function SettingsDrawer({
   onPreAlertToggle,
   colorTheme,
   onColorThemeChange,
+  preAlertMinutes,
+  onPreAlertMinutesChange,
+  alertSound,
+  onAlertSoundChange,
+  onPreviewSound,
+  autoDarkMode,
+  onAutoDarkModeToggle,
 }: SettingsDrawerProps) {
   const { t, language, setLanguage } = useTranslation();
 
@@ -50,81 +62,114 @@ export function SettingsDrawer({
     { value: 'ocean', label: 'Ocean Blue' },
     { value: 'midnight', label: 'Midnight' },
     { value: 'emerald', label: 'Emerald Green' },
+    { value: 'bronze', label: 'White & Bronze' },
+    { value: 'nightbronze', label: 'Night Bronze' },
   ];
+
+  const soundOptions: AlertSound[] = ['uyari', 'uyari1', 'uyari2', 'uyari3'];
 
   return (
     <Drawer>
       <DrawerTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="rounded-full w-10 h-10 hover:bg-secondary"
-        >
+        <Button variant="ghost" size="icon" className="rounded-full w-10 h-10 hover:bg-secondary">
           <Settings className="w-5 h-5 text-muted-foreground" />
         </Button>
       </DrawerTrigger>
       <DrawerContent>
-        <div className="mx-auto w-full max-w-md">
+        <div className="mx-auto w-full max-w-md max-h-[80vh] overflow-y-auto">
           <DrawerHeader>
             <DrawerTitle>{t.settings}</DrawerTitle>
           </DrawerHeader>
           
-          <div className="p-4 space-y-6 pb-8">
+          <div className="p-4 space-y-5 pb-8">
             {/* Notifications */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                {notificationsEnabled ? (
-                  <Bell className="w-5 h-5 text-primary" />
-                ) : (
-                  <BellOff className="w-5 h-5 text-muted-foreground" />
-                )}
+                {notificationsEnabled ? <Bell className="w-5 h-5 text-primary" /> : <BellOff className="w-5 h-5 text-muted-foreground" />}
                 <span className="font-medium">{t.notifications}</span>
               </div>
-              <Switch
-                checked={notificationsEnabled}
-                onCheckedChange={onNotificationToggle}
-              />
+              <Switch checked={notificationsEnabled} onCheckedChange={onNotificationToggle} />
             </div>
 
-            {/* Sound Alert */}
+            {/* Sound Alert (Master) */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                {soundAlertEnabled ? (
-                  <Volume2 className="w-5 h-5 text-primary" />
-                ) : (
-                  <VolumeX className="w-5 h-5 text-muted-foreground" />
-                )}
+                {soundAlertEnabled ? <Volume2 className="w-5 h-5 text-primary" /> : <VolumeX className="w-5 h-5 text-muted-foreground" />}
                 <div>
                   <span className="font-medium block">{t.soundAlert}</span>
                   <span className="text-xs text-muted-foreground">{t.soundAlertDesc}</span>
                 </div>
               </div>
-              <Switch
-                checked={soundAlertEnabled}
-                onCheckedChange={onSoundAlertToggle}
-              />
+              <Switch checked={soundAlertEnabled} onCheckedChange={onSoundAlertToggle} />
             </div>
 
-            {/* 15 min Pre-Alert */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Clock className="w-5 h-5 text-muted-foreground" />
-                <div>
-                  <span className="font-medium block">{t.preAlert}</span>
-                  <span className="text-xs text-muted-foreground">{t.preAlertDesc}</span>
+            {/* Pre-Alert Toggle + Minutes Slider */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Clock className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <span className="font-medium block">{t.preAlert}</span>
+                    <span className="text-xs text-muted-foreground">{preAlertMinutes} {t.preAlertDesc}</span>
+                  </div>
+                </div>
+                <Switch checked={preAlertEnabled} onCheckedChange={onPreAlertToggle} />
+              </div>
+              {preAlertEnabled && (
+                <div className="pl-8 pr-2">
+                  <Slider
+                    value={[preAlertMinutes]}
+                    onValueChange={([v]) => onPreAlertMinutesChange(v)}
+                    min={1}
+                    max={60}
+                    step={1}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                    <span>1 dk</span>
+                    <span>{preAlertMinutes} dk</span>
+                    <span>60 dk</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Alert Sound Selector */}
+            {preAlertEnabled && (
+              <div className="space-y-2 pl-8">
+                <span className="text-sm font-medium text-muted-foreground">{t.alertSoundLabel || 'Hatırlatıcı Sesi'}</span>
+                <div className="space-y-1.5">
+                  {soundOptions.map((key) => (
+                    <div key={key} className="flex items-center justify-between bg-muted/50 rounded-lg px-3 py-2">
+                      <label className="flex items-center gap-2 cursor-pointer flex-1">
+                        <input
+                          type="radio"
+                          name="alertSound"
+                          checked={alertSound === key}
+                          onChange={() => onAlertSoundChange(key)}
+                          className="accent-primary"
+                        />
+                        <span className="text-sm">{ALERT_SOUND_LABELS[key]}</span>
+                      </label>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="w-8 h-8 rounded-full"
+                        onClick={() => onPreviewSound(ALERT_SOUND_FILES[key])}
+                      >
+                        <Play className="w-4 h-4 text-primary" />
+                      </Button>
+                    </div>
+                  ))}
                 </div>
               </div>
-              <Switch
-                checked={preAlertEnabled}
-                onCheckedChange={onPreAlertToggle}
-              />
-            </div>
+            )}
 
             {/* Color Theme */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Palette className="w-5 h-5 text-muted-foreground" />
-                <span className="font-medium">{t.themeLabel || 'Tema'}</span>
+                <span className="font-medium">{t.themeLabel}</span>
               </div>
               <Select value={colorTheme} onValueChange={(v) => onColorThemeChange(v as ColorTheme)}>
                 <SelectTrigger className="w-[150px]">
@@ -132,12 +177,22 @@ export function SettingsDrawer({
                 </SelectTrigger>
                 <SelectContent>
                   {themeOptions.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* Auto Dark Mode */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Moon className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <span className="font-medium block">{t.autoDarkMode || 'Otomatik Gece Modu'}</span>
+                  <span className="text-xs text-muted-foreground">{t.autoDarkModeDesc || 'Akşam vakti karanlık, imsak vakti aydınlık'}</span>
+                </div>
+              </div>
+              <Switch checked={autoDarkMode} onCheckedChange={onAutoDarkModeToggle} />
             </div>
 
             {/* Language */}
@@ -152,9 +207,7 @@ export function SettingsDrawer({
                 </SelectTrigger>
                 <SelectContent>
                   {languages.map((lang) => (
-                    <SelectItem key={lang} value={lang}>
-                      {languageNames[lang]}
-                    </SelectItem>
+                    <SelectItem key={lang} value={lang}>{languageNames[lang]}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
