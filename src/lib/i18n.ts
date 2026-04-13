@@ -146,6 +146,9 @@ const translations: Record<Language, Translations> = {
       November: 'Kasım',
       December: 'Aralık',
     },
+    alertSoundLabel: 'Hatırlatıcı Sesi',
+    autoDarkMode: 'Otomatik Gece Modu',
+    autoDarkModeDesc: 'Akşam vakti karanlık, imsak vakti aydınlık',
   },
   en: {
     appName: 'Nur Ezan Vakti',
@@ -234,6 +237,9 @@ const translations: Record<Language, Translations> = {
       November: 'November',
       December: 'December',
     },
+    alertSoundLabel: 'Alert Sound',
+    autoDarkMode: 'Auto Night Mode',
+    autoDarkModeDesc: 'Dark at Maghrib, light at Fajr',
   },
   de: {
     appName: 'Nur Ezan Vakti',
@@ -322,6 +328,9 @@ const translations: Record<Language, Translations> = {
       November: 'November',
       December: 'Dezember',
     },
+    alertSoundLabel: 'Erinnerungston',
+    autoDarkMode: 'Auto-Nachtmodus',
+    autoDarkModeDesc: 'Dunkel bei Maghrib, hell bei Fajr',
   },
   fr: {
     appName: 'Nur Ezan Vakti',
@@ -410,6 +419,9 @@ const translations: Record<Language, Translations> = {
       November: 'Novembre',
       December: 'Décembre',
     },
+    alertSoundLabel: 'Son de rappel',
+    autoDarkMode: 'Mode nuit auto',
+    autoDarkModeDesc: 'Sombre au Maghrib, clair au Fajr',
   },
   ar: {
     appName: 'Nur Ezan Vakti',
@@ -498,6 +510,9 @@ const translations: Record<Language, Translations> = {
       November: 'نوفمبر',
       December: 'ديسمبر',
     },
+    alertSoundLabel: 'صوت التنبيه',
+    autoDarkMode: 'الوضع الليلي التلقائي',
+    autoDarkModeDesc: 'مظلم عند المغرب، مضيء عند الفجر',
   },
   es: {
     appName: 'Nur Ezan Vakti',
@@ -586,6 +601,9 @@ const translations: Record<Language, Translations> = {
       November: 'Noviembre',
       December: 'Diciembre',
     },
+    alertSoundLabel: 'Sonido de alerta',
+    autoDarkMode: 'Modo noche auto',
+    autoDarkModeDesc: 'Oscuro en Maghrib, claro en Fajr',
   },
   pt: {
     appName: 'Nur Ezan Vakti',
@@ -674,6 +692,9 @@ const translations: Record<Language, Translations> = {
       November: 'Novembro',
       December: 'Dezembro',
     },
+    alertSoundLabel: 'Som de alerta',
+    autoDarkMode: 'Modo noturno auto',
+    autoDarkModeDesc: 'Escuro no Maghrib, claro no Fajr',
   },
 };
 
