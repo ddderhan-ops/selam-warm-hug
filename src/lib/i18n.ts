@@ -53,6 +53,9 @@ export interface Translations {
   hijriMonths: Record<string, string>;
   weekdays: Record<string, string>;
   months: Record<string, string>;
+  alertSoundLabel: string;
+  autoDarkMode: string;
+  autoDarkModeDesc: string;
 }
 
 const translations: Record<Language, Translations> = {
