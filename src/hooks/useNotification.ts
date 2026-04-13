@@ -189,7 +189,7 @@ export function useNotification() {
       prayers: PrayerTime[],
       onPrayerTime?: (prayer: PrayerTime) => void,
       context?: NotificationScheduleContext,
-      options?: { preAlertEnabled?: boolean; onPreAlert?: (prayer: PrayerTime) => void }
+      options?: { preAlertEnabled?: boolean; preAlertMinutes?: number; onPreAlert?: (prayer: PrayerTime) => void }
     ) => {
       void syncPrayerScheduleWithServiceWorker(prayers, context);
 
@@ -211,7 +211,8 @@ export function useNotification() {
 
       const now = Date.now();
       const notifications: Array<any> = [];
-      const PRE_ALERT_MS = 15 * 60 * 1000;
+      const preAlertMins = options?.preAlertMinutes || 15;
+      const PRE_ALERT_MS = preAlertMins * 60 * 1000;
 
       prayers.forEach((prayer) => {
         const timeUntil = prayer.timestamp - now;
@@ -241,7 +242,7 @@ export function useNotification() {
             const preId = getPrayerNotificationId(prayer) + 100;
             notifications.push({
               id: preId,
-              title: `${prayer.name} vaktine 15 dakika`,
+              title: `${prayer.name} vaktine ${preAlertMins} dakika`,
               body: `${prayer.name} vakti yaklaşıyor. Hazırlıklarınızı yapın.`,
               schedule: { at: new Date(preAlertTime), allowWhileIdle: true },
               smallIcon: "ic_notification",

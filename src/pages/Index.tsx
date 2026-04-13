@@ -85,10 +85,10 @@ const Index = () => {
   const lastDateRef = useRef<string>("");
   const homeAdShownRef = useRef(false);
 
-  const { colorTheme, setColorTheme, darkMode, toggleDarkMode } = useTheme();
+  const { colorTheme, setColorTheme, darkMode, setDarkMode, toggleDarkMode, autoDarkMode, toggleAutoDarkMode, preAlertMinutes, setPreAlertMinutes, alertSound, setAlertSound } = useTheme();
   const { requestPermission, schedulePrayerNotifications, isSupported } = useNotification();
   const { latitude, longitude, loading: geoLoading, permissionDenied, requestLocation } = useGeolocation();
-  const { playAdhan, playPreAlert } = useAdhan();
+  const { playAdhan, playPreAlert, previewSound } = useAdhan();
   const { tryShowAd } = useInterstitialAd();
 
   const fcmCity = prayerData?.city || selectedCity?.name || "İstanbul";
@@ -205,10 +205,11 @@ const Index = () => {
           notificationContext,
           {
             preAlertEnabled: preAlertEnabled === true,
+            preAlertMinutes,
             onPreAlert: () => {
               const soundOn = localStorage.getItem(SOUND_ALERT_PREFERENCE_KEY) === "true";
               const preOn = localStorage.getItem(PRE_ALERT_PREFERENCE_KEY) === "true";
-              if (soundOn && preOn) playPreAlert();
+              if (soundOn && preOn) playPreAlert(alertSound);
             },
           }
         );
@@ -238,6 +239,17 @@ const Index = () => {
     const interval = setInterval(checkDateChange, 60000);
     return () => clearInterval(interval);
   }, [loadPrayerTimes]);
+
+  // Auto dark mode: dark between Maghrib and Fajr
+  useEffect(() => {
+    if (!autoDarkMode || !prayerData) return;
+    const now = Date.now();
+    const maghrib = prayerData.prayers.find(p => p.nameEn === 'Maghrib');
+    const fajr = prayerData.prayers.find(p => p.nameEn === 'Fajr');
+    if (!maghrib || !fajr) return;
+    const isNight = now >= maghrib.timestamp || now < fajr.timestamp;
+    setDarkMode(isNight);
+  }, [autoDarkMode, prayerData, nowTimestamp, setDarkMode]);
 
   // Save non-notification preferences after hydration
   useEffect(() => {
@@ -323,10 +335,11 @@ const Index = () => {
             getNotificationContext(),
             {
               preAlertEnabled: true,
+              preAlertMinutes,
               onPreAlert: () => {
                 const soundOn = localStorage.getItem(SOUND_ALERT_PREFERENCE_KEY) === "true";
                 const preOn = localStorage.getItem(PRE_ALERT_PREFERENCE_KEY) === "true";
-                if (soundOn && preOn) playPreAlert();
+                if (soundOn && preOn) playPreAlert(alertSound);
               },
             }
           );
@@ -367,9 +380,10 @@ const Index = () => {
         getNotificationContext(),
         {
           preAlertEnabled: next,
+          preAlertMinutes,
           onPreAlert: () => {
             const soundOn = localStorage.getItem(SOUND_ALERT_PREFERENCE_KEY) === "true";
-            if (soundOn && next) playPreAlert();
+            if (soundOn && next) playPreAlert(alertSound);
           },
         }
       );
@@ -480,6 +494,13 @@ const Index = () => {
               onPreAlertToggle={handlePreAlertToggle}
               colorTheme={colorTheme}
               onColorThemeChange={setColorTheme}
+              preAlertMinutes={preAlertMinutes}
+              onPreAlertMinutesChange={setPreAlertMinutes}
+              alertSound={alertSound}
+              onAlertSoundChange={setAlertSound}
+              onPreviewSound={(path) => previewSound(path, 3000)}
+              autoDarkMode={autoDarkMode}
+              onAutoDarkModeToggle={toggleAutoDarkMode}
             />
           }
         />

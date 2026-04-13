@@ -250,6 +250,121 @@
     --verse-bg: 0 0% 3%;
     --verse-border: 145 50% 18%;
   }
+  /* ===== WHITE & BRONZE — light ===== */
+  .theme-bronze {
+    --primary: 30 70% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 30 30% 95%;
+    --secondary-foreground: 30 70% 38%;
+    --accent: 30 70% 45%;
+    --accent-foreground: 0 0% 100%;
+    --ring: 30 70% 45%;
+    --sidebar-primary: 30 70% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 30 30% 95%;
+    --sidebar-accent-foreground: 30 70% 38%;
+    --sidebar-ring: 30 70% 45%;
+    --prayer-active: 30 70% 45%;
+    --countdown-glow: 30 70% 45%;
+    --verse-bg: 30 30% 97%;
+    --verse-border: 30 40% 85%;
+    --border: 30 20% 90%;
+    --input: 30 20% 90%;
+  }
+
+  /* ===== WHITE & BRONZE — dark ===== */
+  .dark.theme-bronze {
+    --background: 30 10% 8%;
+    --foreground: 30 15% 92%;
+    --card: 30 10% 11%;
+    --card-foreground: 30 15% 92%;
+    --popover: 30 10% 11%;
+    --popover-foreground: 30 15% 92%;
+    --primary: 30 80% 55%;
+    --primary-foreground: 30 10% 8%;
+    --secondary: 30 15% 16%;
+    --secondary-foreground: 30 80% 60%;
+    --muted: 30 10% 14%;
+    --muted-foreground: 30 10% 55%;
+    --accent: 30 80% 55%;
+    --accent-foreground: 30 10% 8%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 30 15% 18%;
+    --input: 30 15% 18%;
+    --ring: 30 80% 55%;
+    --sidebar-background: 30 10% 8%;
+    --sidebar-foreground: 30 15% 92%;
+    --sidebar-primary: 30 80% 55%;
+    --sidebar-primary-foreground: 30 10% 8%;
+    --sidebar-accent: 30 15% 16%;
+    --sidebar-accent-foreground: 30 80% 60%;
+    --sidebar-border: 30 15% 18%;
+    --sidebar-ring: 30 80% 55%;
+    --prayer-active: 30 80% 55%;
+    --prayer-inactive: 30 10% 45%;
+    --countdown-glow: 30 80% 55%;
+    --verse-bg: 30 10% 10%;
+    --verse-border: 30 40% 22%;
+  }
+
+  /* ===== NIGHT BRONZE — light (warm dark bronze accent) ===== */
+  .theme-nightbronze {
+    --primary: 25 60% 35%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 25 25% 94%;
+    --secondary-foreground: 25 60% 30%;
+    --accent: 25 60% 35%;
+    --accent-foreground: 0 0% 100%;
+    --ring: 25 60% 35%;
+    --sidebar-primary: 25 60% 35%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 25 25% 94%;
+    --sidebar-accent-foreground: 25 60% 30%;
+    --sidebar-ring: 25 60% 35%;
+    --prayer-active: 25 60% 35%;
+    --countdown-glow: 25 60% 35%;
+    --verse-bg: 25 25% 96%;
+    --verse-border: 25 35% 85%;
+    --border: 25 20% 88%;
+    --input: 25 20% 88%;
+  }
+
+  /* ===== NIGHT BRONZE — dark (true black + warm bronze) ===== */
+  .dark.theme-nightbronze {
+    --background: 0 0% 2%;
+    --foreground: 30 20% 90%;
+    --card: 25 10% 5%;
+    --card-foreground: 30 20% 90%;
+    --popover: 25 10% 5%;
+    --popover-foreground: 30 20% 90%;
+    --primary: 30 90% 50%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 25 15% 10%;
+    --secondary-foreground: 30 90% 58%;
+    --muted: 25 10% 8%;
+    --muted-foreground: 25 10% 50%;
+    --accent: 30 90% 50%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 25 15% 12%;
+    --input: 25 15% 12%;
+    --ring: 30 90% 50%;
+    --sidebar-background: 0 0% 2%;
+    --sidebar-foreground: 30 20% 90%;
+    --sidebar-primary: 30 90% 50%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 25 15% 10%;
+    --sidebar-accent-foreground: 30 90% 58%;
+    --sidebar-border: 25 15% 12%;
+    --sidebar-ring: 30 90% 50%;
+    --prayer-active: 30 90% 55%;
+    --prayer-inactive: 25 10% 40%;
+    --countdown-glow: 30 90% 50%;
+    --verse-bg: 0 0% 3%;
+    --verse-border: 30 40% 18%;
+  }
 }
 
 @layer base {
