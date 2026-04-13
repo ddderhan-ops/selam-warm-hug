@@ -22,34 +22,10 @@ export interface PrayerTimesData {
   prayers: PrayerTime[];
 }
 
-export interface City {
-  name: string;
-  latitude: number;
-  longitude: number;
-}
-
 export interface Coordinates {
   latitude: number;
   longitude: number;
 }
-
-export const turkishCities: City[] = [
-  { name: "İstanbul", latitude: 41.0082, longitude: 28.9784 },
-  { name: "Ankara", latitude: 39.9334, longitude: 32.8597 },
-  { name: "İzmir", latitude: 38.4192, longitude: 27.1287 },
-  { name: "Bursa", latitude: 40.1885, longitude: 29.061 },
-  { name: "Antalya", latitude: 36.8969, longitude: 30.7133 },
-  { name: "Adana", latitude: 36.9914, longitude: 35.3308 },
-  { name: "Konya", latitude: 37.8746, longitude: 32.4932 },
-  { name: "Gaziantep", latitude: 37.0662, longitude: 37.3833 },
-  { name: "Kayseri", latitude: 38.7312, longitude: 35.4787 },
-  { name: "Trabzon", latitude: 41.0027, longitude: 39.7168 },
-  { name: "Diyarbakır", latitude: 37.9144, longitude: 40.2306 },
-  { name: "Erzurum", latitude: 39.9043, longitude: 41.2679 },
-  { name: "Samsun", latitude: 41.2867, longitude: 36.33 },
-  { name: "Eskişehir", latitude: 39.7767, longitude: 30.5206 },
-  { name: "Mersin", latitude: 36.8121, longitude: 34.6415 },
-];
 
 const prayerNamesTr: Record<string, string> = {
   Fajr: "İmsak",
@@ -85,8 +61,36 @@ const languageToLocale: Record<string, string> = {
   pt: 'pt-BR',
 };
 
+/**
+ * Reverse geocode coordinates to a human-readable location name.
+ * Uses OpenStreetMap Nominatim (free, no API key).
+ */
+export async function reverseGeocode(lat: number, lon: number, lang = 'tr'): Promise<string> {
+  try {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&accept-language=${lang}`,
+      { headers: { 'User-Agent': 'NurEzanVakti/1.0' } }
+    );
+    if (!response.ok) throw new Error('Geocode failed');
+    const data = await response.json();
+    const addr = data.address;
+    
+    // Try to get the most meaningful location name
+    const city = addr.city || addr.town || addr.village || addr.county || addr.state || '';
+    const country = addr.country || '';
+    const district = addr.suburb || addr.district || addr.neighbourhood || '';
+    
+    if (city && country) {
+      return district ? `${city}, ${district}` : `${city}, ${country}`;
+    }
+    return data.display_name?.split(',').slice(0, 2).join(',').trim() || `${lat.toFixed(2)}, ${lon.toFixed(2)}`;
+  } catch {
+    return `${lat.toFixed(2)}, ${lon.toFixed(2)}`;
+  }
+}
+
 export async function fetchPrayerTimes(
-  location: City | Coordinates,
+  coordinates: Coordinates,
   cityName?: string,
   language?: string
 ): Promise<PrayerTimesData> {
@@ -95,11 +99,15 @@ export async function fetchPrayerTimes(
   const month = today.getMonth() + 1;
   const year = today.getFullYear();
   const dateKey = toDateKey(today);
-  const resolvedCity = "name" in location ? location.name : cityName || "Mevcut Konum";
+  const { latitude, longitude } = coordinates;
+
+  // Resolve city name via reverse geocoding if not provided
+  const resolvedCity = cityName || await reverseGeocode(latitude, longitude, language || 'tr');
 
   try {
+    // Method 13 = Turkey/Diyanet (Fajr: 18°, Isha: 17°)
     const response = await fetch(
-      `https://api.aladhan.com/v1/timings/${day}-${month}-${year}?latitude=${location.latitude}&longitude=${location.longitude}&method=13`
+      `https://api.aladhan.com/v1/timings/${day}-${month}-${year}?latitude=${latitude}&longitude=${longitude}&method=13`
     );
 
     if (!response.ok) {
@@ -147,8 +155,8 @@ export async function fetchPrayerTimes(
 
     void savePrayerTimesCache({
       dateKey,
-      latitude: location.latitude,
-      longitude: location.longitude,
+      latitude,
+      longitude,
       data: prayerData,
     });
 
@@ -157,12 +165,12 @@ export async function fetchPrayerTimes(
     const cachedData =
       (await getPrayerTimesCache({
         dateKey,
-        latitude: location.latitude,
-        longitude: location.longitude,
+        latitude,
+        longitude,
       })) ||
       (await getLatestPrayerTimesCache({
-        latitude: location.latitude,
-        longitude: location.longitude,
+        latitude,
+        longitude,
       }));
 
     if (cachedData) {
@@ -204,25 +212,4 @@ export function formatTimeRemaining(targetTime: number): string {
   return `${hours.toString().padStart(2, "0")}:${minutes
     .toString()
     .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-}
-
-export function findNearestCity(
-  latitude: number,
-  longitude: number
-): City | null {
-  let nearestCity: City | null = null;
-  let minDistance = Infinity;
-
-  for (const city of turkishCities) {
-    const distance = Math.sqrt(
-      Math.pow(city.latitude - latitude, 2) +
-        Math.pow(city.longitude - longitude, 2)
-    );
-    if (distance < minDistance) {
-      minDistance = distance;
-      nearestCity = city;
-    }
-  }
-
-  return nearestCity;
 }

@@ -58,12 +58,9 @@ export function SettingsDrawer({
   const languages: Language[] = ['tr', 'en', 'de', 'fr', 'ar', 'es', 'pt'];
 
   const themeOptions: { value: ColorTheme; label: string }[] = [
-    { value: 'default', label: 'Default' },
-    { value: 'ocean', label: 'Ocean Blue' },
-    { value: 'midnight', label: 'Midnight' },
-    { value: 'emerald', label: 'Emerald Green' },
-    { value: 'bronze', label: 'White & Bronze' },
-    { value: 'nightbronze', label: 'Night Bronze' },
+    { value: 'default', label: t.themeDefault || 'Varsayılan' },
+    { value: 'ocean', label: t.themeOcean || 'Deniz Mavisi' },
+    { value: 'bronze', label: t.themeBronze || 'Beyaz & Bronz' },
   ];
 
   const soundOptions: AlertSound[] = ['uyari', 'uyari1', 'uyari2', 'uyari3'];
@@ -110,7 +107,6 @@ export function SettingsDrawer({
                   <Clock className="w-5 h-5 text-muted-foreground" />
                   <div>
                     <span className="font-medium block">{t.preAlert}</span>
-                    <span className="text-xs text-muted-foreground">{preAlertMinutes} {t.preAlertDesc}</span>
                   </div>
                 </div>
                 <Switch checked={preAlertEnabled} onCheckedChange={onPreAlertToggle} />
@@ -125,11 +121,9 @@ export function SettingsDrawer({
                     step={1}
                     className="w-full"
                   />
-                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                    <span>1 dk</span>
-                    <span>{preAlertMinutes} dk</span>
-                    <span>60 dk</span>
-                  </div>
+                  <p className="text-xs text-muted-foreground mt-2 text-center">
+                    {t.preAlertDesc.replace('{min}', String(preAlertMinutes))}
+                  </p>
                 </div>
               )}
             </div>
@@ -137,7 +131,7 @@ export function SettingsDrawer({
             {/* Alert Sound Selector */}
             {preAlertEnabled && (
               <div className="space-y-2 pl-8">
-                <span className="text-sm font-medium text-muted-foreground">{t.alertSoundLabel || 'Hatırlatıcı Sesi'}</span>
+                <span className="text-sm font-medium text-muted-foreground">{t.alertSoundLabel}</span>
                 <div className="space-y-1.5">
                   {soundOptions.map((key) => (
                     <div key={key} className="flex items-center justify-between bg-muted/50 rounded-lg px-3 py-2">
@@ -172,7 +166,7 @@ export function SettingsDrawer({
                 <span className="font-medium">{t.themeLabel}</span>
               </div>
               <Select value={colorTheme} onValueChange={(v) => onColorThemeChange(v as ColorTheme)}>
-                <SelectTrigger className="w-[150px]">
+                <SelectTrigger className="w-[160px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -188,8 +182,8 @@ export function SettingsDrawer({
               <div className="flex items-center gap-3">
                 <Moon className="w-5 h-5 text-muted-foreground" />
                 <div>
-                  <span className="font-medium block">{t.autoDarkMode || 'Otomatik Gece Modu'}</span>
-                  <span className="text-xs text-muted-foreground">{t.autoDarkModeDesc || 'Akşam vakti karanlık, imsak vakti aydınlık'}</span>
+                  <span className="font-medium block">{t.autoDarkMode}</span>
+                  <span className="text-xs text-muted-foreground">{t.autoDarkModeDesc}</span>
                 </div>
               </div>
               <Switch checked={autoDarkMode} onCheckedChange={onAutoDarkModeToggle} />

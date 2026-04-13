@@ -1,76 +1,30 @@
-import { CitySelector } from "./CitySelector";
 import { ThemeToggle } from "./ThemeToggle";
-import type { City } from "@/lib/prayerTimes";
-import { Navigation } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { MapPin } from "lucide-react";
 import { ReactNode } from "react";
 
 interface HeaderProps {
-  selectedCity: City;
-  onCityChange: (city: City) => void;
+  locationName: string;
   date: string;
   hijriDate: string;
   darkMode: boolean;
   onDarkModeToggle: () => void;
-  notificationsEnabled: boolean;
-  onNotificationToggle: () => void;
-  useCurrentLocation?: boolean;
-  onUseCurrentLocation?: () => void;
-  hasLocationPermission?: boolean;
   settingsButton?: ReactNode;
 }
 
 export function Header({
-  selectedCity,
-  onCityChange,
+  locationName,
   date,
   hijriDate,
   darkMode,
   onDarkModeToggle,
-  useCurrentLocation,
-  onUseCurrentLocation,
-  hasLocationPermission,
   settingsButton,
 }: HeaderProps) {
   return (
     <header className="animate-fade-in">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          {hasLocationPermission && onUseCurrentLocation && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={onUseCurrentLocation}
-                  className={`rounded-full w-9 h-9 ${
-                    useCurrentLocation
-                      ? "bg-primary/10 text-primary"
-                      : "hover:bg-secondary text-muted-foreground"
-                  }`}
-                >
-                  <Navigation
-                    className={`w-4 h-4 ${useCurrentLocation ? "fill-primary" : ""}`}
-                  />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                {useCurrentLocation
-                  ? "Mevcut konum kullanılıyor"
-                  : "Mevcut konumu kullan"}
-              </TooltipContent>
-            </Tooltip>
-          )}
-          <CitySelector
-            selectedCity={selectedCity}
-            onCityChange={onCityChange}
-            disabled={useCurrentLocation}
-          />
+          <MapPin className="w-4 h-4 text-primary" />
+          <span className="text-lg font-semibold truncate max-w-[220px]">{locationName}</span>
         </div>
         <div className="flex items-center gap-1">
           {settingsButton}

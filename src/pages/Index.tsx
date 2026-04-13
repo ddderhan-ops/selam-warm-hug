@@ -18,9 +18,7 @@ import { useTranslation } from "@/contexts/LanguageContext";
 import {
   fetchPrayerTimes,
   getNextPrayer,
-  turkishCities,
-  findNearestCity,
-  type City,
+  reverseGeocode,
   type PrayerTimesData,
 } from "@/lib/prayerTimes";
 import { Loader2, ChevronRight, Calendar } from "lucide-react";
@@ -53,23 +51,7 @@ const Index = () => {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   
-  const [selectedCity, setSelectedCity] = useState<City | null>(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("selectedCity");
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        return turkishCities.find((c) => c.name === parsed.name) || null;
-      }
-    }
-    return null;
-  });
-
-  const [useCurrentLocation, setUseCurrentLocation] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("useCurrentLocation") === "true";
-    }
-    return true;
-  });
+  const [locationName, setLocationName] = useState<string>('');
 
   const [prayerData, setPrayerData] = useState<PrayerTimesData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -91,9 +73,9 @@ const Index = () => {
   const { playAdhan, playPreAlert, previewSound } = useAdhan();
   const { tryShowAd } = useInterstitialAd();
 
-  const fcmCity = prayerData?.city || selectedCity?.name || "İstanbul";
-  const fcmLat = latitude || selectedCity?.latitude || 41.0082;
-  const fcmLng = longitude || selectedCity?.longitude || 28.9784;
+  const fcmCity = prayerData?.city || locationName || "Unknown";
+  const fcmLat = latitude || 41.0082;
+  const fcmLng = longitude || 28.9784;
 
   const { updateLocation } = useFCM({
     city: fcmCity,
@@ -173,27 +155,15 @@ const Index = () => {
     setError(null);
 
     try {
-      let data: PrayerTimesData;
-      let notificationContext: {
-        city: string; latitude: number; longitude: number; date: string; hijriDate: string;
-      } | null = null;
-
-      if (useCurrentLocation && latitude && longitude) {
-        const nearestCity = findNearestCity(latitude, longitude);
-        data = await fetchPrayerTimes({ latitude, longitude }, nearestCity?.name, language);
-        notificationContext = { city: data.city, latitude, longitude, date: data.date, hijriDate: data.hijriDate };
-      } else if (selectedCity) {
-        data = await fetchPrayerTimes(selectedCity, undefined, language);
-        notificationContext = { city: data.city, latitude: selectedCity.latitude, longitude: selectedCity.longitude, date: data.date, hijriDate: data.hijriDate };
-      } else {
-        const defaultCity = turkishCities[0];
-        data = await fetchPrayerTimes(defaultCity, undefined, language);
-        setSelectedCity(defaultCity);
-        notificationContext = { city: data.city, latitude: defaultCity.latitude, longitude: defaultCity.longitude, date: data.date, hijriDate: data.hijriDate };
-      }
-
+      const lat = latitude || 41.0082;
+      const lon = longitude || 28.9784;
+      const data = await fetchPrayerTimes({ latitude: lat, longitude: lon }, undefined, language);
+      
+      setLocationName(data.city);
       setPrayerData(data);
       lastDateRef.current = new Date().toDateString();
+
+      const notificationContext = { city: data.city, latitude: lat, longitude: lon, date: data.date, hijriDate: data.hijriDate };
 
       if (notificationsEnabled && notificationContext) {
         schedulePrayerNotifications(
@@ -220,7 +190,7 @@ const Index = () => {
     } finally {
       setLoading(false);
     }
-  }, [useCurrentLocation, latitude, longitude, selectedCity, language, notificationsEnabled, preAlertEnabled, schedulePrayerNotifications, soundAlertEnabled, playAdhan, playPreAlert, t.prayerTimesError]);
+  }, [latitude, longitude, language, notificationsEnabled, preAlertEnabled, schedulePrayerNotifications, soundAlertEnabled, playAdhan, playPreAlert, t.prayerTimesError, preAlertMinutes, alertSound]);
 
   useEffect(() => {
     if (!geoLoading) loadPrayerTimes();
@@ -251,18 +221,6 @@ const Index = () => {
     setDarkMode(isNight);
   }, [autoDarkMode, prayerData, nowTimestamp, setDarkMode]);
 
-  // Save non-notification preferences after hydration
-  useEffect(() => {
-    if (!hydrated) return;
-    if (selectedCity) {
-      const cityJson = JSON.stringify(selectedCity);
-      localStorage.setItem("selectedCity", cityJson);
-      setPreference("selectedCity", cityJson);
-    }
-    localStorage.setItem("useCurrentLocation", String(useCurrentLocation));
-    setPreference("useCurrentLocation", String(useCurrentLocation));
-  }, [hydrated, selectedCity, useCurrentLocation, setPreference]);
-
   // Show home interstitial once per day after first load
   useEffect(() => {
     if (!homeAdShownRef.current && prayerData && hydrated) {
@@ -271,15 +229,8 @@ const Index = () => {
     }
   }, [prayerData, hydrated, tryShowAd]);
 
-  const handleCityChange = (city: City) => {
-    setSelectedCity(city);
-    setUseCurrentLocation(false);
-    if (notificationsEnabled) updateLocation(city.name, city.latitude, city.longitude);
-  };
-
   const handleUseCurrentLocation = () => {
     if (latitude && longitude) {
-      setUseCurrentLocation(true);
       toast.success(t.usingCurrentLocation);
     } else {
       requestLocation();
@@ -287,12 +238,10 @@ const Index = () => {
   };
 
   const getNotificationContext = useCallback(() => {
-    if (useCurrentLocation && latitude && longitude) {
-      return { city: prayerData?.city || t.currentLocation, latitude, longitude, date: prayerData?.date, hijriDate: prayerData?.hijriDate };
-    }
-    const fallbackCity = selectedCity || turkishCities[0];
-    return { city: prayerData?.city || fallbackCity.name, latitude: fallbackCity.latitude, longitude: fallbackCity.longitude, date: prayerData?.date, hijriDate: prayerData?.hijriDate };
-  }, [useCurrentLocation, latitude, longitude, prayerData?.city, prayerData?.date, prayerData?.hijriDate, selectedCity, t.currentLocation]);
+    const lat = latitude || 41.0082;
+    const lon = longitude || 28.9784;
+    return { city: prayerData?.city || locationName || t.currentLocation, latitude: lat, longitude: lon, date: prayerData?.date, hijriDate: prayerData?.hijriDate };
+  }, [latitude, longitude, prayerData?.city, prayerData?.date, prayerData?.hijriDate, locationName, t.currentLocation]);
 
   const handleNotificationToggle = async (nextChecked?: boolean) => {
     const shouldEnable = typeof nextChecked === "boolean" ? nextChecked : !notificationsEnabled;
@@ -469,21 +418,11 @@ const Index = () => {
     >
       <div className="max-w-md mx-auto px-4 sm:px-5 py-4 sm:py-6 pb-8 w-full">
         <Header
-          selectedCity={
-            useCurrentLocation
-              ? { name: prayerData?.city || t.currentLocation, latitude: 0, longitude: 0 }
-              : selectedCity || turkishCities[0]
-          }
-          onCityChange={handleCityChange}
+          locationName={prayerData?.city || locationName || t.currentLocation}
           date={prayerData?.date || ""}
           hijriDate={prayerData?.hijriDate || ""}
           darkMode={darkMode}
           onDarkModeToggle={toggleDarkMode}
-          notificationsEnabled={notificationsEnabled === true}
-          onNotificationToggle={handleNotificationToggle}
-          useCurrentLocation={useCurrentLocation}
-          onUseCurrentLocation={handleUseCurrentLocation}
-          hasLocationPermission={!permissionDenied && latitude !== null}
           settingsButton={
             <SettingsDrawer
               notificationsEnabled={notificationsEnabled === true}
