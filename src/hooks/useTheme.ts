@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 
-export type ColorTheme = "default" | "ocean" | "midnight" | "emerald" | "bronze" | "nightbronze";
+export type ColorTheme = "default" | "ocean" | "bronze";
 
-const THEME_CLASSES = ["theme-ocean", "theme-midnight", "theme-emerald", "theme-bronze", "theme-nightbronze"];
+const THEME_CLASSES = ["theme-ocean", "theme-bronze"];
 
 const PRE_ALERT_MINUTES_KEY = "preAlertMinutes";
 const ALERT_SOUND_KEY = "alertSound";
@@ -28,7 +28,7 @@ export function useTheme() {
   const [colorTheme, setColorTheme] = useState<ColorTheme>(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("colorTheme") as ColorTheme;
-      if (stored && ["default", "ocean", "midnight", "emerald", "bronze", "nightbronze"].includes(stored)) return stored;
+      if (stored && ["default", "ocean", "bronze"].includes(stored)) return stored;
     }
     return "default";
   });
