@@ -73,9 +73,9 @@ const Index = () => {
   const { playAdhan, playPreAlert, previewSound } = useAdhan();
   const { tryShowAd } = useInterstitialAd();
 
-  const fcmCity = prayerData?.city || selectedCity?.name || "İstanbul";
-  const fcmLat = latitude || selectedCity?.latitude || 41.0082;
-  const fcmLng = longitude || selectedCity?.longitude || 28.9784;
+  const fcmCity = prayerData?.city || locationName || "Unknown";
+  const fcmLat = latitude || 41.0082;
+  const fcmLng = longitude || 28.9784;
 
   const { updateLocation } = useFCM({
     city: fcmCity,
@@ -155,27 +155,15 @@ const Index = () => {
     setError(null);
 
     try {
-      let data: PrayerTimesData;
-      let notificationContext: {
-        city: string; latitude: number; longitude: number; date: string; hijriDate: string;
-      } | null = null;
-
-      if (useCurrentLocation && latitude && longitude) {
-        const nearestCity = findNearestCity(latitude, longitude);
-        data = await fetchPrayerTimes({ latitude, longitude }, nearestCity?.name, language);
-        notificationContext = { city: data.city, latitude, longitude, date: data.date, hijriDate: data.hijriDate };
-      } else if (selectedCity) {
-        data = await fetchPrayerTimes(selectedCity, undefined, language);
-        notificationContext = { city: data.city, latitude: selectedCity.latitude, longitude: selectedCity.longitude, date: data.date, hijriDate: data.hijriDate };
-      } else {
-        const defaultCity = turkishCities[0];
-        data = await fetchPrayerTimes(defaultCity, undefined, language);
-        setSelectedCity(defaultCity);
-        notificationContext = { city: data.city, latitude: defaultCity.latitude, longitude: defaultCity.longitude, date: data.date, hijriDate: data.hijriDate };
-      }
-
+      const lat = latitude || 41.0082;
+      const lon = longitude || 28.9784;
+      const data = await fetchPrayerTimes({ latitude: lat, longitude: lon }, undefined, language);
+      
+      setLocationName(data.city);
       setPrayerData(data);
       lastDateRef.current = new Date().toDateString();
+
+      const notificationContext = { city: data.city, latitude: lat, longitude: lon, date: data.date, hijriDate: data.hijriDate };
 
       if (notificationsEnabled && notificationContext) {
         schedulePrayerNotifications(
@@ -202,7 +190,7 @@ const Index = () => {
     } finally {
       setLoading(false);
     }
-  }, [useCurrentLocation, latitude, longitude, selectedCity, language, notificationsEnabled, preAlertEnabled, schedulePrayerNotifications, soundAlertEnabled, playAdhan, playPreAlert, t.prayerTimesError]);
+  }, [latitude, longitude, language, notificationsEnabled, preAlertEnabled, schedulePrayerNotifications, soundAlertEnabled, playAdhan, playPreAlert, t.prayerTimesError, preAlertMinutes, alertSound]);
 
   useEffect(() => {
     if (!geoLoading) loadPrayerTimes();
