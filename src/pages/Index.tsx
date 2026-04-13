@@ -85,10 +85,10 @@ const Index = () => {
   const lastDateRef = useRef<string>("");
   const homeAdShownRef = useRef(false);
 
-  const { colorTheme, setColorTheme, darkMode, toggleDarkMode } = useTheme();
+  const { colorTheme, setColorTheme, darkMode, setDarkMode, toggleDarkMode, autoDarkMode, toggleAutoDarkMode, preAlertMinutes, setPreAlertMinutes, alertSound, setAlertSound } = useTheme();
   const { requestPermission, schedulePrayerNotifications, isSupported } = useNotification();
   const { latitude, longitude, loading: geoLoading, permissionDenied, requestLocation } = useGeolocation();
-  const { playAdhan, playPreAlert } = useAdhan();
+  const { playAdhan, playPreAlert, previewSound } = useAdhan();
   const { tryShowAd } = useInterstitialAd();
 
   const fcmCity = prayerData?.city || selectedCity?.name || "İstanbul";
@@ -480,6 +480,13 @@ const Index = () => {
               onPreAlertToggle={handlePreAlertToggle}
               colorTheme={colorTheme}
               onColorThemeChange={setColorTheme}
+              preAlertMinutes={preAlertMinutes}
+              onPreAlertMinutesChange={setPreAlertMinutes}
+              alertSound={alertSound}
+              onAlertSoundChange={setAlertSound}
+              onPreviewSound={(path) => previewSound(path, 3000)}
+              autoDarkMode={autoDarkMode}
+              onAutoDarkModeToggle={toggleAutoDarkMode}
             />
           }
         />
