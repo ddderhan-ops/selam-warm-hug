@@ -18,9 +18,7 @@ import { useTranslation } from "@/contexts/LanguageContext";
 import {
   fetchPrayerTimes,
   getNextPrayer,
-  turkishCities,
-  findNearestCity,
-  type City,
+  reverseGeocode,
   type PrayerTimesData,
 } from "@/lib/prayerTimes";
 import { Loader2, ChevronRight, Calendar } from "lucide-react";
