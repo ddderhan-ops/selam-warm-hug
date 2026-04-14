@@ -5,11 +5,12 @@
     "": {
       "name": "vite_react_shadcn_ts",
       "dependencies": {
+        "@capacitor-community/native-audio": "^8.0.0",
         "@capacitor/local-notifications": "^8.0.2",
         "@capacitor/preferences": "^8.0.1",
         "@capacitor/status-bar": "^8.0.2",
+        "@capgo/capacitor-navigation-bar": "^8.1.3",
         "@hookform/resolvers": "^3.10.0",
-        "@hugotomazi/capacitor-navigation-bar": "^4.0.1",
         "@radix-ui/react-accordion": "^1.2.11",
         "@radix-ui/react-alert-dialog": "^1.1.14",
         "@radix-ui/react-aspect-ratio": "^1.1.7",
@@ -274,6 +275,8 @@
 
     "@babel/types": ["@babel/types@7.28.6", "", { "dependencies": { "@babel/helper-string-parser": "^7.27.1", "@babel/helper-validator-identifier": "^7.28.5" } }, "sha512-0ZrskXVEHSWIqZM/sQZ4EV3jZJXRkio/WCxaqKZP1g//CEWEPSfeZFcms4XeKBCHU0ZKnIkdJeU/kF+eRp5lBg=="],
 
+    "@capacitor-community/native-audio": ["@capacitor-community/native-audio@8.0.0", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@capacitor-community/native-audio/-/native-audio-8.0.0.tgz", { "peerDependencies": { "@capacitor/core": ">=8.0.0" } }, "sha512-2y7uZfwmAkwfaz+Sj8ZX0ZWGgBK+0Hbg3IUl8gb1brCkH3UgQLAKkMNoaxVJ6yKP5Ov9vp8wKkeyLxU2KEpNMw=="],
+
     "@capacitor/core": ["@capacitor/core@8.3.0", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@capacitor/core/-/core-8.3.0.tgz", { "dependencies": { "tslib": "^2.1.0" } }, "sha512-S4ajn4G/fS3VJj8salxqH/3LO5PPWv1VxGKQ27OCajnDcLJjEg9VXwgMPnlypgkIOqCJ2fmQLtk8GT+BlI9/rw=="],
 
     "@capacitor/local-notifications": ["@capacitor/local-notifications@8.0.2", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@capacitor/local-notifications/-/local-notifications-8.0.2.tgz", { "peerDependencies": { "@capacitor/core": ">=8.0.0" } }, "sha512-X7KE/I4ZutMTGVHNUyTjIugYcQEcHJRLks+TsPnOriuS+lo0geSTuaRln6zAZlJSSXSoVMSSzHexdSbIjR/8iw=="],
@@ -281,6 +284,8 @@
     "@capacitor/preferences": ["@capacitor/preferences@8.0.1", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@capacitor/preferences/-/preferences-8.0.1.tgz", { "peerDependencies": { "@capacitor/core": ">=8.0.0" } }, "sha512-T6no3ebi79XJCk91U3Jp/liJUwgBdvHR+s6vhvPkPxSuch7z3zx5Rv1bdWM6sWruNx+pViuEGqZvbfCdyBvcHQ=="],
 
     "@capacitor/status-bar": ["@capacitor/status-bar@8.0.2", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@capacitor/status-bar/-/status-bar-8.0.2.tgz", { "peerDependencies": { "@capacitor/core": ">=8.0.0" } }, "sha512-WXs8YB8B9eEaPZz+bcdY6t2nForF1FLoj/JU0Dl9RRgQnddnS98FEEyDooQhaY7wivr000j4+SC1FyeJkrFO7A=="],
+
+    "@capgo/capacitor-navigation-bar": ["@capgo/capacitor-navigation-bar@8.1.3", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@capgo/capacitor-navigation-bar/-/capacitor-navigation-bar-8.1.3.tgz", { "peerDependencies": { "@capacitor/core": ">=8.0.0" } }, "sha512-MlfQWa8jxBNC/XMm1U/1CMXUvcrV/xUJ0X945RNVk68R8wSJHRdkwWFHmaEAD2egABqyRk4bibtklGDeLTNR7g=="],
 
     "@esbuild/aix-ppc64": ["@esbuild/aix-ppc64@0.25.0", "", { "os": "aix", "cpu": "ppc64" }, "sha512-O7vun9Sf8DFjH2UtqK8Ku3LkquL9SZL8OLY1T5NZkA34+wG3OQF7cl4Ql8vdNzM6fzBbYfLaiRLIOZ+2FOCgBQ=="],
 
@@ -451,8 +456,6 @@
     "@grpc/proto-loader": ["@grpc/proto-loader@0.7.15", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@grpc/proto-loader/-/proto-loader-0.7.15.tgz", { "dependencies": { "lodash.camelcase": "^4.3.0", "long": "^5.0.0", "protobufjs": "^7.2.5", "yargs": "^17.7.2" }, "bin": { "proto-loader-gen-types": "build/bin/proto-loader-gen-types.js" } }, "sha512-tMXdRCfYVixjuFK+Hk0Q1s38gV9zDiDJfWL3h1rv4Qc39oILCu1TRTDt7+fGUI8K4G1Fj125Hx/ru3azECWTyQ=="],
 
     "@hookform/resolvers": ["@hookform/resolvers@3.10.0", "", { "peerDependencies": { "react-hook-form": "^7.0.0" } }, "sha512-79Dv+3mDF7i+2ajj7SkypSKHhl1cbln1OGavqrsF7p6mbUv11xpqpacPsGDCTRvCSjEEIez2ef1NveSVL3b0Ag=="],
-
-    "@hugotomazi/capacitor-navigation-bar": ["@hugotomazi/capacitor-navigation-bar@4.0.1", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@hugotomazi/capacitor-navigation-bar/-/capacitor-navigation-bar-4.0.1.tgz", { "peerDependencies": { "@capacitor/core": "^4.0.1 || ^5.0.0 || ^6.0.0" } }, "sha512-CtG9c2mxH1hxNvr8+PsoMhfKxoUkv17DQGqt82Y65gM4UARBe0Dp2fa8Eeo+ZzybJ1nRwSAiB4kEQ3nx5UpT1A=="],
 
     "@humanfs/core": ["@humanfs/core@0.19.1", "", {}, "sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA=="],
 
