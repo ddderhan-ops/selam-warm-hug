@@ -9,6 +9,7 @@ import { QiblaCompass } from "@/components/QiblaCompass";
 import { SettingsDrawer } from "@/components/SettingsDrawer";
 import { ReligiousDaysPage } from "@/components/ReligiousDaysPage";
 import { useTheme } from "@/hooks/useTheme";
+import { useSystemBars } from "@/hooks/useSystemBars";
 import { useNotification } from "@/hooks/useNotification";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useAdhan } from "@/hooks/useAdhan";
@@ -72,6 +73,9 @@ const Index = () => {
   const { latitude, longitude, loading: geoLoading, permissionDenied, requestLocation } = useGeolocation();
   const { playAdhan, playPreAlert, previewSound } = useAdhan();
   const { tryShowAd } = useInterstitialAd();
+
+  // Sync Android status bar & navigation bar with theme
+  useSystemBars(colorTheme, darkMode);
 
   const fcmCity = prayerData?.city || locationName || "Unknown";
   const fcmLat = latitude || 41.0082;
