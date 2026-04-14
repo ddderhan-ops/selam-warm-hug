@@ -96,7 +96,7 @@ export function useNotification() {
         }
       }
       if (!channelReady.current) {
-        await ensureNotificationChannel();
+        await ensureNotificationChannels();
         channelReady.current = true;
       }
     };
@@ -116,7 +116,7 @@ export function useNotification() {
           }
         } catch { /* web/eski Android */ }
         if (!channelReady.current) {
-          await ensureNotificationChannel();
+          await ensureNotificationChannels();
           channelReady.current = true;
         }
       }
