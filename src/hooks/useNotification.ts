@@ -1,9 +1,24 @@
 import { useEffect, useRef, useCallback } from "react";
+import { Capacitor } from "@capacitor/core";
 import { LocalNotifications } from "@capacitor/local-notifications";
 import type { PrayerTime } from "@/lib/prayerTimes";
 import { toDateKey } from "@/lib/prayerCache";
 
 const PRAYER_CHANNEL_ID = "prayer-times-channel";
+const PRE_ALERT_CHANNEL_ID = "pre-alert-channel";
+
+/**
+ * On Android native, Capacitor LocalNotifications expect the sound file name
+ * WITHOUT extension, referencing files in android/app/src/main/res/raw/.
+ * On web, we use the full path with extension.
+ */
+function nativeSound(fileName: string): string {
+  if (Capacitor.isNativePlatform()) {
+    // Strip extension for Android res/raw reference
+    return fileName.replace(/\.[^.]+$/, "");
+  }
+  return fileName;
+}
 
 // Fixed IDs per prayer to prevent duplicates
 const PRAYER_FIXED_IDS: Record<string, number> = {
