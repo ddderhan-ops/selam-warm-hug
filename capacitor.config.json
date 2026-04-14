@@ -1,0 +1,25 @@
+{
+  "appId": "app.lovable.fc3160a4b56344cc803bb2c0ffe55322",
+  "appName": "Nur Ezan Vakti",
+  "webDir": "dist",
+  "server": {
+    "url": "https://fc3160a4-b563-44cc-803b-b2c0ffe55322.lovableproject.com?forceHideBadge=true",
+    "cleartext": true
+  },
+  "plugins": {
+    "StatusBar": {
+      "style": "DEFAULT",
+      "backgroundColor": "#fafafa",
+      "overlaysWebView": false
+    },
+    "LocalNotifications": {
+      "smallIcon": "ic_notification",
+      "iconColor": "#065f46",
+      "sound": "ezan"
+    }
+  },
+  "android": {
+    "backgroundColor": "#fafafa",
+    "allowMixedContent": true
+  }
+}
