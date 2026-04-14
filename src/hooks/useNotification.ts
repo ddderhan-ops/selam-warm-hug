@@ -272,7 +272,7 @@ export function useNotification() {
               smallIcon: "ic_notification",
               largeIcon: "ic_launcher",
               sound: nativeSound("uyari.mp3"),
-              channelId: PRAYER_CHANNEL_ID,
+               channelId: PRE_ALERT_CHANNEL_ID,
               ongoing: false,
               autoCancel: true,
             });
