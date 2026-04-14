@@ -1,9 +1,24 @@
 import { useEffect, useRef, useCallback } from "react";
+import { Capacitor } from "@capacitor/core";
 import { LocalNotifications } from "@capacitor/local-notifications";
 import type { PrayerTime } from "@/lib/prayerTimes";
 import { toDateKey } from "@/lib/prayerCache";
 
 const PRAYER_CHANNEL_ID = "prayer-times-channel";
+const PRE_ALERT_CHANNEL_ID = "pre-alert-channel";
+
+/**
+ * On Android native, Capacitor LocalNotifications expect the sound file name
+ * WITHOUT extension, referencing files in android/app/src/main/res/raw/.
+ * On web, we use the full path with extension.
+ */
+function nativeSound(fileName: string): string {
+  if (Capacitor.isNativePlatform()) {
+    // Strip extension for Android res/raw reference
+    return fileName.replace(/\.[^.]+$/, "");
+  }
+  return fileName;
+}
 
 // Fixed IDs per prayer to prevent duplicates
 const PRAYER_FIXED_IDS: Record<string, number> = {
@@ -19,17 +34,26 @@ function getPrayerNotificationId(prayer: PrayerTime): number {
   return PRAYER_FIXED_IDS[prayer.nameEn] || Math.floor(Math.random() * 100000);
 }
 
-async function ensureNotificationChannel(): Promise<void> {
+async function ensureNotificationChannels(): Promise<void> {
   try {
     await LocalNotifications.createChannel({
       id: PRAYER_CHANNEL_ID,
       name: "Namaz Vakitleri",
       description: "Ezan vakitlerinde bildirim ve ses uyarısı",
-      sound: "ezan.mp3",
+      sound: nativeSound("ezan.mp3"),
       importance: 5,
       visibility: 1,
       lights: true,
       lightColor: "#065f46",
+      vibration: true,
+    });
+    await LocalNotifications.createChannel({
+      id: PRE_ALERT_CHANNEL_ID,
+      name: "Vakit Öncesi Hatırlatıcı",
+      description: "Namaz vaktinden önce uyarı sesi",
+      sound: nativeSound("uyari.mp3"),
+      importance: 4,
+      visibility: 1,
       vibration: true,
     });
   } catch {
@@ -72,7 +96,7 @@ export function useNotification() {
         }
       }
       if (!channelReady.current) {
-        await ensureNotificationChannel();
+        await ensureNotificationChannels();
         channelReady.current = true;
       }
     };
@@ -92,7 +116,7 @@ export function useNotification() {
           }
         } catch { /* web/eski Android */ }
         if (!channelReady.current) {
-          await ensureNotificationChannel();
+          await ensureNotificationChannels();
           channelReady.current = true;
         }
       }
@@ -128,7 +152,7 @@ export function useNotification() {
             body: `${prayer.name} vakti girdi. Hayırlı ibadetler.`,
             smallIcon: "ic_notification",
             largeIcon: "ic_launcher",
-            sound: "ezan.mp3",
+            sound: nativeSound("ezan.mp3"),
             channelId: PRAYER_CHANNEL_ID,
             ongoing: true,
             autoCancel: true,
@@ -227,7 +251,7 @@ export function useNotification() {
             schedule: { at: new Date(prayer.timestamp), allowWhileIdle: true },
             smallIcon: "ic_notification",
             largeIcon: "ic_launcher",
-            sound: "ezan.mp3",
+            sound: nativeSound("ezan.mp3"),
             channelId: PRAYER_CHANNEL_ID,
             ongoing: true,
             autoCancel: true,
@@ -247,8 +271,8 @@ export function useNotification() {
               schedule: { at: new Date(preAlertTime), allowWhileIdle: true },
               smallIcon: "ic_notification",
               largeIcon: "ic_launcher",
-              sound: "uyari.mp3",
-              channelId: PRAYER_CHANNEL_ID,
+              sound: nativeSound("uyari.mp3"),
+               channelId: PRE_ALERT_CHANNEL_ID,
               ongoing: false,
               autoCancel: true,
             });
