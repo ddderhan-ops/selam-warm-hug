@@ -1,22 +1,12 @@
 import { useRef, useCallback } from "react";
-import { Capacitor } from "@capacitor/core";
 import { ALERT_SOUND_FILES, type AlertSound } from "@/hooks/useTheme";
 
 /**
- * Returns the correct audio path based on the platform.
- * - Android native: uses file:///android_res/raw/<name> to reference res/raw/ resources
- * - Web / PWA: uses the standard /audio/<name>.mp3 path
+ * All sounds use standard HTML5 Audio from public/sounds/ folder.
+ * No native plugins needed — Capacitor WebView handles HTML5 Audio natively.
  */
-function getAudioPath(webPath: string): string {
-  if (Capacitor.isNativePlatform()) {
-    // Extract file name without extension, e.g. "/audio/ezan.mp3" → "ezan"
-    const fileName = webPath.split("/").pop()?.replace(/\.[^.]+$/, "") || "ezan";
-    return `file:///android_res/raw/${fileName}`;
-  }
-  return webPath;
-}
 
-const ADHAN_WEB_PATH = "/audio/ezan.mp3";
+const ADHAN_PATH = "/sounds/ezan.mp3";
 
 export function useAdhan() {
   const adhanRef = useRef<HTMLAudioElement | null>(null);
@@ -25,7 +15,7 @@ export function useAdhan() {
 
   const getAdhanAudio = useCallback(() => {
     if (!adhanRef.current) {
-      adhanRef.current = new Audio(getAudioPath(ADHAN_WEB_PATH));
+      adhanRef.current = new Audio(ADHAN_PATH);
       adhanRef.current.volume = 0.85;
       adhanRef.current.preload = "auto";
     }
@@ -60,9 +50,9 @@ export function useAdhan() {
   const playPreAlert = useCallback(async (soundKey?: AlertSound) => {
     stopAll();
     const key = soundKey || (localStorage.getItem("alertSound") as AlertSound) || "uyari";
-    const webPath = ALERT_SOUND_FILES[key] || ALERT_SOUND_FILES.uyari;
+    const path = ALERT_SOUND_FILES[key] || ALERT_SOUND_FILES.uyari;
     try {
-      preAlertRef.current = new Audio(getAudioPath(webPath));
+      preAlertRef.current = new Audio(path);
       preAlertRef.current.volume = 0.85;
       await preAlertRef.current.play();
     } catch (error) {
@@ -73,7 +63,7 @@ export function useAdhan() {
   const previewSound = useCallback(async (path: string, durationMs = 3000) => {
     stopAll();
     try {
-      previewRef.current = new Audio(getAudioPath(path));
+      previewRef.current = new Audio(path);
       previewRef.current.volume = 0.85;
       await previewRef.current.play();
       setTimeout(() => {

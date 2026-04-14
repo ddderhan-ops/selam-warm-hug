@@ -8,8 +8,8 @@
   },
   "plugins": {
     "StatusBar": {
-      "style": "DEFAULT",
-      "backgroundColor": "#fafafa",
+      "style": "DARK",
+      "backgroundColor": "#1A1A1A",
       "overlaysWebView": false
     },
     "LocalNotifications": {
@@ -19,7 +19,7 @@
     }
   },
   "android": {
-    "backgroundColor": "#fafafa",
+    "backgroundColor": "#1A1A1A",
     "allowMixedContent": true
   }
 }
