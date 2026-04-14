@@ -34,17 +34,26 @@ function getPrayerNotificationId(prayer: PrayerTime): number {
   return PRAYER_FIXED_IDS[prayer.nameEn] || Math.floor(Math.random() * 100000);
 }
 
-async function ensureNotificationChannel(): Promise<void> {
+async function ensureNotificationChannels(): Promise<void> {
   try {
     await LocalNotifications.createChannel({
       id: PRAYER_CHANNEL_ID,
       name: "Namaz Vakitleri",
       description: "Ezan vakitlerinde bildirim ve ses uyarısı",
-      sound: "ezan.mp3",
+      sound: nativeSound("ezan.mp3"),
       importance: 5,
       visibility: 1,
       lights: true,
       lightColor: "#065f46",
+      vibration: true,
+    });
+    await LocalNotifications.createChannel({
+      id: PRE_ALERT_CHANNEL_ID,
+      name: "Vakit Öncesi Hatırlatıcı",
+      description: "Namaz vaktinden önce uyarı sesi",
+      sound: nativeSound("uyari.mp3"),
+      importance: 4,
+      visibility: 1,
       vibration: true,
     });
   } catch {
