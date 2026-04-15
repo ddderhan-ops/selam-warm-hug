@@ -48,7 +48,7 @@ const DUE_WINDOW_MS = 90 * 1000;
 const CHECK_INTERVAL_MS = 30 * 1000;
 const NOTIFICATION_ICON = "/pwa-192x192.png";
 const NOTIFICATION_BADGE = "/pwa-192x192.png";
-const ADHAN_SOUND_PATH = "/audio/ezan.mp3";
+const ADHAN_SOUND_PATH = "/raw/ezan.mp3";
 
 self.skipWaiting();
 clientsClaim();
