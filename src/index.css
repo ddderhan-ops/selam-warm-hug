@@ -195,8 +195,17 @@
 }
 
 @layer base {
+  html {
+    background-color: hsl(var(--background));
+  }
+
   * {
     @apply border-border;
+  }
+
+  body, #root {
+    min-height: 100vh;
+    background-color: hsl(var(--background));
   }
 
   body {

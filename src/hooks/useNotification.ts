@@ -171,7 +171,7 @@ export function useNotification() {
           requireInteraction: true,
           data: {
             channelId: PRAYER_CHANNEL_ID,
-            sound: "/audio/ezan.mp3",
+            sound: "/raw/ezan.mp3",
             url: "/",
           },
         });
