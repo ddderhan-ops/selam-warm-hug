@@ -450,6 +450,10 @@ const Index = () => {
 
         <CountdownTimer nextPrayer={nextPrayer} />
 
+        <div className="mt-6">
+          <AdPlaceholder />
+        </div>
+
         <div className="mt-6 mb-8">
           <PrayerTimesList prayers={prayerData?.prayers || []} nextPrayer={nextPrayer} />
         </div>
@@ -471,9 +475,6 @@ const Index = () => {
             <span>{t.religiousDays}</span>
           </div>
         </div>
-
-        <AdPlaceholder />
-
         <DailyVerse />
 
         <footer className="mt-8 text-center">
