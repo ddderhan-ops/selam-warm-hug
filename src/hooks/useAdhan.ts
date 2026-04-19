@@ -4,18 +4,25 @@ import { NativeAudio } from "@capacitor-community/native-audio";
 import { ALERT_SOUND_FILES, type AlertSound } from "@/hooks/useTheme";
 
 const WEB_AUDIO_BASE_PATH = "/raw";
-const NATIVE_AUDIO_BASE_PATH = "public/raw";
+const NATIVE_AUDIO_PATH_CANDIDATES = ["public/raw", "raw", ""] as const;
 const ADHAN_PATH = `${WEB_AUDIO_BASE_PATH}/ezan.mp3`;
 
 const NATIVE_AUDIO_ASSETS = {
-  ezan: { assetId: "ezan", nativePath: `${NATIVE_AUDIO_BASE_PATH}/ezan.mp3` },
-  uyari: { assetId: "uyari", nativePath: `${NATIVE_AUDIO_BASE_PATH}/uyari.mp3` },
-  uyari1: { assetId: "uyari1", nativePath: `${NATIVE_AUDIO_BASE_PATH}/uyari1.mp3` },
-  uyari2: { assetId: "uyari2", nativePath: `${NATIVE_AUDIO_BASE_PATH}/uyari2.mp3` },
-  uyari3: { assetId: "uyari3", nativePath: `${NATIVE_AUDIO_BASE_PATH}/uyari3.mp3` },
+  ezan: { assetId: "ezan", fileName: "ezan.mp3" },
+  uyari: { assetId: "uyari", fileName: "uyari.mp3" },
+  uyari1: { assetId: "uyari1", fileName: "uyari1.mp3" },
+  uyari2: { assetId: "uyari2", fileName: "uyari2.mp3" },
+  uyari3: { assetId: "uyari3", fileName: "uyari3.mp3" },
 } as const;
 
 type NativeAssetId = keyof typeof NATIVE_AUDIO_ASSETS;
+
+function getNativeAssetCandidatePaths(assetId: NativeAssetId) {
+  const { fileName } = NATIVE_AUDIO_ASSETS[assetId];
+  return NATIVE_AUDIO_PATH_CANDIDATES.map((basePath) =>
+    basePath ? `${basePath}/${fileName}` : fileName
+  );
+}
 
 function isAndroidNativePlatform() {
   return Capacitor.isNativePlatform() && Capacitor.getPlatform() === "android";
@@ -66,15 +73,24 @@ export function useAdhan() {
     const task = (async () => {
       await ensureNativeConfigured();
       const asset = NATIVE_AUDIO_ASSETS[assetId];
+      let lastError: unknown = null;
 
-      await NativeAudio.preload({
-        assetId: asset.assetId,
-        assetPath: asset.nativePath,
-        audioChannelNum: 1,
-        volume: 0.85,
-      });
+      for (const assetPath of getNativeAssetCandidatePaths(assetId)) {
+        try {
+          await NativeAudio.preload({
+            assetId: asset.assetId,
+            assetPath,
+            audioChannelNum: 1,
+            volume: 0.85,
+          });
+          nativeLoadedRef.current.add(assetId);
+          return;
+        } catch (error) {
+          lastError = error;
+        }
+      }
 
-      nativeLoadedRef.current.add(assetId);
+      throw lastError ?? new Error(`Native asset preload failed for ${assetId}`);
     })().finally(() => {
       delete nativeLoadingRef.current[assetId];
     });
