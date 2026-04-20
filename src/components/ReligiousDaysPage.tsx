@@ -72,7 +72,7 @@ export function ReligiousDaysPage({ hijriDay, hijriMonth, hijriYear, onBack }: R
   })();
 
   return (
-    <div className="min-h-screen bg-background flex flex-col overflow-x-hidden">
+    <div className="screen-shell screen-shell-top min-h-[100dvh] bg-background flex flex-col overflow-x-hidden">
       <div className="p-4 flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={onBack} className="rounded-full">
           <ArrowLeft className="w-5 h-5" />

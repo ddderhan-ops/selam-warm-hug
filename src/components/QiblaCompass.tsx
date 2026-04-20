@@ -70,7 +70,7 @@ export function QiblaCompass({ latitude, longitude, onBack }: QiblaCompassProps)
     : qiblaDirection || 0;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col overflow-x-hidden">
+    <div className="screen-shell screen-shell-top min-h-[100dvh] bg-background flex flex-col overflow-x-hidden">
       {/* Header */}
       <div className="p-4 flex items-center gap-3">
         <Button
