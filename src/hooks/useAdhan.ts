@@ -2,17 +2,18 @@ import { useRef, useCallback, useEffect } from "react";
 import { ALERT_SOUND_FILES, type AlertSound } from "@/hooks/useTheme";
 
 const ADHAN_PATH = "/ezan.mp3";
-const AUDIO_VERSION = Date.now();
 
 function cacheBust(path: string): string {
   const separator = path.includes("?") ? "&" : "?";
-  return `${path}${separator}v=${AUDIO_VERSION}`;
+  return `${path}${separator}v=${Date.now()}`;
 }
 
 function createAudio(path: string) {
-  const audio = new Audio(cacheBust(path));
+  const audio = new Audio();
   audio.preload = "auto";
   audio.volume = 0.85;
+  audio.src = cacheBust(path);
+  audio.load();
   return audio;
 }
 
@@ -33,27 +34,11 @@ export function useAdhan() {
     return () => clearPreviewTimeout();
   }, [clearPreviewTimeout]);
 
-  const getAdhanAudio = useCallback(() => {
-    if (!adhanRef.current) {
-      adhanRef.current = createAudio(ADHAN_PATH);
-    }
-    return adhanRef.current;
-  }, []);
-
-  const stopAll = useCallback(() => {
-    clearPreviewTimeout();
-    [adhanRef, preAlertRef, previewRef].forEach((ref) => {
-      if (ref.current) {
-        ref.current.pause();
-        ref.current.currentTime = 0;
-      }
-    });
-  }, [clearPreviewTimeout]);
-
   const playAdhan = useCallback(async () => {
     stopAll();
     try {
-      const audio = getAdhanAudio();
+      adhanRef.current = createAudio(ADHAN_PATH);
+      const audio = adhanRef.current;
       audio.currentTime = 0;
       await audio.play();
       const replay = () => {
@@ -64,7 +49,7 @@ export function useAdhan() {
     } catch (error) {
       console.error("Ezan sesi çalınamadı:", error);
     }
-  }, [getAdhanAudio, stopAll]);
+  }, [stopAll]);
 
   const playPreAlert = useCallback(async (soundKey?: AlertSound) => {
     stopAll();

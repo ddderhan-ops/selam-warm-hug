@@ -48,7 +48,7 @@ const DUE_WINDOW_MS = 90 * 1000;
 const CHECK_INTERVAL_MS = 30 * 1000;
 const NOTIFICATION_ICON = "/pwa-192x192.png";
 const NOTIFICATION_BADGE = "/pwa-192x192.png";
-const ADHAN_SOUND_PATH = "/raw/ezan.mp3";
+const ADHAN_SOUND_PATH = "/ezan.mp3";
 
 self.skipWaiting();
 clientsClaim();
@@ -95,13 +95,14 @@ registerRoute(
 );
 
 registerRoute(
-  ({ request }) => request.destination === "audio",
-  new CacheFirst({
+  ({ request, url }) => request.destination === "audio" || url.pathname.endsWith("/ezan.mp3"),
+  new NetworkFirst({
     cacheName: "audio-cache",
+    networkTimeoutSeconds: 3,
     plugins: [
       new ExpirationPlugin({
         maxEntries: 10,
-        maxAgeSeconds: 60 * 60 * 24 * 30,
+        maxAgeSeconds: 60 * 60 * 24 * 7,
       }),
     ],
   })

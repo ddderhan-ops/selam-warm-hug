@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => ({
         "favicon.ico",
         "pwa-192x192.png",
         "pwa-512x512.png",
-        "audio/ezan.mp3",
+        "ezan.mp3",
       ],
       manifest: {
         name: "Nur Ezan Vakti",

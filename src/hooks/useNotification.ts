@@ -7,18 +7,7 @@ import { toDateKey } from "@/lib/prayerCache";
 const PRAYER_CHANNEL_ID = "prayer-times-channel";
 const PRE_ALERT_CHANNEL_ID = "pre-alert-channel";
 
-/**
- * On Android native, Capacitor LocalNotifications expect the sound file name
- * WITHOUT extension, referencing files in android/app/src/main/res/raw/.
- * On web, we use the full path with extension.
- */
-function nativeSound(fileName: string): string {
-  if (Capacitor.isNativePlatform()) {
-    // Strip extension for Android res/raw reference
-    return fileName.replace(/\.[^.]+$/, "");
-  }
-  return fileName;
-}
+// Native bildirim kanal sesi kullanılmıyor; ses uygulama içinde HTML5 Audio ile çalınıyor.
 
 // Fixed IDs per prayer to prevent duplicates
 const PRAYER_FIXED_IDS: Record<string, number> = {
@@ -39,8 +28,7 @@ async function ensureNotificationChannels(): Promise<void> {
     await LocalNotifications.createChannel({
       id: PRAYER_CHANNEL_ID,
       name: "Namaz Vakitleri",
-      description: "Ezan vakitlerinde bildirim ve ses uyarısı",
-      sound: nativeSound("ezan.mp3"),
+      description: "Ezan vakitlerinde bildirim gösterir",
       importance: 5,
       visibility: 1,
       lights: true,
@@ -50,8 +38,7 @@ async function ensureNotificationChannels(): Promise<void> {
     await LocalNotifications.createChannel({
       id: PRE_ALERT_CHANNEL_ID,
       name: "Vakit Öncesi Hatırlatıcı",
-      description: "Namaz vaktinden önce uyarı sesi",
-      sound: nativeSound("uyari.mp3"),
+      description: "Namaz vaktinden önce bildirim gösterir",
       importance: 4,
       visibility: 1,
       vibration: true,
@@ -152,7 +139,6 @@ export function useNotification() {
             body: `${prayer.name} vakti girdi. Hayırlı ibadetler.`,
             smallIcon: "ic_notification",
             largeIcon: "ic_launcher",
-            sound: nativeSound("ezan.mp3"),
             channelId: PRAYER_CHANNEL_ID,
             ongoing: true,
             autoCancel: true,
@@ -160,7 +146,6 @@ export function useNotification() {
         ],
       });
     } catch {
-      // Fallback: use SW showNotification for persistent background delivery
       const registration = await getServiceWorkerRegistration();
       if (registration) {
         await registration.showNotification(`Ezan Vakti Geldi: ${prayer.name}`, {
@@ -171,7 +156,7 @@ export function useNotification() {
           requireInteraction: true,
           data: {
             channelId: PRAYER_CHANNEL_ID,
-            sound: "/raw/ezan.mp3",
+            sound: "/ezan.mp3",
             url: "/",
           },
         });
@@ -251,14 +236,12 @@ export function useNotification() {
             schedule: { at: new Date(prayer.timestamp), allowWhileIdle: true },
             smallIcon: "ic_notification",
             largeIcon: "ic_launcher",
-            sound: nativeSound("ezan.mp3"),
             channelId: PRAYER_CHANNEL_ID,
             ongoing: true,
             autoCancel: true,
           });
         }
 
-        // Pre-alert notification (15 min before) — only if preAlertEnabled
         if (options?.preAlertEnabled) {
           const preAlertTime = prayer.timestamp - PRE_ALERT_MS;
           const preTimeUntil = preAlertTime - now;
@@ -271,8 +254,7 @@ export function useNotification() {
               schedule: { at: new Date(preAlertTime), allowWhileIdle: true },
               smallIcon: "ic_notification",
               largeIcon: "ic_launcher",
-              sound: nativeSound("uyari.mp3"),
-               channelId: PRE_ALERT_CHANNEL_ID,
+              channelId: PRE_ALERT_CHANNEL_ID,
               ongoing: false,
               autoCancel: true,
             });
