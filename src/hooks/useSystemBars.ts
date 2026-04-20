@@ -12,7 +12,7 @@ export function useSystemBars(colorTheme: ColorTheme, darkMode: boolean) {
       try {
         await StatusBar.setOverlaysWebView({ overlay: true });
         await StatusBar.setStyle({ style: Style.Dark });
-        await StatusBar.setBackgroundColor({ color: "#00000000" }); // transparent
+        await StatusBar.setBackgroundColor({ color: "#00000000" });
       } catch (error) {
         console.warn("System bar init error:", error);
       }

@@ -18,7 +18,7 @@
     }
   },
   "android": {
-    "backgroundColor": "#1A1A1A",
+    "backgroundColor": "#00000000",
     "allowMixedContent": true
   }
 }
