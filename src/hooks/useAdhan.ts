@@ -2,9 +2,15 @@ import { useRef, useCallback, useEffect } from "react";
 import { ALERT_SOUND_FILES, type AlertSound } from "@/hooks/useTheme";
 
 const ADHAN_PATH = "/ezan.mp3";
+const AUDIO_VERSION = Date.now();
+
+function cacheBust(path: string): string {
+  const separator = path.includes("?") ? "&" : "?";
+  return `${path}${separator}v=${AUDIO_VERSION}`;
+}
 
 function createAudio(path: string) {
-  const audio = new Audio(path);
+  const audio = new Audio(cacheBust(path));
   audio.preload = "auto";
   audio.volume = 0.85;
   return audio;
