@@ -34,6 +34,16 @@ export function useAdhan() {
     return () => clearPreviewTimeout();
   }, [clearPreviewTimeout]);
 
+  const stopAll = useCallback(() => {
+    clearPreviewTimeout();
+    [adhanRef, preAlertRef, previewRef].forEach((ref) => {
+      if (ref.current) {
+        ref.current.pause();
+        ref.current.currentTime = 0;
+      }
+    });
+  }, [clearPreviewTimeout]);
+
   const playAdhan = useCallback(async () => {
     stopAll();
     try {
