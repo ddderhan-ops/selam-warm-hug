@@ -8,14 +8,13 @@
   },
   "plugins": {
     "StatusBar": {
-      "style": "LIGHT",
-      "backgroundColor": "#1A1A1A",
-      "overlaysWebView": false
+      "style": "DARK",
+      "backgroundColor": "#00000000",
+      "overlaysWebView": true
     },
     "LocalNotifications": {
       "smallIcon": "ic_notification",
-      "iconColor": "#065f46",
-      "sound": "ezan"
+      "iconColor": "#065f46"
     }
   },
   "android": {
