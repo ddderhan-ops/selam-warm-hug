@@ -1,7 +1,14 @@
 import { useRef, useCallback, useEffect } from "react";
 import { ALERT_SOUND_FILES, type AlertSound } from "@/hooks/useTheme";
 
-const ADHAN_PATH = "/raw/ezan.mp3";
+const ADHAN_PATH = "/ezan.mp3";
+
+function createAudio(path: string) {
+  const audio = new Audio(path);
+  audio.preload = "auto";
+  audio.volume = 0.85;
+  return audio;
+}
 
 export function useAdhan() {
   const adhanRef = useRef<HTMLAudioElement | null>(null);
@@ -22,9 +29,7 @@ export function useAdhan() {
 
   const getAdhanAudio = useCallback(() => {
     if (!adhanRef.current) {
-      adhanRef.current = new Audio(ADHAN_PATH);
-      adhanRef.current.volume = 0.85;
-      adhanRef.current.preload = "auto";
+      adhanRef.current = createAudio(ADHAN_PATH);
     }
     return adhanRef.current;
   }, []);
@@ -60,8 +65,7 @@ export function useAdhan() {
     const key = soundKey || (localStorage.getItem("alertSound") as AlertSound) || "uyari";
     const path = ALERT_SOUND_FILES[key] || ALERT_SOUND_FILES.uyari;
     try {
-      preAlertRef.current = new Audio(path);
-      preAlertRef.current.volume = 0.85;
+      preAlertRef.current = createAudio(path);
       await preAlertRef.current.play();
     } catch (error) {
       console.error("Uyarı sesi çalınamadı:", error);
@@ -71,8 +75,7 @@ export function useAdhan() {
   const previewSound = useCallback(async (path: string, durationMs = 3000) => {
     stopAll();
     try {
-      previewRef.current = new Audio(path);
-      previewRef.current.volume = 0.85;
+      previewRef.current = createAudio(path);
       await previewRef.current.play();
       previewTimeoutRef.current = window.setTimeout(() => {
         if (previewRef.current) {

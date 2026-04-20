@@ -11,10 +11,10 @@ const AUTO_DARK_KEY = "autoDarkMode";
 export type AlertSound = "uyari" | "uyari1" | "uyari2" | "uyari3";
 
 export const ALERT_SOUND_FILES: Record<AlertSound, string> = {
-  uyari: "/raw/uyari.mp3",
-  uyari1: "/raw/uyari1.mp3",
-  uyari2: "/raw/uyari2.mp3",
-  uyari3: "/raw/uyari3.mp3",
+  uyari: "/ezan.mp3",
+  uyari1: "/ezan.mp3",
+  uyari2: "/ezan.mp3",
+  uyari3: "/ezan.mp3",
 };
 
 export const ALERT_SOUND_LABELS: Record<AlertSound, string> = {

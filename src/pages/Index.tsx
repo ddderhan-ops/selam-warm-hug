@@ -382,7 +382,7 @@ const Index = () => {
 
   if (geoLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="screen-shell min-h-[100dvh] bg-background flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
           <p className="text-muted-foreground">{t.loadingLocation}</p>
@@ -393,7 +393,7 @@ const Index = () => {
 
   if (loading && !prayerData) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="screen-shell min-h-[100dvh] bg-background flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
           <p className="text-muted-foreground">{t.loadingPrayerTimes}</p>
@@ -404,7 +404,7 @@ const Index = () => {
 
   if (error && !prayerData) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="screen-shell min-h-[100dvh] bg-background flex items-center justify-center p-4">
         <div className="text-center">
           <p className="text-destructive mb-4">{error}</p>
           <button onClick={loadPrayerTimes} className="text-primary underline">{t.retry}</button>
@@ -415,7 +415,7 @@ const Index = () => {
 
   return (
     <div 
-      className="min-h-screen bg-background overflow-x-hidden"
+      className="screen-shell screen-shell-top min-h-[100dvh] bg-background overflow-x-hidden"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
