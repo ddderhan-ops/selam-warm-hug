@@ -37,6 +37,17 @@ async function ensureNotificationChannels(): Promise<void> {
       vibration: true,
     });
     await LocalNotifications.createChannel({
+      id: PRAYER_SILENT_CHANNEL_ID,
+      name: "Namaz Vakitleri (Sessiz)",
+      description: "Ezan sesi uygulama içinden çalınır",
+      importance: 5,
+      visibility: 1,
+      lights: true,
+      lightColor: "#065f46",
+      vibration: true,
+      sound: "",
+    });
+    await LocalNotifications.createChannel({
       id: PRE_ALERT_CHANNEL_ID,
       name: "Vakit Öncesi Hatırlatıcı",
       description: "Namaz vaktinden önce bildirim gösterir",
