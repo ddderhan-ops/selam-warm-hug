@@ -39,6 +39,12 @@ function getStoredBoolean(key: string, fallback = false) {
   return value === null ? fallback : value === "true";
 }
 
+function getInitialToggleState(key: string) {
+  if (typeof window === "undefined") return false;
+  const value = localStorage.getItem(key);
+  return value === "true";
+}
+
 const Index = () => {
   const { t, language } = useTranslation();
   const { setPreference } = usePreferences();
