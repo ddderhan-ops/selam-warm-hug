@@ -439,12 +439,12 @@ const Index = () => {
 
   return (
     <div 
-      className="screen-shell screen-shell-top min-h-[100dvh] bg-background overflow-x-hidden"
+      className="screen-shell screen-shell-top min-h-[100dvh] bg-background overflow-x-hidden overflow-y-auto"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <div className="max-w-md mx-auto px-4 sm:px-5 py-4 sm:py-6 pb-8 w-full">
+      <div className="max-w-md mx-auto px-4 sm:px-5 py-3 sm:py-6 pb-6 w-full">
         <Header
           locationName={prayerData?.city || locationName || t.currentLocation}
           date={prayerData?.date || ""}
@@ -475,11 +475,11 @@ const Index = () => {
 
         <CountdownTimer nextPrayer={nextPrayer} />
 
-        <div className="mt-6">
+        <div className="mt-4">
           <AdPlaceholder />
         </div>
 
-        <div className="mt-6 mb-8">
+        <div className="mt-4 mb-4">
           <PrayerTimesList prayers={prayerData?.prayers || []} nextPrayer={nextPrayer} />
         </div>
 
