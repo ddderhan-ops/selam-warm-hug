@@ -207,6 +207,7 @@
 
   html.dark {
     color-scheme: dark;
+    background-color: hsl(var(--background));
   }
 
   * {
@@ -227,11 +228,20 @@
     overflow-x: hidden;
   }
 
+  /* Native Android edge-to-edge background fix */
   html.native-edge-to-edge,
-  body.native-edge-to-edge,
+  body.native-edge-to-edge {
+    background-color: hsl(var(--background)) !important;
+  }
+  
   html.native-edge-to-edge body,
   body.native-edge-to-edge #root {
     background-color: hsl(var(--background));
+  }
+
+  html.dark.native-edge-to-edge,
+  html.dark.native-edge-to-edge body {
+    background-color: hsl(var(--background)) !important;
   }
 
   #root {
