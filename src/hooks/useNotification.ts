@@ -5,6 +5,7 @@ import type { PrayerTime } from "@/lib/prayerTimes";
 import { toDateKey } from "@/lib/prayerCache";
 
 const PRAYER_CHANNEL_ID = "prayer-times-channel";
+const PRAYER_SILENT_CHANNEL_ID = "prayer-times-silent";
 const PRE_ALERT_CHANNEL_ID = "pre-alert-channel";
 
 // Native bildirim kanal sesi kullanılmıyor; ses uygulama içinde HTML5 Audio ile çalınıyor.
