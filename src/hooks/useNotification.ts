@@ -3,14 +3,13 @@ import { Capacitor } from "@capacitor/core";
 import { LocalNotifications } from "@capacitor/local-notifications";
 import type { PrayerTime } from "@/lib/prayerTimes";
 import { toDateKey } from "@/lib/prayerCache";
+import { useTranslation } from "@/contexts/LanguageContext";
+import type { Translations } from "@/lib/i18n";
 
 const PRAYER_CHANNEL_ID = "prayer-times-channel";
 const PRAYER_SILENT_CHANNEL_ID = "prayer-times-silent";
 const PRE_ALERT_CHANNEL_ID = "pre-alert-channel";
 
-// Native bildirim kanal sesi kullanılmıyor; ses uygulama içinde HTML5 Audio ile çalınıyor.
-
-// Fixed IDs per prayer to prevent duplicates
 const PRAYER_FIXED_IDS: Record<string, number> = {
   Fajr: 1,
   Sunrise: 2,
@@ -24,12 +23,12 @@ function getPrayerNotificationId(prayer: PrayerTime): number {
   return PRAYER_FIXED_IDS[prayer.nameEn] || Math.floor(Math.random() * 100000);
 }
 
-async function ensureNotificationChannels(): Promise<void> {
+async function ensureNotificationChannels(t: Translations): Promise<void> {
   try {
     await LocalNotifications.createChannel({
       id: PRAYER_CHANNEL_ID,
-      name: "Namaz Vakitleri",
-      description: "Ezan vakitlerinde bildirim gösterir",
+      name: t.notifChannelName,
+      description: t.notifChannelName,
       importance: 5,
       visibility: 1,
       lights: true,
@@ -38,8 +37,8 @@ async function ensureNotificationChannels(): Promise<void> {
     });
     await LocalNotifications.createChannel({
       id: PRAYER_SILENT_CHANNEL_ID,
-      name: "Namaz Vakitleri (Sessiz)",
-      description: "Ezan sesi uygulama içinden çalınır",
+      name: t.notifChannelSilent,
+      description: t.notifChannelSilent,
       importance: 5,
       visibility: 1,
       lights: true,
@@ -49,8 +48,8 @@ async function ensureNotificationChannels(): Promise<void> {
     });
     await LocalNotifications.createChannel({
       id: PRE_ALERT_CHANNEL_ID,
-      name: "Vakit Öncesi Hatırlatıcı",
-      description: "Namaz vaktinden önce bildirim gösterir",
+      name: t.notifPreAlertChannel,
+      description: t.notifPreAlertChannel,
       importance: 4,
       visibility: 1,
       vibration: true,
@@ -81,6 +80,7 @@ async function getServiceWorkerRegistration(): Promise<ServiceWorkerRegistration
 }
 
 export function useNotification() {
+  const { t } = useTranslation();
   const permissionGranted = useRef(false);
   const channelReady = useRef(false);
 
@@ -95,12 +95,12 @@ export function useNotification() {
         }
       }
       if (!channelReady.current) {
-        await ensureNotificationChannels();
+        await ensureNotificationChannels(t);
         channelReady.current = true;
       }
     };
     init();
-  }, []);
+  }, [t]);
 
   const requestPermission = useCallback(async () => {
     try {
@@ -115,7 +115,7 @@ export function useNotification() {
           }
         } catch { /* web/eski Android */ }
         if (!channelReady.current) {
-          await ensureNotificationChannels();
+          await ensureNotificationChannels(t);
           channelReady.current = true;
         }
       }
@@ -135,20 +135,22 @@ export function useNotification() {
       }
       return false;
     }
-  }, []);
+  }, [t]);
 
   const sendNotification = useCallback(async (prayer: PrayerTime) => {
     if (!permissionGranted.current) return null;
 
     const id = getPrayerNotificationId(prayer);
+    const title = t.notifPrayerTitle.replace('{prayer}', prayer.name);
+    const body = t.notifPrayerBody.replace('{prayer}', prayer.name);
 
     try {
       await LocalNotifications.schedule({
         notifications: [
           {
             id,
-            title: `Ezan Vakti Geldi: ${prayer.name}`,
-            body: `${prayer.name} vakti girdi. Hayırlı ibadetler.`,
+            title,
+            body,
             smallIcon: "ic_notification",
             largeIcon: "ic_launcher",
             channelId: PRAYER_CHANNEL_ID,
@@ -160,8 +162,8 @@ export function useNotification() {
     } catch {
       const registration = await getServiceWorkerRegistration();
       if (registration) {
-        await registration.showNotification(`Ezan Vakti Geldi: ${prayer.name}`, {
-          body: `${prayer.name} vakti girdi. Hayırlı ibadetler.`,
+        await registration.showNotification(title, {
+          body,
           icon: "/pwa-192x192.png",
           badge: "/pwa-192x192.png",
           tag: `prayer-${prayer.nameEn}`,
@@ -176,7 +178,7 @@ export function useNotification() {
     }
 
     return null;
-  }, []);
+  }, [t]);
 
   const syncPrayerScheduleWithServiceWorker = useCallback(
     async (prayers: PrayerTime[], context?: NotificationScheduleContext) => {
@@ -216,8 +218,6 @@ export function useNotification() {
 
       if (!permissionGranted.current) return;
 
-      // Cancel ALL pending notifications before scheduling new ones
-      // IDs 1-6 = exact time, 101-106 = pre-alert (15 min before)
       try {
         const allIds = [
           ...Object.values(PRAYER_FIXED_IDS),
@@ -240,13 +240,12 @@ export function useNotification() {
       prayers.forEach((prayer) => {
         const timeUntil = prayer.timestamp - now;
 
-        // Exact time notification
         if (timeUntil > 0 && timeUntil < 24 * 60 * 60 * 1000) {
           const id = getPrayerNotificationId(prayer);
           notifications.push({
             id,
-            title: `Ezan Vakti Geldi: ${prayer.name}`,
-            body: `${prayer.name} vakti girdi. Hayırlı ibadetler.`,
+            title: t.notifPrayerTitle.replace('{prayer}', prayer.name),
+            body: t.notifPrayerBody.replace('{prayer}', prayer.name),
             schedule: { at: new Date(prayer.timestamp), allowWhileIdle: true },
             smallIcon: "ic_notification",
             largeIcon: "ic_launcher",
@@ -263,8 +262,8 @@ export function useNotification() {
             const preId = getPrayerNotificationId(prayer) + 100;
             notifications.push({
               id: preId,
-              title: `${prayer.name} vaktine ${preAlertMins} dakika`,
-              body: `${prayer.name} vakti yaklaşıyor. Hazırlıklarınızı yapın.`,
+              title: t.notifPreAlertTitle.replace('{prayer}', prayer.name).replace('{min}', String(preAlertMins)),
+              body: t.notifPreAlertBody.replace('{prayer}', prayer.name),
               schedule: { at: new Date(preAlertTime), allowWhileIdle: true },
               smallIcon: "ic_notification",
               largeIcon: "ic_launcher",
@@ -280,7 +279,6 @@ export function useNotification() {
         try {
           await LocalNotifications.schedule({ notifications: notifications as any });
         } catch {
-          // Fallback to setTimeout for web
           prayers.forEach((prayer) => {
             const timeUntil = prayer.timestamp - now;
             if (timeUntil > 0 && timeUntil < 24 * 60 * 60 * 1000) {
@@ -289,7 +287,6 @@ export function useNotification() {
                 onPrayerTime?.(prayer);
               }, timeUntil);
             }
-            // Pre-alert fallback — only if preAlertEnabled
             if (options?.preAlertEnabled) {
               const preAlertTime = prayer.timestamp - PRE_ALERT_MS;
               const preTimeUntil = preAlertTime - now;
@@ -303,7 +300,6 @@ export function useNotification() {
         }
       }
 
-      // Listen for notification events to trigger callbacks
       LocalNotifications.addListener("localNotificationReceived", (notification) => {
         const isPreAlert = notification.id > 100;
         const closest = prayers.find(
@@ -321,7 +317,7 @@ export function useNotification() {
         }
       }).catch(() => undefined);
     },
-    [sendNotification, syncPrayerScheduleWithServiceWorker]
+    [sendNotification, syncPrayerScheduleWithServiceWorker, t]
   );
 
   return {
