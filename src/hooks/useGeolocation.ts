@@ -74,8 +74,27 @@ export function useGeolocation() {
     );
   }, []);
 
+  // On mount, check if permission is already granted — only auto-request if so
   useEffect(() => {
-    requestLocation();
+    if (hasRequestedRef.current) return;
+
+    if (navigator.permissions) {
+      navigator.permissions.query({ name: "geolocation" }).then((result) => {
+        if (result.state === "granted") {
+          hasRequestedRef.current = true;
+          requestLocation();
+        }
+        // If "prompt" or "denied", show the LocationPermissionCard instead
+      }).catch(() => {
+        // Fallback: auto-request (older browsers)
+        hasRequestedRef.current = true;
+        requestLocation();
+      });
+    } else {
+      // No permissions API — auto-request
+      hasRequestedRef.current = true;
+      requestLocation();
+    }
   }, [requestLocation]);
 
   return { ...state, requestLocation };
