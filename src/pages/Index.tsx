@@ -414,6 +414,14 @@ const Index = () => {
     );
   }
 
+  if (!latitude && !longitude && !loading && (permissionDenied || !geoLoading)) {
+    return (
+      <div className="screen-shell min-h-[100dvh] bg-background flex items-center justify-center p-4">
+        <LocationPermissionCard onRequestLocation={requestLocation} loading={geoLoading} />
+      </div>
+    );
+  }
+
   if (loading && !prayerData) {
     return (
       <div className="screen-shell min-h-[100dvh] bg-background flex items-center justify-center">
