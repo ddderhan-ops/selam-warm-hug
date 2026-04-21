@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Capacitor } from "@capacitor/core";
 import { StatusBar, Style } from "@capacitor/status-bar";
-import { NavigationBar } from "@hugotomazi/capacitor-navigation-bar";
+import { NavigationBar } from "@capgo/capacitor-navigation-bar";
 import type { ColorTheme } from "@/hooks/useTheme";
 
 export function useSystemBars(colorTheme: ColorTheme, darkMode: boolean) {
@@ -15,8 +15,7 @@ export function useSystemBars(colorTheme: ColorTheme, darkMode: boolean) {
       try {
         await StatusBar.setOverlaysWebView({ overlay: true });
         await StatusBar.setBackgroundColor({ color: "#00000000" });
-        await NavigationBar.setTransparency({ isTransparent: true });
-        await NavigationBar.setColor({
+        await NavigationBar.setNavigationBarColor({
           color: "#00000000",
           darkButtons: !darkMode,
         });
@@ -38,7 +37,7 @@ export function useSystemBars(colorTheme: ColorTheme, darkMode: boolean) {
     const frame = window.requestAnimationFrame(() => {
       void Promise.all([
         StatusBar.setStyle({ style: darkMode ? Style.Light : Style.Dark }),
-        NavigationBar.setColor({ color: "#00000000", darkButtons: !darkMode }),
+        NavigationBar.setNavigationBarColor({ color: "#00000000", darkButtons: !darkMode }),
       ]).catch((error) => {
         console.warn("System bar sync error:", error);
       });

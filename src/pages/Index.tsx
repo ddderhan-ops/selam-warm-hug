@@ -22,9 +22,10 @@ import {
   reverseGeocode,
   type PrayerTimesData,
 } from "@/lib/prayerTimes";
-import { Loader2, ChevronRight, Calendar } from "lucide-react";
+import { Loader2, ChevronRight, Calendar, Volume2 } from "lucide-react";
 import { toast } from "sonner";
 import { usePreferences, readPreference } from "@/hooks/usePreferences";
+import { Button } from "@/components/ui/button";
 
 type View = 'main' | 'qibla' | 'religious';
 
