@@ -17,8 +17,6 @@ export function useGeolocation() {
     permissionDenied: false,
   });
 
-  const hasRequestedRef = useRef(false);
-
   const requestLocation = useCallback(() => {
     if (!navigator.geolocation) {
       setState((prev) => ({
@@ -29,7 +27,7 @@ export function useGeolocation() {
       return;
     }
 
-    setState((prev) => ({ ...prev, loading: true, error: null }));
+    setState((prev) => ({ ...prev, loading: true, error: null, permissionDenied: false }));
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -47,7 +45,7 @@ export function useGeolocation() {
 
         switch (error.code) {
           case error.PERMISSION_DENIED:
-            errorMessage = "Konum izni reddedildi";
+            errorMessage = "Konum izni reddedildi. Lütfen cihaz ayarlarından konum iznini açın.";
             permissionDenied = true;
             break;
           case error.POSITION_UNAVAILABLE:
@@ -69,32 +67,14 @@ export function useGeolocation() {
       {
         enableHighAccuracy: true,
         timeout: 15000,
-        maximumAge: 60000, // 1 minute cache for fresher data
+        maximumAge: 60000,
       }
     );
   }, []);
 
-  // On mount, check if permission is already granted — only auto-request if so
+  // On mount, auto-request location immediately
   useEffect(() => {
-    if (hasRequestedRef.current) return;
-
-    if (navigator.permissions) {
-      navigator.permissions.query({ name: "geolocation" }).then((result) => {
-        if (result.state === "granted") {
-          hasRequestedRef.current = true;
-          requestLocation();
-        }
-        // If "prompt" or "denied", show the LocationPermissionCard instead
-      }).catch(() => {
-        // Fallback: auto-request (older browsers)
-        hasRequestedRef.current = true;
-        requestLocation();
-      });
-    } else {
-      // No permissions API — auto-request
-      hasRequestedRef.current = true;
-      requestLocation();
-    }
+    requestLocation();
   }, [requestLocation]);
 
   return { ...state, requestLocation };
