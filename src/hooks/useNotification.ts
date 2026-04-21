@@ -210,7 +210,7 @@ export function useNotification() {
       prayers: PrayerTime[],
       onPrayerTime?: (prayer: PrayerTime) => void,
       context?: NotificationScheduleContext,
-      options?: { preAlertEnabled?: boolean; preAlertMinutes?: number; onPreAlert?: (prayer: PrayerTime) => void }
+      options?: { soundAlertEnabled?: boolean; preAlertEnabled?: boolean; preAlertMinutes?: number; onPreAlert?: (prayer: PrayerTime) => void }
     ) => {
       void syncPrayerScheduleWithServiceWorker(prayers, context);
 
