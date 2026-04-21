@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { ArrowLeft, Compass, Navigation2, MapPin } from 'lucide-react';
+import { useEffect, useState, useCallback } from 'react';
+import { ArrowLeft, Compass, Navigation2, MapPin, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { calculateQiblaDirection, calculateDistanceToKaaba } from '@/lib/qibla';
 import { useDeviceOrientation } from '@/hooks/useDeviceOrientation';
