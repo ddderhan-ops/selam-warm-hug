@@ -1,4 +1,4 @@
-import { useRef, useCallback, useEffect } from "react";
+import { useRef, useCallback, useEffect, type MutableRefObject } from "react";
 import { ALERT_SOUND_FILES, type AlertSound } from "@/hooks/useTheme";
 
 const ADHAN_PATH = "/ezan.mp3";
@@ -45,7 +45,7 @@ export function useAdhan() {
     });
   }, [clearPreviewTimeout]);
 
-  const playAudio = useCallback(async (path: string, targetRef: React.MutableRefObject<HTMLAudioElement | null>) => {
+  const playAudio = useCallback(async (path: string, targetRef: MutableRefObject<HTMLAudioElement | null>) => {
     stopAll();
     try {
       const audio = createAudio(path);

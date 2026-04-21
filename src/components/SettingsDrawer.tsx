@@ -20,11 +20,11 @@ import {
 
 interface SettingsDrawerProps {
   notificationsEnabled: boolean;
-  onNotificationToggle: () => void;
+  onNotificationToggle: (checked: boolean) => void;
   soundAlertEnabled: boolean;
-  onSoundAlertToggle: () => void;
+  onSoundAlertToggle: (checked: boolean) => void;
   preAlertEnabled: boolean;
-  onPreAlertToggle: () => void;
+  onPreAlertToggle: (checked: boolean) => void;
   colorTheme: ColorTheme;
   onColorThemeChange: (theme: ColorTheme) => void;
   preAlertMinutes: number;
@@ -33,7 +33,7 @@ interface SettingsDrawerProps {
   onAlertSoundChange: (sound: AlertSound) => void;
   onPreviewSound: (path: string) => void;
   autoDarkMode: boolean;
-  onAutoDarkModeToggle: () => void;
+  onAutoDarkModeToggle: (checked: boolean) => void;
   disabled?: boolean;
 }
 
