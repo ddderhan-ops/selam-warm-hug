@@ -13,9 +13,11 @@ export function useGeolocation() {
     latitude: null,
     longitude: null,
     error: null,
-    loading: true,
+    loading: false,
     permissionDenied: false,
   });
+
+  const hasRequestedRef = useRef(false);
 
   const requestLocation = useCallback(() => {
     if (!navigator.geolocation) {
