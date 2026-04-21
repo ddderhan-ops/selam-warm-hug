@@ -275,6 +275,8 @@ export function QiblaCompass({ latitude, longitude, onBack }: QiblaCompassProps)
           </p>
         )}
       </div>
+      </>
+      )}
     </div>
   );
 }
