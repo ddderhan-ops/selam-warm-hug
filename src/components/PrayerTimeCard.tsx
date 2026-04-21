@@ -28,7 +28,7 @@ export function PrayerTimeCard({ prayer, isActive, isPassed }: PrayerTimeCardPro
   return (
     <div
       className={cn(
-        "flex items-center justify-between px-5 py-4 rounded-xl transition-all duration-300 animate-fade-in",
+        "flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 animate-fade-in",
         isActive && "prayer-card-active scale-[1.02]",
         !isActive && "prayer-card-inactive",
         isPassed && !isActive && "opacity-50"

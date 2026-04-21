@@ -38,20 +38,20 @@ export function CountdownTimer({ nextPrayer }: CountdownTimerProps) {
   }
 
   return (
-    <div className="text-center py-8 animate-slide-up">
-      <p className="text-muted-foreground text-sm font-medium mb-2 uppercase tracking-wider">
+    <div className="text-center py-4 sm:py-8 animate-slide-up">
+      <p className="text-muted-foreground text-sm font-medium mb-1 uppercase tracking-wider">
         {t.nextPrayer}
       </p>
-      <h2 className="text-2xl font-semibold text-primary mb-4">
+      <h2 className="text-xl sm:text-2xl font-semibold text-primary mb-2 sm:mb-4">
         {nextPrayer ? (prayerNameKeys[nextPrayer.nameEn] ? t.prayerNames[prayerNameKeys[nextPrayer.nameEn]] : nextPrayer.name) : ''}
       </h2>
       <div className="relative">
         <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full" />
-        <p className="relative text-5xl sm:text-6xl md:text-7xl font-bold tabular-nums countdown-glow text-foreground">
+        <p className="relative font-bold tabular-nums countdown-glow text-foreground" style={{ fontSize: 'clamp(2rem, 10vw, 4.5rem)' }}>
           {timeRemaining}
         </p>
       </div>
-      <p className="text-muted-foreground text-sm mt-4">
+      <p className="text-muted-foreground text-sm mt-2 sm:mt-4">
         {nextPrayer.time} {t.atTime}
       </p>
     </div>
