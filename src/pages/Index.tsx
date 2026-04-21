@@ -450,7 +450,7 @@ const Index = () => {
       <div className="screen-shell min-h-[100dvh] bg-background flex items-center justify-center p-4">
         <div className="text-center">
           <p className="text-destructive mb-4">{error}</p>
-          <button onClick={loadPrayerTimes} className="text-primary underline">{t.retry}</button>
+          <button onClick={permissionDenied ? requestLocation : loadPrayerTimes} className="text-primary underline">{t.retry}</button>
         </div>
       </div>
     );
