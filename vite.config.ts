@@ -25,7 +25,6 @@ export default defineConfig(({ mode }) => ({
         "favicon.ico",
         "pwa-192x192.png",
         "pwa-512x512.png",
-        "ezan.mp3",
       ],
       manifest: {
         name: "Nur Ezan Vakti",
@@ -67,7 +66,7 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       injectManifest: {
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,json,mp3}"],
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,json}"],
       },
       devOptions: {
         enabled: true,
