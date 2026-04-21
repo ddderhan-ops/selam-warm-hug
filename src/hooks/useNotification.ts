@@ -5,6 +5,7 @@ import type { PrayerTime } from "@/lib/prayerTimes";
 import { toDateKey } from "@/lib/prayerCache";
 
 const PRAYER_CHANNEL_ID = "prayer-times-channel";
+const PRAYER_SILENT_CHANNEL_ID = "prayer-times-silent";
 const PRE_ALERT_CHANNEL_ID = "pre-alert-channel";
 
 // Native bildirim kanal sesi kullanılmıyor; ses uygulama içinde HTML5 Audio ile çalınıyor.
@@ -34,6 +35,17 @@ async function ensureNotificationChannels(): Promise<void> {
       lights: true,
       lightColor: "#065f46",
       vibration: true,
+    });
+    await LocalNotifications.createChannel({
+      id: PRAYER_SILENT_CHANNEL_ID,
+      name: "Namaz Vakitleri (Sessiz)",
+      description: "Ezan sesi uygulama içinden çalınır",
+      importance: 5,
+      visibility: 1,
+      lights: true,
+      lightColor: "#065f46",
+      vibration: true,
+      sound: "",
     });
     await LocalNotifications.createChannel({
       id: PRE_ALERT_CHANNEL_ID,
@@ -198,7 +210,7 @@ export function useNotification() {
       prayers: PrayerTime[],
       onPrayerTime?: (prayer: PrayerTime) => void,
       context?: NotificationScheduleContext,
-      options?: { preAlertEnabled?: boolean; preAlertMinutes?: number; onPreAlert?: (prayer: PrayerTime) => void }
+      options?: { soundAlertEnabled?: boolean; preAlertEnabled?: boolean; preAlertMinutes?: number; onPreAlert?: (prayer: PrayerTime) => void }
     ) => {
       void syncPrayerScheduleWithServiceWorker(prayers, context);
 
@@ -223,6 +235,8 @@ export function useNotification() {
       const preAlertMins = options?.preAlertMinutes || 15;
       const PRE_ALERT_MS = preAlertMins * 60 * 1000;
 
+      const useSilentChannel = options?.soundAlertEnabled === true;
+
       prayers.forEach((prayer) => {
         const timeUntil = prayer.timestamp - now;
 
@@ -236,7 +250,7 @@ export function useNotification() {
             schedule: { at: new Date(prayer.timestamp), allowWhileIdle: true },
             smallIcon: "ic_notification",
             largeIcon: "ic_launcher",
-            channelId: PRAYER_CHANNEL_ID,
+            channelId: useSilentChannel ? PRAYER_SILENT_CHANNEL_ID : PRAYER_CHANNEL_ID,
             ongoing: true,
             autoCancel: true,
           });

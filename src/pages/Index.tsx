@@ -197,6 +197,7 @@ const Index = () => {
           },
           notificationContext,
           {
+            soundAlertEnabled: soundAlertEnabled === true,
             preAlertEnabled: preAlertEnabled === true,
             preAlertMinutes,
             onPreAlert: () => {
@@ -306,6 +307,7 @@ const Index = () => {
             },
             getNotificationContext(),
             {
+              soundAlertEnabled: true,
               preAlertEnabled: true,
               preAlertMinutes,
               onPreAlert: () => {
@@ -351,6 +353,7 @@ const Index = () => {
         },
         getNotificationContext(),
         {
+          soundAlertEnabled: soundAlertEnabled === true,
           preAlertEnabled: next,
           preAlertMinutes,
           onPreAlert: () => {
