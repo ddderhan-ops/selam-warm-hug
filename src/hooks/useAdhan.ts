@@ -11,10 +11,9 @@ function cacheBust(path: string): string {
 }
 
 function createAudio(path: string): HTMLAudioElement {
-  const audio = new Audio();
+  const audio = new Audio(cacheBust(path));
   audio.preload = "auto";
   audio.volume = 0.85;
-  audio.src = cacheBust(path);
   return audio;
 }
 
@@ -24,7 +23,6 @@ export function useAdhan() {
   const previewRef = useRef<HTMLAudioElement | null>(null);
   const previewTimeoutRef = useRef<number | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [audioContextUnlocked, setAudioContextUnlocked] = useState(false);
 
   const clearPreviewTimeout = useCallback(() => {
     if (previewTimeoutRef.current !== null) {
@@ -43,52 +41,22 @@ export function useAdhan() {
       if (ref.current) {
         ref.current.pause();
         ref.current.currentTime = 0;
+        ref.current.src = "";
       }
     });
     setIsPlaying(false);
   }, [clearPreviewTimeout]);
 
-  // Audio context'i kilidi aç - kullanıcı etkileşimi gerektirir
-  const unlockAudioContext = useCallback(async () => {
-    if (audioContextUnlocked) return true;
-    
-    try {
-      // Dummy ses çalarak unlock yap
-      const dummyAudio = new Audio();
-      dummyAudio.volume = 0.01;
-      dummyAudio.src = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
-      await dummyAudio.play();
-      
-      setAudioContextUnlocked(true);
-      return true;
-    } catch (err) {
-      console.warn("Audio context unlock failed:", err);
-      return false;
-    }
-  }, [audioContextUnlocked]);
-
   const playAudio = useCallback(async (path: string, targetRef: MutableRefObject<HTMLAudioElement | null>, label?: string) => {
-    const isUnlocked = await unlockAudioContext();
-    if (!isUnlocked) {
-      toast.error(`Ses çalmak için önce ekrana dokunun`);
-      return false;
-    }
-    
     stopAll();
-    
+
     try {
       const audio = createAudio(path);
       targetRef.current = audio;
-      
       audio.currentTime = 0;
       setIsPlaying(true);
-      
       await audio.play();
-      
-      if (label) {
-        toast.success(`${label} çalıyor...`);
-      }
-      
+      if (label) toast.success(`${label} çalıyor...`);
       return true;
     } catch (error) {
       console.error(`${AUDIO_ERROR_MESSAGE}:`, error);
@@ -97,27 +65,20 @@ export function useAdhan() {
       toast.error(label ? `"${label}" çalınamadı` : AUDIO_ERROR_MESSAGE);
       return false;
     }
-  }, [stopAll, unlockAudioContext]);
+  }, [stopAll]);
 
   const playAdhan = useCallback(async () => {
     const started = await playAudio(ADHAN_PATH, adhanRef, "Ezan");
     if (!started || !adhanRef.current) return false;
 
     const audio = adhanRef.current;
-    
     audio.addEventListener("ended", () => {
       setIsPlaying(false);
-      // Tekrar çal
-      audio.currentTime = 0;
-      void audio.play().catch((e) => console.error("Ezan tekrar çalınamadı:", e));
     }, { once: true });
-    
     return true;
   }, [playAudio]);
 
-  const primeAudio = useCallback(async (path = ADHAN_PATH) => {
-    return unlockAudioContext();
-  }, [unlockAudioContext]);
+  const primeAudio = useCallback(async () => true, []);
 
   const playPreAlert = useCallback(async (soundKey?: AlertSound) => {
     const key = soundKey || (localStorage.getItem("alertSound") as AlertSound) || "uyari";
