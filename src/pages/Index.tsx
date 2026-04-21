@@ -66,9 +66,9 @@ const Index = () => {
   const [error, setError] = useState<string | null>(null);
 
   // Initialize from localStorage synchronously, then async hydrate from Preferences
-  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean | null>(null);
-  const [soundAlertEnabled, setSoundAlertEnabled] = useState<boolean | null>(null);
-  const [preAlertEnabled, setPreAlertEnabled] = useState<boolean | null>(null);
+  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(getInitialToggleState(NOTIFICATION_PREFERENCE_KEY));
+  const [soundAlertEnabled, setSoundAlertEnabled] = useState<boolean>(getInitialToggleState(SOUND_ALERT_PREFERENCE_KEY));
+  const [preAlertEnabled, setPreAlertEnabled] = useState<boolean>(getInitialToggleState(PRE_ALERT_PREFERENCE_KEY));
   const [nowTimestamp, setNowTimestamp] = useState(Date.now());
   const [hydrated, setHydrated] = useState(false);
 
@@ -78,7 +78,7 @@ const Index = () => {
   const { colorTheme, setColorTheme, darkMode, setDarkMode, toggleDarkMode, autoDarkMode, toggleAutoDarkMode, preAlertMinutes, setPreAlertMinutes, alertSound, setAlertSound } = useTheme();
   const { requestPermission, schedulePrayerNotifications, isSupported } = useNotification();
   const { latitude, longitude, loading: geoLoading, permissionDenied, requestLocation } = useGeolocation();
-  const { playAdhan, playPreAlert, previewSound, primeAudio } = useAdhan();
+  const { playAdhan, playPreAlert, previewSound } = useAdhan();
   const { tryShowAd } = useInterstitialAd();
 
   // Sync Android status bar & navigation bar with theme
@@ -420,7 +420,7 @@ const Index = () => {
     );
   }
 
-  const settingsReady = hydrated && notificationsEnabled !== null && soundAlertEnabled !== null && preAlertEnabled !== null;
+  const settingsReady = hydrated;
 
   return (
     <div 
@@ -438,11 +438,11 @@ const Index = () => {
           onDarkModeToggle={toggleDarkMode}
           settingsButton={
             <SettingsDrawer
-              notificationsEnabled={notificationsEnabled === true}
+              notificationsEnabled={notificationsEnabled}
               onNotificationToggle={handleNotificationToggle}
-              soundAlertEnabled={soundAlertEnabled === true}
+              soundAlertEnabled={soundAlertEnabled}
               onSoundAlertToggle={handleSoundAlertToggle}
-              preAlertEnabled={preAlertEnabled === true}
+              preAlertEnabled={preAlertEnabled}
               onPreAlertToggle={handlePreAlertToggle}
               colorTheme={colorTheme}
               onColorThemeChange={setColorTheme}
