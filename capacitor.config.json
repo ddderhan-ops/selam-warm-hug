@@ -4,8 +4,8 @@
   "webDir": "dist",
   "plugins": {
     "StatusBar": {
-      "style": "DARK",
-      "backgroundColor": "#00000000",
+      "style": "LIGHT",
+      "backgroundColor": "#0f172a",
       "overlaysWebView": true
     },
     "LocalNotifications": {
@@ -14,7 +14,7 @@
     }
   },
   "android": {
-    "backgroundColor": "#00000000",
+    "backgroundColor": "#0f172a",
     "allowMixedContent": true
   }
 }

@@ -65,7 +65,13 @@ export function SettingsDrawer({
     { value: 'bronze', label: t.themeBronze || 'Beyaz & Bronz' },
   ];
 
-  const soundOptions: AlertSound[] = ['uyari', 'uyari1', 'uyari2', 'uyari3'];
+  const soundOptions: AlertSound[] = Object.entries(ALERT_SOUND_FILES).reduce<AlertSound[]>((acc, [key, path]) => {
+    const soundKey = key as AlertSound;
+    if (!acc.some((existingKey) => ALERT_SOUND_FILES[existingKey] === path)) {
+      acc.push(soundKey);
+    }
+    return acc;
+  }, []);
 
   return (
     <Drawer>
@@ -141,9 +147,9 @@ export function SettingsDrawer({
                         <input
                           type="radio"
                           name="alertSound"
-                          checked={alertSound === key}
-                         onChange={() => onAlertSoundChange(key)}
-                         disabled={disabled}
+                          checked={ALERT_SOUND_FILES[alertSound] === ALERT_SOUND_FILES[key]}
+                          onChange={() => onAlertSoundChange(key)}
+                          disabled={disabled}
                           className="accent-primary"
                         />
                         <span className="text-sm">{ALERT_SOUND_LABELS[key]}</span>
