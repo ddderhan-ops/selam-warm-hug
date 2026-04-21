@@ -65,13 +65,7 @@ export function SettingsDrawer({
     { value: 'bronze', label: t.themeBronze || 'Beyaz & Bronz' },
   ];
 
-  const soundOptions: AlertSound[] = Object.entries(ALERT_SOUND_FILES).reduce<AlertSound[]>((acc, [key, path]) => {
-    const soundKey = key as AlertSound;
-    if (!acc.some((existingKey) => ALERT_SOUND_FILES[existingKey] === path)) {
-      acc.push(soundKey);
-    }
-    return acc;
-  }, []);
+  const soundOptions: AlertSound[] = Object.keys(ALERT_SOUND_FILES) as AlertSound[];
 
   return (
     <Drawer>
