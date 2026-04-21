@@ -131,6 +131,39 @@ export function QiblaCompass({ latitude, longitude, onBack }: QiblaCompassProps)
         <h1 className="text-xl font-semibold">{t.qiblaCompass}</h1>
       </div>
 
+      {/* Location loading/error */}
+      {(localLat === null || localLng === null) ? (
+        <div className="flex-1 flex flex-col items-center justify-center px-6">
+          <div className="bg-card border border-border rounded-2xl p-6 text-center max-w-xs">
+            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <MapPin className="w-6 h-6 text-primary" />
+            </div>
+            {locationLoading ? (
+              <>
+                <RefreshCw className="w-6 h-6 animate-spin text-primary mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">Konum alınıyor...</p>
+              </>
+            ) : locationError ? (
+              <>
+                <p className="text-sm text-destructive mb-3">{locationError}</p>
+                <Button onClick={requestLocation} variant="outline" size="sm">
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Tekrar Dene
+                </Button>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground mb-3">Kıble yönünü hesaplamak için konum izni gerekli.</p>
+                <Button onClick={requestLocation}>
+                  <MapPin className="w-4 h-4 mr-2" />
+                  Konum İzni Ver
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      ) : (
+      <>
       {/* Compass Area */}
       <div className="flex-1 flex flex-col items-center justify-center px-6">
         {/* Compass */}
