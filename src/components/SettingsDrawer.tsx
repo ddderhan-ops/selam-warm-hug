@@ -146,7 +146,7 @@ export function SettingsDrawer({
                           disabled={disabled}
                           className="accent-primary"
                         />
-                        <span className="text-sm">{ALERT_SOUND_LABELS[key]}</span>
+                        <span className="text-sm">{t.alertSoundNames[key]}</span>
                       </label>
                       <Button
                         variant="ghost"
