@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { ArrowLeft, Compass, Navigation2, MapPin } from 'lucide-react';
+import { useEffect, useState, useCallback } from 'react';
+import { ArrowLeft, Compass, Navigation2, MapPin, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { calculateQiblaDirection, calculateDistanceToKaaba } from '@/lib/qibla';
 import { useDeviceOrientation } from '@/hooks/useDeviceOrientation';
@@ -46,15 +46,62 @@ export function QiblaCompass({ latitude, longitude, onBack }: QiblaCompassProps)
   const [qiblaDirection, setQiblaDirection] = useState<number | null>(null);
   const [distance, setDistance] = useState<number | null>(null);
   const [declination, setDeclination] = useState(0);
+  const [localLat, setLocalLat] = useState<number | null>(latitude);
+  const [localLng, setLocalLng] = useState<number | null>(longitude);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
 
+  // Request location if not provided
+  const requestLocation = useCallback(() => {
+    if (!navigator.geolocation) {
+      setLocationError('Tarayıcınız konum özelliğini desteklemiyor');
+      return;
+    }
+    setLocationLoading(true);
+    setLocationError(null);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocalLat(position.coords.latitude);
+        setLocalLng(position.coords.longitude);
+        setLocationLoading(false);
+      },
+      (error) => {
+        let msg = 'Konum alınamadı';
+        if (error.code === error.PERMISSION_DENIED) msg = 'Konum izni reddedildi';
+        else if (error.code === error.POSITION_UNAVAILABLE) msg = 'Konum bilgisi mevcut değil';
+        else if (error.code === error.TIMEOUT) msg = 'Konum isteği zaman aşımına uğradı';
+        setLocationError(msg);
+        setLocationLoading(false);
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
+    );
+  }, []);
+
+  // Sync parent props
   useEffect(() => {
     if (latitude !== null && longitude !== null) {
-      setQiblaDirection(calculateQiblaDirection(latitude, longitude));
-      setDistance(calculateDistanceToKaaba(latitude, longitude));
-      setDeclination(getMagneticDeclination(latitude, longitude));
+      setLocalLat(latitude);
+      setLocalLng(longitude);
     }
   }, [latitude, longitude]);
 
+  // Auto-request location if missing
+  useEffect(() => {
+    if (localLat === null || localLng === null) {
+      requestLocation();
+    }
+  }, [localLat, localLng, requestLocation]);
+
+  // Calculate qibla when location available
+  useEffect(() => {
+    if (localLat !== null && localLng !== null) {
+      setQiblaDirection(calculateQiblaDirection(localLat, localLng));
+      setDistance(calculateDistanceToKaaba(localLat, localLng));
+      setDeclination(getMagneticDeclination(localLat, localLng));
+    }
+  }, [localLat, localLng]);
+
+  // Auto-request compass permission on mount
   useEffect(() => {
     if (isSupported && !hasPermission) {
       requestPermission();
@@ -84,6 +131,39 @@ export function QiblaCompass({ latitude, longitude, onBack }: QiblaCompassProps)
         <h1 className="text-xl font-semibold">{t.qiblaCompass}</h1>
       </div>
 
+      {/* Location loading/error */}
+      {(localLat === null || localLng === null) ? (
+        <div className="flex-1 flex flex-col items-center justify-center px-6">
+          <div className="bg-card border border-border rounded-2xl p-6 text-center max-w-xs">
+            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <MapPin className="w-6 h-6 text-primary" />
+            </div>
+            {locationLoading ? (
+              <>
+                <RefreshCw className="w-6 h-6 animate-spin text-primary mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">Konum alınıyor...</p>
+              </>
+            ) : locationError ? (
+              <>
+                <p className="text-sm text-destructive mb-3">{locationError}</p>
+                <Button onClick={requestLocation} variant="outline" size="sm">
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Tekrar Dene
+                </Button>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground mb-3">Kıble yönünü hesaplamak için konum izni gerekli.</p>
+                <Button onClick={requestLocation}>
+                  <MapPin className="w-4 h-4 mr-2" />
+                  Konum İzni Ver
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      ) : (
+      <>
       {/* Compass Area */}
       <div className="flex-1 flex flex-col items-center justify-center px-6">
         {/* Compass */}
@@ -195,6 +275,8 @@ export function QiblaCompass({ latitude, longitude, onBack }: QiblaCompassProps)
           </p>
         )}
       </div>
+      </>
+      )}
     </div>
   );
 }
