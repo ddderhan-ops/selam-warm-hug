@@ -102,7 +102,7 @@ export async function fetchPrayerTimes(
   const { latitude, longitude } = coordinates;
 
   // Resolve city name via reverse geocoding if not provided
-  const resolvedCity = cityName || await reverseGeocode(latitude, longitude, language || 'tr');
+  let resolvedCity = cityName || await reverseGeocode(latitude, longitude, language || 'tr');
 
   try {
     // Method 13 = Turkey/Diyanet (Fajr: 18°, Isha: 17°)
@@ -117,6 +117,13 @@ export async function fetchPrayerTimes(
     const data = await response.json();
     const timings = data.data.timings;
     const hijri = data.data.date.hijri;
+
+    // If reverseGeocode returned raw coordinates, try timezone as fallback
+    if (resolvedCity.match(/^-?\d+\.\d+,\s*-?\d+\.\d+$/)) {
+      const tz = data.data.meta?.timezone || '';
+      const tzCity = tz.split('/').pop()?.replace(/_/g, ' ') || '';
+      if (tzCity) resolvedCity = tzCity;
+    }
 
     const prayerKeys = ["Fajr", "Sunrise", "Dhuhr", "Asr", "Maghrib", "Isha"];
 
