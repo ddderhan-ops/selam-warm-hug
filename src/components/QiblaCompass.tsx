@@ -46,15 +46,62 @@ export function QiblaCompass({ latitude, longitude, onBack }: QiblaCompassProps)
   const [qiblaDirection, setQiblaDirection] = useState<number | null>(null);
   const [distance, setDistance] = useState<number | null>(null);
   const [declination, setDeclination] = useState(0);
+  const [localLat, setLocalLat] = useState<number | null>(latitude);
+  const [localLng, setLocalLng] = useState<number | null>(longitude);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
 
+  // Request location if not provided
+  const requestLocation = useCallback(() => {
+    if (!navigator.geolocation) {
+      setLocationError('Tarayıcınız konum özelliğini desteklemiyor');
+      return;
+    }
+    setLocationLoading(true);
+    setLocationError(null);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocalLat(position.coords.latitude);
+        setLocalLng(position.coords.longitude);
+        setLocationLoading(false);
+      },
+      (error) => {
+        let msg = 'Konum alınamadı';
+        if (error.code === error.PERMISSION_DENIED) msg = 'Konum izni reddedildi';
+        else if (error.code === error.POSITION_UNAVAILABLE) msg = 'Konum bilgisi mevcut değil';
+        else if (error.code === error.TIMEOUT) msg = 'Konum isteği zaman aşımına uğradı';
+        setLocationError(msg);
+        setLocationLoading(false);
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
+    );
+  }, []);
+
+  // Sync parent props
   useEffect(() => {
     if (latitude !== null && longitude !== null) {
-      setQiblaDirection(calculateQiblaDirection(latitude, longitude));
-      setDistance(calculateDistanceToKaaba(latitude, longitude));
-      setDeclination(getMagneticDeclination(latitude, longitude));
+      setLocalLat(latitude);
+      setLocalLng(longitude);
     }
   }, [latitude, longitude]);
 
+  // Auto-request location if missing
+  useEffect(() => {
+    if (localLat === null || localLng === null) {
+      requestLocation();
+    }
+  }, [localLat, localLng, requestLocation]);
+
+  // Calculate qibla when location available
+  useEffect(() => {
+    if (localLat !== null && localLng !== null) {
+      setQiblaDirection(calculateQiblaDirection(localLat, localLng));
+      setDistance(calculateDistanceToKaaba(localLat, localLng));
+      setDeclination(getMagneticDeclination(localLat, localLng));
+    }
+  }, [localLat, localLng]);
+
+  // Auto-request compass permission on mount
   useEffect(() => {
     if (isSupported && !hasPermission) {
       requestPermission();
