@@ -59,6 +59,25 @@ export interface Translations {
   alertSoundLabel: string;
   autoDarkMode: string;
   autoDarkModeDesc: string;
+  // Notification & audio strings
+  notifPrayerTitle: string;
+  notifPrayerBody: string;
+  notifPreAlertTitle: string;
+  notifPreAlertBody: string;
+  notifChannelName: string;
+  notifChannelSilent: string;
+  notifPreAlertChannel: string;
+  audioPlaying: string;
+  audioError: string;
+  audioPlayError: string;
+  notifNotSupported: string;
+  notifPermissionDenied: string;
+  alertSoundNames: {
+    uyari: string;
+    uyari1: string;
+    uyari2: string;
+    uyari3: string;
+  };
 }
 
 const translations: Record<Language, Translations> = {
