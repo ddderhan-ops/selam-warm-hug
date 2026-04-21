@@ -22,9 +22,12 @@ export function useGeolocation() {
     setState((prev) => ({ ...prev, loading: true, error: null, permissionDenied: false }));
 
     try {
-      // Request native permission via Capacitor
       const permResult = await Geolocation.requestPermissions();
-      if (permResult.location === "denied") {
+      const locationPermission = permResult.location;
+      const coarsePermission = permResult.coarseLocation;
+      const permissionGranted = locationPermission === "granted" || coarsePermission === "granted";
+
+      if (!permissionGranted) {
         setState({
           latitude: null,
           longitude: null,
