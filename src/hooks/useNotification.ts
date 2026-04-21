@@ -235,6 +235,8 @@ export function useNotification() {
       const preAlertMins = options?.preAlertMinutes || 15;
       const PRE_ALERT_MS = preAlertMins * 60 * 1000;
 
+      const useSilentChannel = options?.soundAlertEnabled === true;
+
       prayers.forEach((prayer) => {
         const timeUntil = prayer.timestamp - now;
 
@@ -248,7 +250,7 @@ export function useNotification() {
             schedule: { at: new Date(prayer.timestamp), allowWhileIdle: true },
             smallIcon: "ic_notification",
             largeIcon: "ic_launcher",
-            channelId: PRAYER_CHANNEL_ID,
+            channelId: useSilentChannel ? PRAYER_SILENT_CHANNEL_ID : PRAYER_CHANNEL_ID,
             ongoing: true,
             autoCancel: true,
           });
