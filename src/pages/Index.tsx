@@ -71,7 +71,7 @@ const Index = () => {
   const { colorTheme, setColorTheme, darkMode, setDarkMode, toggleDarkMode, autoDarkMode, toggleAutoDarkMode, preAlertMinutes, setPreAlertMinutes, alertSound, setAlertSound } = useTheme();
   const { requestPermission, schedulePrayerNotifications, isSupported } = useNotification();
   const { latitude, longitude, loading: geoLoading, permissionDenied, requestLocation } = useGeolocation();
-  const { playAdhan, playPreAlert, previewSound } = useAdhan();
+  const { playAdhan, playPreAlert, previewSound, primeAudio } = useAdhan();
   const { tryShowAd } = useInterstitialAd();
 
   // Sync Android status bar & navigation bar with theme
@@ -266,6 +266,7 @@ const Index = () => {
       ]);
       toast.info(t.notificationsOff);
     } else {
+      await primeAudio();
       const granted = await requestPermission();
       if (granted) {
         setNotificationsEnabled(true);
@@ -313,6 +314,9 @@ const Index = () => {
 
   const handleSoundAlertToggle = async (nextChecked?: boolean) => {
     const next = typeof nextChecked === "boolean" ? nextChecked : !soundAlertEnabled;
+    if (next) {
+      await primeAudio();
+    }
     setSoundAlertEnabled(next);
     await persistToggle(SOUND_ALERT_PREFERENCE_KEY, next);
   };
@@ -413,6 +417,8 @@ const Index = () => {
     );
   }
 
+  const settingsReady = hydrated && notificationsEnabled !== null && soundAlertEnabled !== null && preAlertEnabled !== null;
+
   return (
     <div 
       className="screen-shell screen-shell-top min-h-[100dvh] bg-background overflow-x-hidden"
@@ -444,6 +450,7 @@ const Index = () => {
               onPreviewSound={(path) => previewSound(path, 3000)}
               autoDarkMode={autoDarkMode}
               onAutoDarkModeToggle={toggleAutoDarkMode}
+              disabled={!settingsReady}
             />
           }
         />

@@ -20,11 +20,11 @@ import {
 
 interface SettingsDrawerProps {
   notificationsEnabled: boolean;
-  onNotificationToggle: () => void;
+  onNotificationToggle: (checked: boolean) => void;
   soundAlertEnabled: boolean;
-  onSoundAlertToggle: () => void;
+  onSoundAlertToggle: (checked: boolean) => void;
   preAlertEnabled: boolean;
-  onPreAlertToggle: () => void;
+  onPreAlertToggle: (checked: boolean) => void;
   colorTheme: ColorTheme;
   onColorThemeChange: (theme: ColorTheme) => void;
   preAlertMinutes: number;
@@ -33,7 +33,8 @@ interface SettingsDrawerProps {
   onAlertSoundChange: (sound: AlertSound) => void;
   onPreviewSound: (path: string) => void;
   autoDarkMode: boolean;
-  onAutoDarkModeToggle: () => void;
+  onAutoDarkModeToggle: (checked: boolean) => void;
+  disabled?: boolean;
 }
 
 export function SettingsDrawer({
@@ -52,6 +53,7 @@ export function SettingsDrawer({
   onPreviewSound,
   autoDarkMode,
   onAutoDarkModeToggle,
+  disabled = false,
 }: SettingsDrawerProps) {
   const { t, language, setLanguage } = useTranslation();
 
@@ -85,7 +87,7 @@ export function SettingsDrawer({
                 {notificationsEnabled ? <Bell className="w-5 h-5 text-primary" /> : <BellOff className="w-5 h-5 text-muted-foreground" />}
                 <span className="font-medium">{t.notifications}</span>
               </div>
-              <Switch checked={notificationsEnabled} onCheckedChange={onNotificationToggle} />
+              <Switch checked={notificationsEnabled} onCheckedChange={onNotificationToggle} disabled={disabled} />
             </div>
 
             {/* Sound Alert (Master) */}
@@ -97,7 +99,7 @@ export function SettingsDrawer({
                   <span className="text-xs text-muted-foreground">{t.soundAlertDesc}</span>
                 </div>
               </div>
-              <Switch checked={soundAlertEnabled} onCheckedChange={onSoundAlertToggle} />
+              <Switch checked={soundAlertEnabled} onCheckedChange={onSoundAlertToggle} disabled={disabled} />
             </div>
 
             {/* Pre-Alert Toggle + Minutes Slider */}
@@ -109,7 +111,7 @@ export function SettingsDrawer({
                     <span className="font-medium block">{t.preAlert}</span>
                   </div>
                 </div>
-                <Switch checked={preAlertEnabled} onCheckedChange={onPreAlertToggle} />
+                <Switch checked={preAlertEnabled} onCheckedChange={onPreAlertToggle} disabled={disabled} />
               </div>
               {preAlertEnabled && (
                 <div className="pl-8 pr-2">
@@ -140,7 +142,8 @@ export function SettingsDrawer({
                           type="radio"
                           name="alertSound"
                           checked={alertSound === key}
-                          onChange={() => onAlertSoundChange(key)}
+                         onChange={() => onAlertSoundChange(key)}
+                         disabled={disabled}
                           className="accent-primary"
                         />
                         <span className="text-sm">{ALERT_SOUND_LABELS[key]}</span>
@@ -150,6 +153,7 @@ export function SettingsDrawer({
                         size="icon"
                         className="w-8 h-8 rounded-full"
                         onClick={() => onPreviewSound(ALERT_SOUND_FILES[key])}
+                        disabled={disabled}
                       >
                         <Play className="w-4 h-4 text-primary" />
                       </Button>
@@ -165,7 +169,7 @@ export function SettingsDrawer({
                 <Palette className="w-5 h-5 text-muted-foreground" />
                 <span className="font-medium">{t.themeLabel}</span>
               </div>
-              <Select value={colorTheme} onValueChange={(v) => onColorThemeChange(v as ColorTheme)}>
+               <Select value={colorTheme} onValueChange={(v) => onColorThemeChange(v as ColorTheme)} disabled={disabled}>
                 <SelectTrigger className="w-[160px]">
                   <SelectValue />
                 </SelectTrigger>
@@ -186,7 +190,7 @@ export function SettingsDrawer({
                   <span className="text-xs text-muted-foreground">{t.autoDarkModeDesc}</span>
                 </div>
               </div>
-              <Switch checked={autoDarkMode} onCheckedChange={onAutoDarkModeToggle} />
+               <Switch checked={autoDarkMode} onCheckedChange={onAutoDarkModeToggle} disabled={disabled} />
             </div>
 
             {/* Language */}
@@ -195,7 +199,7 @@ export function SettingsDrawer({
                 <Globe className="w-5 h-5 text-muted-foreground" />
                 <span className="font-medium">{t.language}</span>
               </div>
-              <Select value={language} onValueChange={(value) => setLanguage(value as Language)}>
+               <Select value={language} onValueChange={(value) => setLanguage(value as Language)} disabled={disabled}>
                 <SelectTrigger className="w-[140px]">
                   <SelectValue />
                 </SelectTrigger>
