@@ -141,7 +141,7 @@ export function SettingsDrawer({
                         <input
                           type="radio"
                           name="alertSound"
-                          checked={ALERT_SOUND_FILES[alertSound] === ALERT_SOUND_FILES[key]}
+                          checked={alertSound === key}
                           onChange={() => onAlertSoundChange(key)}
                           disabled={disabled}
                           className="accent-primary"
