@@ -22,16 +22,17 @@ import {
   reverseGeocode,
   type PrayerTimesData,
 } from "@/lib/prayerTimes";
-import { Loader2, ChevronRight, Calendar, Volume2 } from "lucide-react";
+import { Loader2, ChevronRight, Calendar } from "lucide-react";
 import { toast } from "sonner";
 import { usePreferences, readPreference } from "@/hooks/usePreferences";
-import { Button } from "@/components/ui/button";
 
 type View = 'main' | 'qibla' | 'religious';
 
 const NOTIFICATION_PREFERENCE_KEY = "notificationsEnabled";
 const SOUND_ALERT_PREFERENCE_KEY = "soundAlertEnabled";
 const PRE_ALERT_PREFERENCE_KEY = "preAlertEnabled";
+const SETTINGS_BOOTSTRAP_VERSION_KEY = "settingsBootstrapVersion";
+const SETTINGS_BOOTSTRAP_VERSION = "2026-04-21-default-off";
 
 function getStoredBoolean(key: string, fallback = false) {
   if (typeof window === "undefined") return fallback;
@@ -95,39 +96,50 @@ const Index = () => {
     enabled: notificationsEnabled === true,
   });
 
-  // Hydrate all toggle states from Preferences on mount — until done, render null states
+  // Hydrate all toggle states from Preferences on mount — reset old persisted values once
   useEffect(() => {
     let isActive = true;
 
     const hydrate = async () => {
       try {
-        const [notifValue, soundValue, preAlertValue] = await Promise.all([
+        const [settingsVersion, notifValue, soundValue, preAlertValue] = await Promise.all([
+          readPreference(SETTINGS_BOOTSTRAP_VERSION_KEY),
           readPreference(NOTIFICATION_PREFERENCE_KEY),
           readPreference(SOUND_ALERT_PREFERENCE_KEY),
           readPreference(PRE_ALERT_PREFERENCE_KEY),
         ]);
         if (!isActive) return;
 
-        const n = notifValue !== null ? notifValue === "true" : getStoredBoolean(NOTIFICATION_PREFERENCE_KEY);
-        const s = soundValue !== null ? soundValue === "true" : getStoredBoolean(SOUND_ALERT_PREFERENCE_KEY);
-        const p = preAlertValue !== null ? preAlertValue === "true" : getStoredBoolean(PRE_ALERT_PREFERENCE_KEY);
+        const shouldReset = settingsVersion !== SETTINGS_BOOTSTRAP_VERSION;
+        const n = shouldReset ? false : notifValue !== null ? notifValue === "true" : getStoredBoolean(NOTIFICATION_PREFERENCE_KEY);
+        const s = shouldReset ? false : soundValue !== null ? soundValue === "true" : getStoredBoolean(SOUND_ALERT_PREFERENCE_KEY);
+        const p = shouldReset ? false : preAlertValue !== null ? preAlertValue === "true" : getStoredBoolean(PRE_ALERT_PREFERENCE_KEY);
 
         setNotificationsEnabled(n);
         setSoundAlertEnabled(s);
         setPreAlertEnabled(p);
 
-        // Sync back to localStorage
         localStorage.setItem(NOTIFICATION_PREFERENCE_KEY, String(n));
         localStorage.setItem(SOUND_ALERT_PREFERENCE_KEY, String(s));
         localStorage.setItem(PRE_ALERT_PREFERENCE_KEY, String(p));
+        localStorage.setItem(SETTINGS_BOOTSTRAP_VERSION_KEY, SETTINGS_BOOTSTRAP_VERSION);
+
+        if (shouldReset) {
+          await Promise.all([
+            setPreference(NOTIFICATION_PREFERENCE_KEY, "false"),
+            setPreference(SOUND_ALERT_PREFERENCE_KEY, "false"),
+            setPreference(PRE_ALERT_PREFERENCE_KEY, "false"),
+            setPreference(SETTINGS_BOOTSTRAP_VERSION_KEY, SETTINGS_BOOTSTRAP_VERSION),
+          ]);
+        }
       } finally {
         if (isActive) setHydrated(true);
       }
     };
 
-    hydrate();
+    void hydrate();
     return () => { isActive = false; };
-  }, []);
+  }, [setPreference]);
 
   // Re-sync when app comes to foreground
   useEffect(() => {
