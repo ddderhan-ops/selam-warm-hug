@@ -284,3 +284,13 @@
     @apply backdrop-blur-xl bg-card/80 border border-border/50;
   }
 }
+
+/* Prevent system font scaling from breaking layout */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+.screen-shell {
+  font-size: clamp(0.75rem, 2vw, 1rem);
+}
