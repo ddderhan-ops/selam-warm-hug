@@ -3,7 +3,7 @@
 import { clientsClaim } from "workbox-core";
 import { cleanupOutdatedCaches, precacheAndRoute } from "workbox-precaching";
 import { registerRoute } from "workbox-routing";
-import { CacheFirst, NetworkFirst, StaleWhileRevalidate } from "workbox-strategies";
+import { NetworkFirst, StaleWhileRevalidate } from "workbox-strategies";
 import { ExpirationPlugin } from "workbox-expiration";
 import {
   getAllPrayerTimesCache,
@@ -95,20 +95,6 @@ registerRoute(
 );
 
 registerRoute(
-  ({ request, url }) => request.destination === "audio" || url.pathname.endsWith("/ezan.mp3"),
-  new NetworkFirst({
-    cacheName: "audio-cache",
-    networkTimeoutSeconds: 3,
-    plugins: [
-      new ExpirationPlugin({
-        maxEntries: 10,
-        maxAgeSeconds: 60 * 60 * 24 * 7,
-      }),
-    ],
-  })
-);
-
-registerRoute(
   ({ url }) => /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i.test(url.href),
   new StaleWhileRevalidate({
     cacheName: "google-fonts-cache",
@@ -169,9 +155,11 @@ async function checkDuePrayerNotifications(): Promise<void> {
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    checkDuePrayerNotifications().then(() => {
-      startPeriodicCheck();
-    })
+    caches.delete("audio-cache").then(() =>
+      checkDuePrayerNotifications().then(() => {
+        startPeriodicCheck();
+      })
+    )
   );
 });
 
