@@ -4,7 +4,7 @@ import { CountdownTimer } from "@/components/CountdownTimer";
 import { PrayerTimesList } from "@/components/PrayerTimesList";
 import { DailyVerse } from "@/components/DailyVerse";
 import { AdPlaceholder } from "@/components/AdPlaceholder";
-import { LocationPermissionCard } from "@/components/LocationPermissionCard";
+
 import { SplashScreen } from "@/components/SplashScreen";
 import { QiblaCompass } from "@/components/QiblaCompass";
 import { SettingsDrawer } from "@/components/SettingsDrawer";
