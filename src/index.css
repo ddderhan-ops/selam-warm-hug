@@ -227,6 +227,13 @@
     overflow-x: hidden;
   }
 
+  html.native-edge-to-edge,
+  body.native-edge-to-edge,
+  html.native-edge-to-edge body,
+  body.native-edge-to-edge #root {
+    background-color: hsl(var(--background));
+  }
+
   #root {
     display: flex;
     flex-direction: column;

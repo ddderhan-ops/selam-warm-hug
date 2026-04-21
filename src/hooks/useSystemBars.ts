@@ -20,7 +20,7 @@ export function useSystemBars(colorTheme: ColorTheme, darkMode: boolean) {
           color: "#00000000",
           darkButtons: !darkMode,
         });
-        await StatusBar.setStyle({ style: darkMode ? Style.Dark : Style.Light });
+        await StatusBar.setStyle({ style: darkMode ? Style.Light : Style.Dark });
       } catch (error) {
         console.warn("System bar init error:", error);
       }
@@ -37,7 +37,7 @@ export function useSystemBars(colorTheme: ColorTheme, darkMode: boolean) {
 
     const frame = window.requestAnimationFrame(() => {
       void Promise.all([
-        StatusBar.setStyle({ style: darkMode ? Style.Dark : Style.Light }),
+        StatusBar.setStyle({ style: darkMode ? Style.Light : Style.Dark }),
         NavigationBar.setColor({ color: "#00000000", darkButtons: !darkMode }),
       ]).catch((error) => {
         console.warn("System bar sync error:", error);

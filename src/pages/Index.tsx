@@ -266,7 +266,6 @@ const Index = () => {
       ]);
       toast.info(t.notificationsOff);
     } else {
-      await primeAudio();
       const granted = await requestPermission();
       if (granted) {
         setNotificationsEnabled(true);
@@ -314,9 +313,6 @@ const Index = () => {
 
   const handleSoundAlertToggle = async (nextChecked?: boolean) => {
     const next = typeof nextChecked === "boolean" ? nextChecked : !soundAlertEnabled;
-    if (next) {
-      await primeAudio();
-    }
     setSoundAlertEnabled(next);
     await persistToggle(SOUND_ALERT_PREFERENCE_KEY, next);
   };

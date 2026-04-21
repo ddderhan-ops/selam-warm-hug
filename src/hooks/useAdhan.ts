@@ -14,7 +14,6 @@ function createAudio(path: string) {
   audio.preload = "auto";
   audio.volume = 0.85;
   audio.src = cacheBust(path);
-  audio.load();
   return audio;
 }
 
@@ -76,18 +75,8 @@ export function useAdhan() {
   const primeAudio = useCallback((path = ADHAN_PATH) => {
     try {
       const audio = createAudio(path);
-      audio.muted = true;
-      const unlock = audio.play()
-        .then(() => {
-          audio.pause();
-          audio.currentTime = 0;
-          audio.muted = false;
-        })
-        .catch((error) => {
-          console.warn("Ses ön hazırlığı başarısız:", error);
-        });
-
-      return unlock;
+      audio.load();
+      return Promise.resolve();
     } catch (error) {
       console.warn("Ses ön hazırlığı kurulamadı:", error);
       return Promise.resolve();
