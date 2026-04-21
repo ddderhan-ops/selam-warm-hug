@@ -4,6 +4,7 @@ import { CountdownTimer } from "@/components/CountdownTimer";
 import { PrayerTimesList } from "@/components/PrayerTimesList";
 import { DailyVerse } from "@/components/DailyVerse";
 import { AdPlaceholder } from "@/components/AdPlaceholder";
+import { LocationPermissionCard } from "@/components/LocationPermissionCard";
 import { SplashScreen } from "@/components/SplashScreen";
 import { QiblaCompass } from "@/components/QiblaCompass";
 import { SettingsDrawer } from "@/components/SettingsDrawer";
@@ -409,6 +410,14 @@ const Index = () => {
           <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
           <p className="text-muted-foreground">{t.loadingLocation}</p>
         </div>
+      </div>
+    );
+  }
+
+  if (!latitude && !longitude && !loading && (permissionDenied || !geoLoading)) {
+    return (
+      <div className="screen-shell min-h-[100dvh] bg-background flex items-center justify-center p-4">
+        <LocationPermissionCard onRequestLocation={requestLocation} loading={geoLoading} />
       </div>
     );
   }

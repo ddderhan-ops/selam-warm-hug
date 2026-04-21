@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 interface GeolocationState {
   latitude: number | null;
@@ -13,9 +13,11 @@ export function useGeolocation() {
     latitude: null,
     longitude: null,
     error: null,
-    loading: true,
+    loading: false,
     permissionDenied: false,
   });
+
+  const hasRequestedRef = useRef(false);
 
   const requestLocation = useCallback(() => {
     if (!navigator.geolocation) {
@@ -72,8 +74,27 @@ export function useGeolocation() {
     );
   }, []);
 
+  // On mount, check if permission is already granted — only auto-request if so
   useEffect(() => {
-    requestLocation();
+    if (hasRequestedRef.current) return;
+
+    if (navigator.permissions) {
+      navigator.permissions.query({ name: "geolocation" }).then((result) => {
+        if (result.state === "granted") {
+          hasRequestedRef.current = true;
+          requestLocation();
+        }
+        // If "prompt" or "denied", show the LocationPermissionCard instead
+      }).catch(() => {
+        // Fallback: auto-request (older browsers)
+        hasRequestedRef.current = true;
+        requestLocation();
+      });
+    } else {
+      // No permissions API — auto-request
+      hasRequestedRef.current = true;
+      requestLocation();
+    }
   }, [requestLocation]);
 
   return { ...state, requestLocation };
