@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Capacitor } from "@capacitor/core";
 import { StatusBar, Style } from "@capacitor/status-bar";
-import { NavigationBar } from "@hugotomazi/capacitor-navigation-bar";
+import { NavigationBar } from "@capgo/capacitor-navigation-bar";
 import type { ColorTheme } from "@/hooks/useTheme";
 
 export function useSystemBars(colorTheme: ColorTheme, darkMode: boolean) {
