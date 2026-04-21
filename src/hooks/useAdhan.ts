@@ -1,9 +1,9 @@
 import { useRef, useCallback, useEffect, useState, type MutableRefObject } from "react";
-import { ALERT_SOUND_FILES, ALERT_SOUND_LABELS, type AlertSound } from "@/hooks/useTheme";
+import { ALERT_SOUND_FILES, type AlertSound } from "@/hooks/useTheme";
+import { useTranslation } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
 
 const ADHAN_PATH = "/ezan.mp3";
-const AUDIO_ERROR_MESSAGE = "Ses dosyası çalınamadı";
 
 function cacheBust(path: string): string {
   const separator = path.includes("?") ? "&" : "?";
@@ -18,6 +18,7 @@ function createAudio(path: string): HTMLAudioElement {
 }
 
 export function useAdhan() {
+  const { t } = useTranslation();
   const adhanRef = useRef<HTMLAudioElement | null>(null);
   const preAlertRef = useRef<HTMLAudioElement | null>(null);
   const previewRef = useRef<HTMLAudioElement | null>(null);
@@ -56,19 +57,20 @@ export function useAdhan() {
       audio.currentTime = 0;
       setIsPlaying(true);
       await audio.play();
-      if (label) toast.success(`${label} çalıyor...`);
+      if (label) toast.success(t.audioPlaying.replace('{label}', label));
       return true;
     } catch (error) {
-      console.error(`${AUDIO_ERROR_MESSAGE}:`, error);
+      console.error(`${t.audioError}:`, error);
       targetRef.current = null;
       setIsPlaying(false);
-      toast.error(label ? `"${label}" çalınamadı` : AUDIO_ERROR_MESSAGE);
+      toast.error(label ? t.audioPlayError.replace('{label}', label) : t.audioError);
       return false;
     }
-  }, [stopAll]);
+  }, [stopAll, t]);
 
   const playAdhan = useCallback(async () => {
-    const started = await playAudio(ADHAN_PATH, adhanRef, "Ezan");
+    const label = t.alertSoundNames.uyari;
+    const started = await playAudio(ADHAN_PATH, adhanRef, label);
     if (!started || !adhanRef.current) return false;
 
     const audio = adhanRef.current;
@@ -76,16 +78,16 @@ export function useAdhan() {
       setIsPlaying(false);
     }, { once: true });
     return true;
-  }, [playAudio]);
+  }, [playAudio, t]);
 
   const primeAudio = useCallback(async () => true, []);
 
   const playPreAlert = useCallback(async (soundKey?: AlertSound) => {
     const key = soundKey || (localStorage.getItem("alertSound") as AlertSound) || "uyari";
     const path = ALERT_SOUND_FILES[key] || ALERT_SOUND_FILES.uyari;
-    const label = ALERT_SOUND_LABELS[key] || "Uyarı";
+    const label = t.alertSoundNames[key] || t.alertSoundNames.uyari;
     return playAudio(path, preAlertRef, label);
-  }, [playAudio]);
+  }, [playAudio, t]);
 
   const previewSound = useCallback(async (path: string, durationMs = 3000) => {
     const started = await playAudio(path, previewRef);

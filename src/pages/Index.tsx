@@ -272,7 +272,7 @@ const Index = () => {
     const shouldEnable = typeof nextChecked === "boolean" ? nextChecked : !notificationsEnabled;
 
     if (!isSupported) {
-      toast.error("Tarayıcınız bildirimleri desteklemiyor.");
+      toast.error(t.notifNotSupported);
       return;
     }
 
@@ -328,7 +328,7 @@ const Index = () => {
           persistToggle(SOUND_ALERT_PREFERENCE_KEY, false),
           persistToggle(PRE_ALERT_PREFERENCE_KEY, false),
         ]);
-        toast.error("Bildirim izni reddedildi");
+        toast.error(t.notifPermissionDenied);
       }
     }
   };

@@ -59,6 +59,25 @@ export interface Translations {
   alertSoundLabel: string;
   autoDarkMode: string;
   autoDarkModeDesc: string;
+  // Notification & audio strings
+  notifPrayerTitle: string;
+  notifPrayerBody: string;
+  notifPreAlertTitle: string;
+  notifPreAlertBody: string;
+  notifChannelName: string;
+  notifChannelSilent: string;
+  notifPreAlertChannel: string;
+  audioPlaying: string;
+  audioError: string;
+  audioPlayError: string;
+  notifNotSupported: string;
+  notifPermissionDenied: string;
+  alertSoundNames: {
+    uyari: string;
+    uyari1: string;
+    uyari2: string;
+    uyari3: string;
+  };
 }
 
 const translations: Record<Language, Translations> = {
@@ -155,6 +174,24 @@ const translations: Record<Language, Translations> = {
     alertSoundLabel: 'Hatırlatıcı Sesi',
     autoDarkMode: 'Otomatik Gece Modu',
     autoDarkModeDesc: 'Akşam vakti karanlık, imsak vakti aydınlık',
+    notifPrayerTitle: 'Ezan Vakti Geldi: {prayer}',
+    notifPrayerBody: '{prayer} vakti girdi. Hayırlı ibadetler.',
+    notifPreAlertTitle: '{prayer} vaktine {min} dakika',
+    notifPreAlertBody: '{prayer} vakti yaklaşıyor. Hazırlıklarınızı yapın.',
+    notifChannelName: 'Namaz Vakitleri',
+    notifChannelSilent: 'Namaz Vakitleri (Sessiz)',
+    notifPreAlertChannel: 'Vakit Öncesi Hatırlatıcı',
+    audioPlaying: '{label} çalıyor...',
+    audioError: 'Ses dosyası çalınamadı',
+    audioPlayError: '"{label}" çalınamadı',
+    notifNotSupported: 'Tarayıcınız bildirimleri desteklemiyor.',
+    notifPermissionDenied: 'Bildirim izni reddedildi',
+    alertSoundNames: {
+      uyari: 'Allahu Ekber',
+      uyari1: 'Uyarı Sesi 1',
+      uyari2: 'Uyarı Sesi 2',
+      uyari3: 'Uyarı Sesi 3',
+    },
   },
   en: {
     appName: 'Nur Ezan Vakti',
@@ -249,6 +286,24 @@ const translations: Record<Language, Translations> = {
     alertSoundLabel: 'Alert Sound',
     autoDarkMode: 'Auto Night Mode',
     autoDarkModeDesc: 'Dark at Maghrib, light at Fajr',
+    notifPrayerTitle: 'Prayer Time: {prayer}',
+    notifPrayerBody: '{prayer} time has arrived. May your prayers be accepted.',
+    notifPreAlertTitle: '{min} minutes until {prayer}',
+    notifPreAlertBody: '{prayer} time is approaching. Get ready.',
+    notifChannelName: 'Prayer Times',
+    notifChannelSilent: 'Prayer Times (Silent)',
+    notifPreAlertChannel: 'Pre-Prayer Reminder',
+    audioPlaying: '{label} playing...',
+    audioError: 'Could not play audio',
+    audioPlayError: 'Could not play "{label}"',
+    notifNotSupported: 'Your browser does not support notifications.',
+    notifPermissionDenied: 'Notification permission denied',
+    alertSoundNames: {
+      uyari: 'Allahu Akbar',
+      uyari1: 'Alert Sound 1',
+      uyari2: 'Alert Sound 2',
+      uyari3: 'Alert Sound 3',
+    },
   },
   de: {
     appName: 'Nur Ezan Vakti',
@@ -343,6 +398,24 @@ const translations: Record<Language, Translations> = {
     alertSoundLabel: 'Erinnerungston',
     autoDarkMode: 'Auto-Nachtmodus',
     autoDarkModeDesc: 'Dunkel bei Maghrib, hell bei Fajr',
+    notifPrayerTitle: 'Gebetszeit: {prayer}',
+    notifPrayerBody: '{prayer}-Zeit ist da. Mögen Ihre Gebete angenommen werden.',
+    notifPreAlertTitle: '{min} Minuten bis {prayer}',
+    notifPreAlertBody: '{prayer}-Zeit nähert sich. Bereiten Sie sich vor.',
+    notifChannelName: 'Gebetszeiten',
+    notifChannelSilent: 'Gebetszeiten (Stumm)',
+    notifPreAlertChannel: 'Gebetserinnerung',
+    audioPlaying: '{label} wird abgespielt...',
+    audioError: 'Audiodatei konnte nicht abgespielt werden',
+    audioPlayError: '"{label}" konnte nicht abgespielt werden',
+    notifNotSupported: 'Ihr Browser unterstützt keine Benachrichtigungen.',
+    notifPermissionDenied: 'Benachrichtigungsberechtigung verweigert',
+    alertSoundNames: {
+      uyari: 'Allahu Akbar',
+      uyari1: 'Alarmsignal 1',
+      uyari2: 'Alarmsignal 2',
+      uyari3: 'Alarmsignal 3',
+    },
   },
   fr: {
     appName: 'Nur Ezan Vakti',
@@ -437,6 +510,24 @@ const translations: Record<Language, Translations> = {
     alertSoundLabel: 'Son de rappel',
     autoDarkMode: 'Mode nuit auto',
     autoDarkModeDesc: 'Sombre au Maghrib, clair au Fajr',
+    notifPrayerTitle: 'Heure de prière : {prayer}',
+    notifPrayerBody: "L'heure de {prayer} est arrivée. Que vos prières soient acceptées.",
+    notifPreAlertTitle: '{min} minutes avant {prayer}',
+    notifPreAlertBody: "L'heure de {prayer} approche. Préparez-vous.",
+    notifChannelName: 'Heures de prière',
+    notifChannelSilent: 'Heures de prière (Silencieux)',
+    notifPreAlertChannel: 'Rappel avant la prière',
+    audioPlaying: '{label} en cours...',
+    audioError: 'Impossible de lire le fichier audio',
+    audioPlayError: 'Impossible de lire "{label}"',
+    notifNotSupported: 'Votre navigateur ne prend pas en charge les notifications.',
+    notifPermissionDenied: 'Autorisation de notification refusée',
+    alertSoundNames: {
+      uyari: 'Allahu Akbar',
+      uyari1: 'Son d\'alerte 1',
+      uyari2: 'Son d\'alerte 2',
+      uyari3: 'Son d\'alerte 3',
+    },
   },
   ar: {
     appName: 'Nur Ezan Vakti',
@@ -531,6 +622,24 @@ const translations: Record<Language, Translations> = {
     alertSoundLabel: 'صوت التنبيه',
     autoDarkMode: 'الوضع الليلي التلقائي',
     autoDarkModeDesc: 'مظلم عند المغرب، مضيء عند الفجر',
+    notifPrayerTitle: 'وقت الصلاة: {prayer}',
+    notifPrayerBody: 'حان وقت {prayer}. تقبل الله صلاتكم.',
+    notifPreAlertTitle: '{min} دقيقة حتى {prayer}',
+    notifPreAlertBody: 'يقترب وقت {prayer}. استعدّوا.',
+    notifChannelName: 'أوقات الصلاة',
+    notifChannelSilent: 'أوقات الصلاة (صامت)',
+    notifPreAlertChannel: 'تذكير قبل الصلاة',
+    audioPlaying: 'يتم تشغيل {label}...',
+    audioError: 'تعذّر تشغيل الملف الصوتي',
+    audioPlayError: 'تعذّر تشغيل "{label}"',
+    notifNotSupported: 'متصفحك لا يدعم الإشعارات.',
+    notifPermissionDenied: 'تم رفض إذن الإشعارات',
+    alertSoundNames: {
+      uyari: 'الله أكبر',
+      uyari1: 'صوت تنبيه 1',
+      uyari2: 'صوت تنبيه 2',
+      uyari3: 'صوت تنبيه 3',
+    },
   },
   es: {
     appName: 'Nur Ezan Vakti',
@@ -625,6 +734,24 @@ const translations: Record<Language, Translations> = {
     alertSoundLabel: 'Sonido de alerta',
     autoDarkMode: 'Modo noche auto',
     autoDarkModeDesc: 'Oscuro en Maghrib, claro en Fajr',
+    notifPrayerTitle: 'Hora de oración: {prayer}',
+    notifPrayerBody: 'Ha llegado la hora de {prayer}. Que tus oraciones sean aceptadas.',
+    notifPreAlertTitle: '{min} minutos para {prayer}',
+    notifPreAlertBody: 'Se acerca la hora de {prayer}. Prepárate.',
+    notifChannelName: 'Horarios de oración',
+    notifChannelSilent: 'Horarios de oración (Silencioso)',
+    notifPreAlertChannel: 'Recordatorio previo',
+    audioPlaying: '{label} reproduciendo...',
+    audioError: 'No se pudo reproducir el archivo de audio',
+    audioPlayError: 'No se pudo reproducir "{label}"',
+    notifNotSupported: 'Tu navegador no admite notificaciones.',
+    notifPermissionDenied: 'Permiso de notificación denegado',
+    alertSoundNames: {
+      uyari: 'Allahu Akbar',
+      uyari1: 'Sonido de alerta 1',
+      uyari2: 'Sonido de alerta 2',
+      uyari3: 'Sonido de alerta 3',
+    },
   },
   pt: {
     appName: 'Nur Ezan Vakti',
@@ -719,6 +846,24 @@ const translations: Record<Language, Translations> = {
     alertSoundLabel: 'Som de alerta',
     autoDarkMode: 'Modo noturno auto',
     autoDarkModeDesc: 'Escuro no Maghrib, claro no Fajr',
+    notifPrayerTitle: 'Hora da oração: {prayer}',
+    notifPrayerBody: 'Chegou a hora de {prayer}. Que suas orações sejam aceitas.',
+    notifPreAlertTitle: '{min} minutos para {prayer}',
+    notifPreAlertBody: 'A hora de {prayer} está se aproximando. Prepare-se.',
+    notifChannelName: 'Horários de oração',
+    notifChannelSilent: 'Horários de oração (Silencioso)',
+    notifPreAlertChannel: 'Lembrete prévio',
+    audioPlaying: '{label} reproduzindo...',
+    audioError: 'Não foi possível reproduzir o áudio',
+    audioPlayError: 'Não foi possível reproduzir "{label}"',
+    notifNotSupported: 'Seu navegador não suporta notificações.',
+    notifPermissionDenied: 'Permissão de notificação negada',
+    alertSoundNames: {
+      uyari: 'Allahu Akbar',
+      uyari1: 'Som de alerta 1',
+      uyari2: 'Som de alerta 2',
+      uyari3: 'Som de alerta 3',
+    },
   },
 };
 
