@@ -1,5 +1,5 @@
 import { useRef, useCallback, useEffect, useState, type MutableRefObject } from "react";
-import { ALERT_SOUND_FILES, type AlertSound } from "@/hooks/useTheme";
+import { ALERT_SOUND_FILES, ALERT_SOUND_LABELS, type AlertSound } from "@/hooks/useTheme";
 import { toast } from "sonner";
 
 const ADHAN_PATH = "/ezan.mp3";
@@ -147,5 +147,3 @@ export function useAdhan() {
 
   return { playAdhan, playPreAlert, previewSound, stopAdhan, primeAudio, isPlaying };
 }
-
-import { ALERT_SOUND_LABELS } from "./useTheme";
