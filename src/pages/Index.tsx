@@ -79,7 +79,7 @@ const Index = () => {
 
   const { colorTheme, setColorTheme, darkMode, setDarkMode, toggleDarkMode, autoDarkMode, toggleAutoDarkMode, preAlertMinutes, setPreAlertMinutes, alertSound, setAlertSound } = useTheme();
   const { requestPermission, schedulePrayerNotifications, isSupported } = useNotification();
-  const { latitude, longitude, loading: geoLoading, permissionDenied, requestLocation } = useGeolocation();
+  const { latitude, longitude, loading: geoLoading, error: geoError, permissionDenied, requestLocation } = useGeolocation();
   const { playAdhan, playPreAlert, previewSound } = useAdhan();
   const { tryShowAd } = useInterstitialAd();
 
@@ -179,8 +179,13 @@ const Index = () => {
     setError(null);
 
     try {
-      const lat = latitude || 41.0082;
-      const lon = longitude || 28.9784;
+      if (latitude == null || longitude == null) {
+        setLoading(false);
+        return;
+      }
+
+      const lat = latitude;
+      const lon = longitude;
       const data = await fetchPrayerTimes({ latitude: lat, longitude: lon }, undefined, language);
       
       setLocationName(data.city);
@@ -218,8 +223,23 @@ const Index = () => {
   }, [latitude, longitude, language, notificationsEnabled, preAlertEnabled, schedulePrayerNotifications, soundAlertEnabled, playAdhan, playPreAlert, t.prayerTimesError, preAlertMinutes, alertSound]);
 
   useEffect(() => {
-    if (!geoLoading) loadPrayerTimes();
+    if (!geoLoading && latitude != null && longitude != null) loadPrayerTimes();
   }, [geoLoading, loadPrayerTimes]);
+
+  useEffect(() => {
+    if (geoLoading) return;
+
+    if (permissionDenied) {
+      setLoading(false);
+      setError(geoError || "Konum izni reddedildi. Lütfen cihaz ayarlarından konum iznini açın.");
+      return;
+    }
+
+    if ((latitude == null || longitude == null) && geoError) {
+      setLoading(false);
+      setError(geoError);
+    }
+  }, [geoLoading, permissionDenied, geoError, latitude, longitude]);
 
   useEffect(() => {
     const interval = window.setInterval(() => setNowTimestamp(Date.now()), 1000);
@@ -414,11 +434,6 @@ const Index = () => {
     );
   }
 
-  if (!latitude && !longitude && !loading && permissionDenied) {
-    // Permission denied — retry triggers native dialog again
-    requestLocation();
-  }
-
   if (loading && !prayerData) {
     return (
       <div className="screen-shell min-h-[100dvh] bg-background flex items-center justify-center">
@@ -435,7 +450,7 @@ const Index = () => {
       <div className="screen-shell min-h-[100dvh] bg-background flex items-center justify-center p-4">
         <div className="text-center">
           <p className="text-destructive mb-4">{error}</p>
-          <button onClick={loadPrayerTimes} className="text-primary underline">{t.retry}</button>
+          <button onClick={permissionDenied ? requestLocation : loadPrayerTimes} className="text-primary underline">{t.retry}</button>
         </div>
       </div>
     );
