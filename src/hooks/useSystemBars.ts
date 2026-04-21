@@ -7,6 +7,7 @@ import type { ColorTheme } from "@/hooks/useTheme";
 export function useSystemBars(colorTheme: ColorTheme, darkMode: boolean) {
   useEffect(() => {
     document.documentElement.classList.toggle("native-edge-to-edge", Capacitor.isNativePlatform());
+    document.body.classList.toggle("native-edge-to-edge", Capacitor.isNativePlatform());
 
     if (!Capacitor.isNativePlatform()) return;
 
@@ -27,6 +28,7 @@ export function useSystemBars(colorTheme: ColorTheme, darkMode: boolean) {
 
     return () => {
       document.documentElement.classList.remove("native-edge-to-edge");
+      document.body.classList.remove("native-edge-to-edge");
     };
   }, [darkMode]);
 
