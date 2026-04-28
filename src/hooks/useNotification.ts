@@ -243,7 +243,7 @@ export function useNotification() {
       prayers: PrayerTime[],
       onPrayerTime?: (prayer: PrayerTime) => void,
       context?: NotificationScheduleContext,
-      options?: { soundAlertEnabled?: boolean; preAlertEnabled?: boolean; preAlertMinutes?: number; onPreAlert?: (prayer: PrayerTime) => void }
+      options?: { soundAlertEnabled?: boolean; preAlertEnabled?: boolean; preAlertMinutes?: number; alertSound?: string; onPreAlert?: (prayer: PrayerTime) => void }
     ) => {
       void syncPrayerScheduleWithServiceWorker(prayers, context);
 
@@ -267,6 +267,9 @@ export function useNotification() {
       const PRE_ALERT_MS = preAlertMins * 60 * 1000;
 
       const useSilentChannel = options?.soundAlertEnabled === true;
+      const preAlertSoundKey = options?.alertSound || "uyari";
+      const preAlertChannelId = getPreAlertChannelId(preAlertSoundKey);
+      const preAlertSoundFile = PRE_ALERT_SOUND_CHANNELS[preAlertSoundKey]?.sound;
 
       prayers.forEach((prayer) => {
         const timeUntil = prayer.timestamp - now;
@@ -298,13 +301,16 @@ export function useNotification() {
               schedule: { at: new Date(preAlertTime), allowWhileIdle: true },
               smallIcon: "ic_notification",
               largeIcon: "ic_launcher",
-              channelId: PRE_ALERT_CHANNEL_ID,
+              channelId: preAlertChannelId,
+              sound: preAlertSoundFile,
               ongoing: false,
               autoCancel: true,
             });
           }
         }
       });
+
+      console.log(`[Notification] Scheduling ${notifications.length} notifications. Pre-alert: ${options?.preAlertEnabled ? `${preAlertMins}min, sound=${preAlertSoundKey}` : 'off'}`);
 
       if (notifications.length > 0) {
         try {
