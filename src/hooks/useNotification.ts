@@ -10,6 +10,21 @@ const PRAYER_CHANNEL_ID = "prayer-times-channel";
 const PRAYER_SILENT_CHANNEL_ID = "prayer-times-silent";
 const PRE_ALERT_CHANNEL_ID = "pre-alert-channel";
 
+// Per-sound pre-alert channels (Android channel sound is immutable; we need one channel per sound)
+const PRE_ALERT_SOUND_CHANNELS: Record<string, { id: string; sound: string }> = {
+  uyari: { id: "pre-alert-uyari", sound: "ezan" },
+  uyari1: { id: "pre-alert-uyari1", sound: "uyari1" },
+  uyari2: { id: "pre-alert-uyari2", sound: "uyari2" },
+  uyari3: { id: "pre-alert-uyari3", sound: "uyari3" },
+};
+
+function getPreAlertChannelId(soundKey?: string): string {
+  if (soundKey && PRE_ALERT_SOUND_CHANNELS[soundKey]) {
+    return PRE_ALERT_SOUND_CHANNELS[soundKey].id;
+  }
+  return PRE_ALERT_CHANNEL_ID;
+}
+
 const PRAYER_FIXED_IDS: Record<string, number> = {
   Fajr: 1,
   Sunrise: 2,
@@ -54,6 +69,22 @@ async function ensureNotificationChannels(t: Translations): Promise<void> {
       visibility: 1,
       vibration: true,
     });
+    // Create one channel per pre-alert sound so the right sound plays
+    for (const [, ch] of Object.entries(PRE_ALERT_SOUND_CHANNELS)) {
+      try {
+        await LocalNotifications.createChannel({
+          id: ch.id,
+          name: `${t.notifPreAlertChannel} (${ch.sound})`,
+          description: t.notifPreAlertChannel,
+          importance: 5,
+          visibility: 1,
+          vibration: true,
+          sound: ch.sound, // Android raw resource name (without extension)
+        });
+      } catch {
+        // ignore individual channel failures
+      }
+    }
   } catch {
     // Web ortamında createChannel desteklenmez
   }
@@ -212,7 +243,7 @@ export function useNotification() {
       prayers: PrayerTime[],
       onPrayerTime?: (prayer: PrayerTime) => void,
       context?: NotificationScheduleContext,
-      options?: { soundAlertEnabled?: boolean; preAlertEnabled?: boolean; preAlertMinutes?: number; onPreAlert?: (prayer: PrayerTime) => void }
+      options?: { soundAlertEnabled?: boolean; preAlertEnabled?: boolean; preAlertMinutes?: number; alertSound?: string; onPreAlert?: (prayer: PrayerTime) => void }
     ) => {
       void syncPrayerScheduleWithServiceWorker(prayers, context);
 
@@ -236,6 +267,9 @@ export function useNotification() {
       const PRE_ALERT_MS = preAlertMins * 60 * 1000;
 
       const useSilentChannel = options?.soundAlertEnabled === true;
+      const preAlertSoundKey = options?.alertSound || "uyari";
+      const preAlertChannelId = getPreAlertChannelId(preAlertSoundKey);
+      const preAlertSoundFile = PRE_ALERT_SOUND_CHANNELS[preAlertSoundKey]?.sound;
 
       prayers.forEach((prayer) => {
         const timeUntil = prayer.timestamp - now;
@@ -267,13 +301,16 @@ export function useNotification() {
               schedule: { at: new Date(preAlertTime), allowWhileIdle: true },
               smallIcon: "ic_notification",
               largeIcon: "ic_launcher",
-              channelId: PRE_ALERT_CHANNEL_ID,
+              channelId: preAlertChannelId,
+              sound: preAlertSoundFile,
               ongoing: false,
               autoCancel: true,
             });
           }
         }
       });
+
+      console.log(`[Notification] Scheduling ${notifications.length} notifications. Pre-alert: ${options?.preAlertEnabled ? `${preAlertMins}min, sound=${preAlertSoundKey}` : 'off'}`);
 
       if (notifications.length > 0) {
         try {
