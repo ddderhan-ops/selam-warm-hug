@@ -206,6 +206,7 @@ const Index = () => {
             soundAlertEnabled: soundAlertEnabled === true,
             preAlertEnabled: preAlertEnabled === true,
             preAlertMinutes,
+            alertSound,
             onPreAlert: () => {
               const soundOn = localStorage.getItem(SOUND_ALERT_PREFERENCE_KEY) === "true";
               const preOn = localStorage.getItem(PRE_ALERT_PREFERENCE_KEY) === "true";
@@ -331,6 +332,7 @@ const Index = () => {
               soundAlertEnabled: true,
               preAlertEnabled: true,
               preAlertMinutes,
+              alertSound,
               onPreAlert: () => {
                 const soundOn = localStorage.getItem(SOUND_ALERT_PREFERENCE_KEY) === "true";
                 const preOn = localStorage.getItem(PRE_ALERT_PREFERENCE_KEY) === "true";
@@ -377,6 +379,7 @@ const Index = () => {
           soundAlertEnabled: soundAlertEnabled === true,
           preAlertEnabled: next,
           preAlertMinutes,
+          alertSound,
           onPreAlert: () => {
             const soundOn = localStorage.getItem(SOUND_ALERT_PREFERENCE_KEY) === "true";
             if (soundOn && next) playPreAlert(alertSound);
@@ -385,6 +388,34 @@ const Index = () => {
       );
     }
   };
+
+  // Re-schedule whenever pre-alert minutes or alert sound changes
+  const reschedulePrayerNotifs = useCallback(() => {
+    if (!notificationsEnabled || !prayerData) return;
+    schedulePrayerNotifications(
+      prayerData.prayers,
+      () => {
+        const soundOn = localStorage.getItem(SOUND_ALERT_PREFERENCE_KEY) === "true";
+        if (soundOn) playAdhan();
+      },
+      getNotificationContext(),
+      {
+        soundAlertEnabled: soundAlertEnabled === true,
+        preAlertEnabled: preAlertEnabled === true,
+        preAlertMinutes,
+        alertSound,
+        onPreAlert: () => {
+          const soundOn = localStorage.getItem(SOUND_ALERT_PREFERENCE_KEY) === "true";
+          const preOn = localStorage.getItem(PRE_ALERT_PREFERENCE_KEY) === "true";
+          if (soundOn && preOn) playPreAlert(alertSound);
+        },
+      }
+    );
+  }, [notificationsEnabled, prayerData, schedulePrayerNotifications, soundAlertEnabled, preAlertEnabled, preAlertMinutes, alertSound, getNotificationContext, playAdhan, playPreAlert]);
+
+  useEffect(() => {
+    reschedulePrayerNotifs();
+  }, [preAlertMinutes, alertSound, reschedulePrayerNotifs]);
 
   const handleTouchStart = (e: React.TouchEvent) => { setTouchEnd(null); setTouchStart(e.targetTouches[0].clientX); };
   const handleTouchMove = (e: React.TouchEvent) => { setTouchEnd(e.targetTouches[0].clientX); };
