@@ -301,7 +301,13 @@ export function useNotification() {
               id: preId,
               title: t.notifPreAlertTitle.replace('{prayer}', prayer.name).replace('{min}', String(preAlertMins)),
               body: t.notifPreAlertBody.replace('{prayer}', prayer.name),
-              schedule: { at: preAlertDate, allowWhileIdle: true, repeats: false },
+              // allowWhileIdle: Doze modunda bile tetiklensin
+              // repeats: false -> exact alarm (tekrarlamayan exact zamanlayıcı arka planda da çalışır)
+              schedule: {
+                at: preAlertDate,
+                allowWhileIdle: true,
+                repeats: false,
+              },
               smallIcon: "ic_notification",
               largeIcon: "ic_launcher",
               channelId: preAlertChannelId,
