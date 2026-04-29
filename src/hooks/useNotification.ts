@@ -280,7 +280,11 @@ export function useNotification() {
             id,
             title: t.notifPrayerTitle.replace('{prayer}', prayer.name),
             body: t.notifPrayerBody.replace('{prayer}', prayer.name),
-            schedule: { at: new Date(prayer.timestamp), allowWhileIdle: true },
+            schedule: {
+              at: new Date(prayer.timestamp),
+              allowWhileIdle: true,
+              repeats: false,
+            },
             smallIcon: "ic_notification",
             largeIcon: "ic_launcher",
             channelId: useSilentChannel ? PRAYER_SILENT_CHANNEL_ID : PRAYER_CHANNEL_ID,
