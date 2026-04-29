@@ -120,6 +120,16 @@ export function useNotification() {
       try {
         const result = await LocalNotifications.checkPermissions();
         permissionGranted.current = result.display === "granted";
+
+        // Android 12+ exact alarm izni — açılışta kontrol et
+        if (permissionGranted.current) {
+          try {
+            const exactResult = await LocalNotifications.checkExactNotificationSetting();
+            if (exactResult.exact_alarm === "denied") {
+              console.warn("[Notification] Exact alarm permission denied — pre-alerts may drift");
+            }
+          } catch { /* web/eski Android */ }
+        }
       } catch {
         if ("Notification" in window) {
           permissionGranted.current = Notification.permission === "granted";
@@ -280,7 +290,11 @@ export function useNotification() {
             id,
             title: t.notifPrayerTitle.replace('{prayer}', prayer.name),
             body: t.notifPrayerBody.replace('{prayer}', prayer.name),
-            schedule: { at: new Date(prayer.timestamp), allowWhileIdle: true },
+            schedule: {
+              at: new Date(prayer.timestamp),
+              allowWhileIdle: true,
+              repeats: false,
+            },
             smallIcon: "ic_notification",
             largeIcon: "ic_launcher",
             channelId: useSilentChannel ? PRAYER_SILENT_CHANNEL_ID : PRAYER_CHANNEL_ID,
@@ -301,7 +315,13 @@ export function useNotification() {
               id: preId,
               title: t.notifPreAlertTitle.replace('{prayer}', prayer.name).replace('{min}', String(preAlertMins)),
               body: t.notifPreAlertBody.replace('{prayer}', prayer.name),
-              schedule: { at: preAlertDate, allowWhileIdle: true, repeats: false },
+              // allowWhileIdle: Doze modunda bile tetiklensin
+              // repeats: false -> exact alarm (tekrarlamayan exact zamanlayıcı arka planda da çalışır)
+              schedule: {
+                at: preAlertDate,
+                allowWhileIdle: true,
+                repeats: false,
+              },
               smallIcon: "ic_notification",
               largeIcon: "ic_launcher",
               channelId: preAlertChannelId,
