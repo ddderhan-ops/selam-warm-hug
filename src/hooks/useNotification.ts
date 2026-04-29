@@ -120,6 +120,16 @@ export function useNotification() {
       try {
         const result = await LocalNotifications.checkPermissions();
         permissionGranted.current = result.display === "granted";
+
+        // Android 12+ exact alarm izni — açılışta kontrol et
+        if (permissionGranted.current) {
+          try {
+            const exactResult = await LocalNotifications.checkExactNotificationSetting();
+            if (exactResult.exact_alarm === "denied") {
+              console.warn("[Notification] Exact alarm permission denied — pre-alerts may drift");
+            }
+          } catch { /* web/eski Android */ }
+        }
       } catch {
         if ("Notification" in window) {
           permissionGranted.current = Notification.permission === "granted";
