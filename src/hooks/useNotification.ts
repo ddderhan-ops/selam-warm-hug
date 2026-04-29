@@ -290,15 +290,18 @@ export function useNotification() {
         }
 
         if (options?.preAlertEnabled) {
+          // Exact pre-alert time: prayer timestamp minus N minutes (in ms, no rounding)
           const preAlertTime = prayer.timestamp - PRE_ALERT_MS;
           const preTimeUntil = preAlertTime - now;
           if (preTimeUntil > 0 && preTimeUntil < 24 * 60 * 60 * 1000) {
             const preId = getPrayerNotificationId(prayer) + 100;
+            const preAlertDate = new Date(preAlertTime);
+            console.log(`[Notification] Pre-alert for ${prayer.nameEn}: prayer=${new Date(prayer.timestamp).toLocaleTimeString()}, fireAt=${preAlertDate.toLocaleTimeString()}, diffMin=${Math.round((prayer.timestamp - preAlertTime) / 60000)}`);
             notifications.push({
               id: preId,
               title: t.notifPreAlertTitle.replace('{prayer}', prayer.name).replace('{min}', String(preAlertMins)),
               body: t.notifPreAlertBody.replace('{prayer}', prayer.name),
-              schedule: { at: new Date(preAlertTime), allowWhileIdle: true },
+              schedule: { at: preAlertDate, allowWhileIdle: true, repeats: false },
               smallIcon: "ic_notification",
               largeIcon: "ic_launcher",
               channelId: preAlertChannelId,
@@ -310,7 +313,7 @@ export function useNotification() {
         }
       });
 
-      console.log(`[Notification] Scheduling ${notifications.length} notifications. Pre-alert: ${options?.preAlertEnabled ? `${preAlertMins}min, sound=${preAlertSoundKey}` : 'off'}`);
+      console.log(`[Notification] Scheduling ${notifications.length} notifications. Pre-alert: ${options?.preAlertEnabled ? `${preAlertMins}min, sound=${preAlertSoundKey}` : 'off'}, now=${new Date(now).toLocaleTimeString()}`);
 
       if (notifications.length > 0) {
         try {
