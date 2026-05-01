@@ -18,6 +18,21 @@ export function useGeolocation() {
     permissionDenied: false,
   });
 
+  // TODO: Geçici fallback — kaldırılacak. Konum izni alınamazsa İstanbul kullanılır.
+  const FALLBACK_LAT = 41.0082;
+  const FALLBACK_LON = 28.9784;
+
+  const useFallback = (reason: string) => {
+    console.warn("[useGeolocation] Fallback to Istanbul:", reason);
+    setState({
+      latitude: FALLBACK_LAT,
+      longitude: FALLBACK_LON,
+      error: null,
+      loading: false,
+      permissionDenied: false,
+    });
+  };
+
   const requestLocation = useCallback(async () => {
     setState((prev) => ({ ...prev, loading: true, error: null, permissionDenied: false }));
 
@@ -28,13 +43,7 @@ export function useGeolocation() {
       const permissionGranted = locationPermission === "granted" || coarsePermission === "granted";
 
       if (!permissionGranted) {
-        setState({
-          latitude: null,
-          longitude: null,
-          error: "Konum izni reddedildi. Lütfen cihaz ayarlarından konum iznini açın.",
-          loading: false,
-          permissionDenied: true,
-        });
+        useFallback("permission not granted");
         return;
       }
 
@@ -51,15 +60,7 @@ export function useGeolocation() {
         permissionDenied: false,
       });
     } catch (err: any) {
-      const msg = err?.message || "Konum alınamadı";
-      const denied = msg.toLowerCase().includes("denied") || msg.toLowerCase().includes("permission");
-      setState({
-        latitude: null,
-        longitude: null,
-        error: msg,
-        loading: false,
-        permissionDenied: denied,
-      });
+      useFallback(err?.message || "unknown error");
     }
   }, []);
 
