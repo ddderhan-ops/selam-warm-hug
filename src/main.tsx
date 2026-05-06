@@ -2,6 +2,11 @@ import { createRoot } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
 import App from "./App.tsx";
 import "./index.css";
+import { initializeAdMob, prepareInterstitial, isNativePlatform } from "./lib/admob";
+
+if (isNativePlatform()) {
+  void initializeAdMob().then(() => prepareInterstitial());
+}
 
 registerSW({
   immediate: true,

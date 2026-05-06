@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { showInterstitial, isNativePlatform } from '@/lib/admob';
 
 const AD_STORAGE_PREFIX = 'interstitial_last_shown_';
 
@@ -18,20 +19,21 @@ function markAdShown(key: string): void {
 /**
  * Frequency-capped interstitial ad hook.
  * Each placement (e.g. 'home', 'compass') is shown at most 1x per day.
- * 
- * In production, replace the console.log with actual AdMob SDK calls:
- * - AdMob.showInterstitial()
+ * On native (Capacitor), shows real AdMob interstitial.
+ * On web, no-op (logs only).
  */
 export function useInterstitialAd() {
   const tryShowAd = useCallback((placement: 'home' | 'compass') => {
-    if (!canShowAd(placement)) {
-      return false;
-    }
+    if (!canShowAd(placement)) return false;
 
-    // TODO: Replace with actual AdMob interstitial call
-    // e.g. AdMob.showInterstitial({ adId: 'ca-app-pub-xxx/yyy' });
-    console.log(`[AdMob] Showing interstitial for placement: ${placement}`);
-    markAdShown(placement);
+    if (isNativePlatform()) {
+      void showInterstitial().then((shown) => {
+        if (shown) markAdShown(placement);
+      });
+    } else {
+      console.log(`[AdMob web stub] Would show interstitial: ${placement}`);
+      markAdShown(placement);
+    }
     return true;
   }, []);
 
