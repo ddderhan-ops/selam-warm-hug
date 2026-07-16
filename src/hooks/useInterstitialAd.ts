@@ -2,6 +2,8 @@ import { useCallback } from 'react';
 import { showInterstitial, isNativePlatform } from '@/lib/admob';
 
 const AD_STORAGE_PREFIX = 'interstitial_last_shown_';
+const CLICK_COUNTER_KEY = 'interstitial_click_counter';
+const CLICKS_PER_AD = 4; // Show an interstitial every N tracked clicks
 
 function getToday(): string {
   return new Date().toISOString().slice(0, 10);
@@ -17,10 +19,9 @@ function markAdShown(key: string): void {
 }
 
 /**
- * Frequency-capped interstitial ad hook.
- * Each placement (e.g. 'home', 'compass') is shown at most 1x per day.
- * On native (Capacitor), shows real AdMob interstitial.
- * On web, no-op (logs only).
+ * Interstitial ad hook.
+ * - tryShowAd(placement): daily-capped (1x per day per placement)
+ * - trackClickAndMaybeShow(): shows an interstitial every ~4 clicks
  */
 export function useInterstitialAd() {
   const tryShowAd = useCallback((placement: 'home' | 'compass') => {
@@ -37,5 +38,20 @@ export function useInterstitialAd() {
     return true;
   }, []);
 
-  return { tryShowAd };
+  const trackClickAndMaybeShow = useCallback(() => {
+    const current = Number(localStorage.getItem(CLICK_COUNTER_KEY) || '0') + 1;
+    if (current >= CLICKS_PER_AD) {
+      localStorage.setItem(CLICK_COUNTER_KEY, '0');
+      if (isNativePlatform()) {
+        void showInterstitial();
+      } else {
+        console.log('[AdMob web stub] Would show interstitial (click threshold)');
+      }
+      return true;
+    }
+    localStorage.setItem(CLICK_COUNTER_KEY, String(current));
+    return false;
+  }, []);
+
+  return { tryShowAd, trackClickAndMaybeShow };
 }
