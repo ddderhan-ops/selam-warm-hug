@@ -26,15 +26,25 @@ export const ADMOB_TEST_IDS = {
   interstitial: "ca-app-pub-3940256099942544/1033173712",
 };
 
-const USE_TEST_ADS = true; // flip to false when production IDs are configured
+// Production AdMob IDs for Nur Ezan Vakti
+export const ADMOB_PROD_IDS = {
+  appId: "ca-app-pub-4225306495072438~2731555792",
+  banner: "ca-app-pub-4225306495072438/4801662859",
+  interstitial: "ca-app-pub-4225306495072438/8746179665",
+};
+
+// Flip to false to serve real ads in production builds
+const USE_TEST_ADS = false;
 
 export const ADMOB_BANNER_ID = USE_TEST_ADS
   ? ADMOB_TEST_IDS.banner
-  : "ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY";
+  : ADMOB_PROD_IDS.banner;
 
 export const ADMOB_INTERSTITIAL_ID = USE_TEST_ADS
   ? ADMOB_TEST_IDS.interstitial
-  : "ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY";
+  : ADMOB_PROD_IDS.interstitial;
+
+export const ADMOB_APP_ID = ADMOB_PROD_IDS.appId;
 
 let initialized = false;
 let bannerVisible = false;
