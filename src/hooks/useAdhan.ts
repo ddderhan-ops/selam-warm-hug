@@ -1,3 +1,4 @@
+const VOLUME_BUTTONS_PKG = "@capacitor-community/volume-buttons";
 import { useRef, useCallback, useEffect, useState, type MutableRefObject } from "react";
 import { ALERT_SOUND_FILES, type AlertSound } from "@/hooks/useTheme";
 import { useTranslation } from "@/contexts/LanguageContext";
@@ -40,7 +41,7 @@ function useVolumeButtonSilence(active: boolean, silence: () => void) {
         if (!Capacitor.isNativePlatform()) return;
         // Dinamik + vite-ignore: paket kurulu değilse build kırılmasın
         const mod: any = await import(
-          /* @vite-ignore */ "@capacitor-community/volume-buttons"
+          /* @vite-ignore */ VOLUME_BUTTONS_PKG
         ).catch(() => null);
         const VolumeButtons = mod?.VolumeButtons;
         if (!VolumeButtons) return;
