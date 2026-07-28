@@ -119,10 +119,6 @@ async function ensureNotificationChannels(t: Translations): Promise<void> {
   } catch {
     // Web ortamında createChannel desteklenmez
   }
-
-  } catch {
-    // Web ortamında createChannel desteklenmez
-  }
 }
 
 interface NotificationScheduleContext {
