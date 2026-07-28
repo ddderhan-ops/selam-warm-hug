@@ -38,7 +38,12 @@ function useVolumeButtonSilence(active: boolean, silence: () => void) {
       try {
         const { Capacitor } = await import("@capacitor/core");
         if (!Capacitor.isNativePlatform()) return;
-        const { VolumeButtons } = await import("@capacitor-community/volume-buttons");
+        // Dinamik + vite-ignore: paket kurulu değilse build kırılmasın
+        const mod: any = await import(
+          /* @vite-ignore */ "@capacitor-community/volume-buttons"
+        ).catch(() => null);
+        const VolumeButtons = mod?.VolumeButtons;
+        if (!VolumeButtons) return;
         await VolumeButtons.watchVolume({ disableSystemVolumeHandler: true }, () => {
           silenceRef.current();
         });
