@@ -226,6 +226,7 @@ export function useNotification() {
             smallIcon: "ic_notification",
             largeIcon: "ic_launcher",
             channelId: PRAYER_CHANNEL_ID,
+            sound: ADHAN_SOUND_FILE,
             ongoing: true,
             autoCancel: true,
           },
