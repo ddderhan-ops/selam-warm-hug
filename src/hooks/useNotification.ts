@@ -6,16 +6,35 @@ import { toDateKey } from "@/lib/prayerCache";
 import { useTranslation } from "@/contexts/LanguageContext";
 import type { Translations } from "@/lib/i18n";
 
-const PRAYER_CHANNEL_ID = "prayer-times-channel";
-const PRAYER_SILENT_CHANNEL_ID = "prayer-times-silent";
-const PRE_ALERT_CHANNEL_ID = "pre-alert-channel";
+// NOTE: Android notification channels are IMMUTABLE once created — changing a
+// channel's sound requires a NEW channel id. Bump CHANNEL_VERSION whenever a
+// channel's sound/importance changes so the new settings actually take effect.
+const CHANNEL_VERSION = "v3";
+
+const PRAYER_CHANNEL_ID = `prayer-times-${CHANNEL_VERSION}`;
+const PRAYER_SILENT_CHANNEL_ID = `prayer-times-silent-${CHANNEL_VERSION}`;
+const PRE_ALERT_CHANNEL_ID = `pre-alert-${CHANNEL_VERSION}`;
+
+// Legacy channel ids (created without custom sounds) — deleted on startup
+const LEGACY_CHANNEL_IDS = [
+  "prayer-times-channel",
+  "prayer-times-silent",
+  "pre-alert-channel",
+  "pre-alert-uyari",
+  "pre-alert-uyari1",
+  "pre-alert-uyari2",
+  "pre-alert-uyari3",
+];
+
+// Adhan sound for the main prayer notification (android/app/src/main/res/raw/ezan.mp3)
+const ADHAN_SOUND_FILE = "ezan.mp3";
 
 // Per-sound pre-alert channels (Android channel sound is immutable; we need one channel per sound)
 const PRE_ALERT_SOUND_CHANNELS: Record<string, { id: string; sound: string }> = {
-  uyari: { id: "pre-alert-uyari", sound: "ezan" },
-  uyari1: { id: "pre-alert-uyari1", sound: "uyari1" },
-  uyari2: { id: "pre-alert-uyari2", sound: "uyari2" },
-  uyari3: { id: "pre-alert-uyari3", sound: "uyari3" },
+  uyari: { id: `pre-alert-uyari-${CHANNEL_VERSION}`, sound: "ezan.mp3" },
+  uyari1: { id: `pre-alert-uyari1-${CHANNEL_VERSION}`, sound: "uyari1.mp3" },
+  uyari2: { id: `pre-alert-uyari2-${CHANNEL_VERSION}`, sound: "uyari2.mp3" },
+  uyari3: { id: `pre-alert-uyari3-${CHANNEL_VERSION}`, sound: "uyari3.mp3" },
 };
 
 function getPreAlertChannelId(soundKey?: string): string {
@@ -24,6 +43,7 @@ function getPreAlertChannelId(soundKey?: string): string {
   }
   return PRE_ALERT_CHANNEL_ID;
 }
+
 
 const PRAYER_FIXED_IDS: Record<string, number> = {
   Fajr: 1,
