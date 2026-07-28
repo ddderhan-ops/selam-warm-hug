@@ -330,6 +330,8 @@ export function useNotification() {
             smallIcon: "ic_notification",
             largeIcon: "ic_launcher",
             channelId: useSilentChannel ? PRAYER_SILENT_CHANNEL_ID : PRAYER_CHANNEL_ID,
+            sound: useSilentChannel ? undefined : ADHAN_SOUND_FILE,
+
             ongoing: true,
             autoCancel: true,
           });
