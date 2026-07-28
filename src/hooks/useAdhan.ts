@@ -17,6 +17,51 @@ function createAudio(path: string): HTMLAudioElement {
   return audio;
 }
 
+// Ses açma/kısma tuşuna basılınca çalan ezanı/uyarıyı sustur
+function useVolumeButtonSilence(active: boolean, silence: () => void) {
+  const silenceRef = useRef(silence);
+  silenceRef.current = silence;
+
+  useEffect(() => {
+    if (!active) return;
+    let cancelled = false;
+    let cleanup: (() => void) | null = null;
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "AudioVolumeUp" || e.key === "AudioVolumeDown" || e.key === "VolumeUp" || e.key === "VolumeDown") {
+        silenceRef.current();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+
+    (async () => {
+      try {
+        const { Capacitor } = await import("@capacitor/core");
+        if (!Capacitor.isNativePlatform()) return;
+        const { VolumeButtons } = await import("@capacitor-community/volume-buttons");
+        await VolumeButtons.watchVolume({ disableSystemVolumeHandler: true }, () => {
+          silenceRef.current();
+        });
+        if (cancelled) {
+          await VolumeButtons.clearWatch();
+          return;
+        }
+        cleanup = () => {
+          VolumeButtons.clearWatch().catch(() => undefined);
+        };
+      } catch {
+        // plugin yoksa / web ortamı
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener("keydown", onKey);
+      cleanup?.();
+    };
+  }, [active]);
+}
+
 export function useAdhan() {
   const { t } = useTranslation();
   const adhanRef = useRef<HTMLAudioElement | null>(null);
@@ -47,6 +92,26 @@ export function useAdhan() {
     });
     setIsPlaying(false);
   }, [clearPreviewTimeout]);
+
+  // Ses tuşuyla susturma: sesi durdur + aktif bildirimleri kaldır (kanal sesi de kesilir)
+  const silenceByVolumeKey = useCallback(() => {
+    stopAll();
+    (async () => {
+      try {
+        const { LocalNotifications } = await import("@capacitor/local-notifications");
+        const delivered = await LocalNotifications.getDeliveredNotifications();
+        if (delivered.notifications?.length) {
+          await LocalNotifications.removeDeliveredNotifications(delivered);
+        }
+      } catch {
+        // web ortamı
+      }
+    })();
+  }, [stopAll]);
+
+  useVolumeButtonSilence(isPlaying, silenceByVolumeKey);
+
+
 
   const playAudio = useCallback(async (path: string, targetRef: MutableRefObject<HTMLAudioElement | null>, label?: string) => {
     stopAll();
