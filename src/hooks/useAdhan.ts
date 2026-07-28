@@ -93,6 +93,26 @@ export function useAdhan() {
     setIsPlaying(false);
   }, [clearPreviewTimeout]);
 
+  // Ses tuşuyla susturma: sesi durdur + aktif bildirimleri kaldır (kanal sesi de kesilir)
+  const silenceByVolumeKey = useCallback(() => {
+    stopAll();
+    (async () => {
+      try {
+        const { LocalNotifications } = await import("@capacitor/local-notifications");
+        const delivered = await LocalNotifications.getDeliveredNotifications();
+        if (delivered.notifications?.length) {
+          await LocalNotifications.removeDeliveredNotifications(delivered);
+        }
+      } catch {
+        // web ortamı
+      }
+    })();
+  }, [stopAll]);
+
+  useVolumeButtonSilence(isPlaying, silenceByVolumeKey);
+
+
+
   const playAudio = useCallback(async (path: string, targetRef: MutableRefObject<HTMLAudioElement | null>, label?: string) => {
     stopAll();
 
