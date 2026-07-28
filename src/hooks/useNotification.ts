@@ -60,6 +60,15 @@ function getPrayerNotificationId(prayer: PrayerTime): number {
 
 async function ensureNotificationChannels(t: Translations): Promise<void> {
   try {
+    // Remove old channels so stale (default-sound) settings don't linger
+    for (const id of LEGACY_CHANNEL_IDS) {
+      try {
+        await LocalNotifications.deleteChannel({ id });
+      } catch {
+        // channel may not exist
+      }
+    }
+
     await LocalNotifications.createChannel({
       id: PRAYER_CHANNEL_ID,
       name: t.notifChannelName,
@@ -69,6 +78,7 @@ async function ensureNotificationChannels(t: Translations): Promise<void> {
       lights: true,
       lightColor: "#065f46",
       vibration: true,
+      sound: ADHAN_SOUND_FILE, // res/raw/ezan.mp3
     });
     await LocalNotifications.createChannel({
       id: PRAYER_SILENT_CHANNEL_ID,
@@ -85,26 +95,31 @@ async function ensureNotificationChannels(t: Translations): Promise<void> {
       id: PRE_ALERT_CHANNEL_ID,
       name: t.notifPreAlertChannel,
       description: t.notifPreAlertChannel,
-      importance: 4,
+      importance: 5,
       visibility: 1,
       vibration: true,
+      sound: PRE_ALERT_SOUND_CHANNELS.uyari1.sound,
     });
     // Create one channel per pre-alert sound so the right sound plays
     for (const [, ch] of Object.entries(PRE_ALERT_SOUND_CHANNELS)) {
       try {
         await LocalNotifications.createChannel({
           id: ch.id,
-          name: `${t.notifPreAlertChannel} (${ch.sound})`,
+          name: `${t.notifPreAlertChannel} (${ch.sound.replace(/\.\w+$/, "")})`,
           description: t.notifPreAlertChannel,
           importance: 5,
           visibility: 1,
           vibration: true,
-          sound: ch.sound, // Android raw resource name (without extension)
+          sound: ch.sound, // res/raw/<name>.mp3
         });
       } catch {
         // ignore individual channel failures
       }
     }
+  } catch {
+    // Web ortamında createChannel desteklenmez
+  }
+
   } catch {
     // Web ortamında createChannel desteklenmez
   }
